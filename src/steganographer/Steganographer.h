@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "ByteBuffer.h"
 #include "../images/Image.h"
 #include "Random32.h"
 
@@ -21,6 +22,6 @@ private:
     static void write_seed(Image &image, uint32_t seed, uint32_t seed_size);
     static uint32_t read_seed(Image &image, uint32_t seed_size);
 public:
-    static void encode(Image &image);
+    static void encode(Image &image, const ByteBuffer &data);
     static void decode(Image &image);
 };

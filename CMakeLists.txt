@@ -21,9 +21,11 @@ set(SOURCES
         src/steganographer/SequenceManager.h
         src/steganographer/sequences/WriteSequence.cpp
         src/steganographer/sequences/WriteSequence.h
-        src/steganographer/sequences/sequence_constant.h
+        src/steganographer/constant.h
         src/steganographer/sequences/ReadSequence.cpp
         src/steganographer/sequences/ReadSequence.h
+        src/steganographer/ByteBuffer.cpp
+        src/steganographer/ByteBuffer.h
 )
 
 add_executable(${APP_NAME} ${SOURCES})

@@ -4,7 +4,7 @@
 
 #include "ReadSequence.h"
 
-#include "sequence_constant.h"
+#include "../constant.h"
 #include "../../utils/Logger.h"
 
 void ReadSequence::check_checksum()

@@ -105,8 +105,10 @@ uint32_t Steganographer::read_seed(Image& image, uint32_t seed_size)
     return seed;
 }
 
-void Steganographer::encode(Image& image)
+void Steganographer::encode(Image& image, const ByteBuffer& data)
 {
+    std::cout << data << std::endl;
+
     uint32_t seed = generate_real_random();
     uint32_t seed_size = get_seed_size(image);
     seed = zero_unused_seed_bits(seed, seed_size); // set seed_size last bit to zero

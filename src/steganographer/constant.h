@@ -7,7 +7,4 @@
 #include <cstdint>
 
 constexpr uint32_t CHECKSUM = 0b01101101011010010111010001100101;
-
-struct header {
-    std::uint32_t data_size;
-};
+constexpr uint8_t PROTOCOL_VERSION = 1;

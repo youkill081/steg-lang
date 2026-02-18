@@ -3,7 +3,7 @@
 //
 
 #include "WriteSequence.h"
-#include "sequence_constant.h"
+#include "../constant.h"
 #include "../../utils/Logger.h"
 
 void WriteSequence::write_checksum()
@@ -19,7 +19,7 @@ void WriteSequence::write_checksum()
     }
 }
 
-void WriteSequence::write_sequence(const std::vector<std::byte>& data)
+void WriteSequence::write_sequence(const ByteBuffer& data)
 {
     this->write_checksum();
 }

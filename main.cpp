@@ -12,7 +12,8 @@ int main() {
     try
     {
         Image image("C:/Users/Roumite/CLionProjects/stegnocode/data/img_1.png");
-        Steganographer::decode(image);
+        Steganographer::encode(image, ByteBuffer{'a', 'b', 'c', 'd'});
+        image.save_png("image.png");
     } catch (const std::exception &e)
     {
         Logger::log(std::string("Error -> ") + e.what());

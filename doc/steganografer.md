@@ -112,7 +112,7 @@ Ce padding seras du type uint32 pour avoir un modulo automatique au moment de l'
    usage = ONE_READ -> la valeurs est enregistrer dans le bit de poid faible de la couleur bleu | nous mettons maintenant l'usage du pixel sur TWO_READ  
    usage = TWO_READ -> la valeurs est enregistrer dans le bit de poid faible de la couleur vert | nous mettons maintenant l'usage du pixel sur ALL_READ
 
-### Étape 2 : Checksum et Header
+### Étape 2 : Checksum,CR32 et Header et DATA 
 
 #### Checksum
 
@@ -122,15 +122,22 @@ Pour vérifier si notre image est bien une image encoder par notre encodeur, les
 ```
 Si les 32 premiers bit lus ne sont pas ça, nous arrêtons toutes opérations
 
+#### CRC32
+
+Les 32 prochains bit seront le CR32 calculer pour le header.
+
 #### Header
 
 Les prochains bits seront utiliser par le header. Le header est le suivant :
 ```c++
 struct header {
-  uint32_t data_size; // contains number of bits of data stored in image
+  uint_8 version; // current version of protocole (current 0b1)
+  uint32_t data_size_byte; // contains number of bits of data stored in image
   uint8_t data_type;  // contains type of data stored in image
+  uint32_t data_crc32; // contains CRC32 of data stored in image
 }
 ```
+Pour vérifier son intégriter nous devons utiliser le CRC32 précédent
 
 ### Étape 3 : Lecture de la donnée
 

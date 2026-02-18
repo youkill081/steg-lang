@@ -8,6 +8,8 @@
 
 #include <vector>
 
+class ByteBuffer;
+
 class WriteSequence : public SequenceManager
 {
 private:
@@ -18,6 +20,6 @@ public:
     {
     }
 
-    void write_sequence(const std::vector<std::byte> &data);
+    void write_sequence(const ByteBuffer& data);
 };
 
