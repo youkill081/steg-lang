@@ -19,7 +19,7 @@ struct header {
 
 constexpr size_t HEADER_SIZE_BYTE = (8 + 32 + 8 + 32) / 8;
 
-inline ByteBuffer gen_header(const ByteBuffer &data, data_type data_type)
+inline ByteBuffer gen_header(const ByteBuffer &data, Data_type data_type)
 {
     ByteBuffer header_buffer;
 

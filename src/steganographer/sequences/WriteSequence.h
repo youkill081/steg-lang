@@ -23,6 +23,6 @@ public:
     {
     }
 
-    void write_sequence(const ByteBuffer& data, data_type type);
+    void write_sequence(const ByteBuffer& data, Data_type type);
 };
 

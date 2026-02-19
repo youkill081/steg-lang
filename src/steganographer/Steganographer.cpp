@@ -105,7 +105,7 @@ uint32_t Steganographer::read_seed(Image& image, uint32_t seed_size)
     return seed;
 }
 
-void Steganographer::encode(Image& image, const ByteBuffer& data, data_type type)
+void Steganographer::encode(Image& image, const ByteBuffer& data, Data_type type)
 {
     uint32_t seed = generate_real_random();
     uint32_t seed_size = get_seed_size(image);

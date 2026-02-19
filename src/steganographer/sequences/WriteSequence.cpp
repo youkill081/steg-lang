@@ -34,7 +34,7 @@ void WriteSequence::write_byte_buffer(const ByteBuffer& buffer)
 
 }
 
-void WriteSequence::write_sequence(const ByteBuffer& data, data_type type)
+void WriteSequence::write_sequence(const ByteBuffer& data, Data_type type)
 {
     ByteBuffer header = gen_header(data, type);
 

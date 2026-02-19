@@ -23,6 +23,6 @@ private:
     static void write_seed(Image &image, uint32_t seed, uint32_t seed_size);
     static uint32_t read_seed(Image &image, uint32_t seed_size);
 public:
-    static void encode(Image &image, const ByteBuffer &data, data_type type);
+    static void encode(Image &image, const ByteBuffer &data, Data_type type);
     static void decode(Image &image);
 };
