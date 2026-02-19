@@ -107,8 +107,6 @@ uint32_t Steganographer::read_seed(Image& image, uint32_t seed_size)
 
 void Steganographer::encode(Image& image, const ByteBuffer& data, data_type type)
 {
-    std::cout << data << std::endl;
-
     uint32_t seed = generate_real_random();
     uint32_t seed_size = get_seed_size(image);
     seed = zero_unused_seed_bits(seed, seed_size); // set seed_size last bit to zero
@@ -127,7 +125,7 @@ void Steganographer::decode(Image& image)
     uint32_t seed = read_seed(image, seed_size);
     uint32_t real_seed = complete_to_final_seed(image, seed);
 
-    Logger::log("Decode with obfuscated seed " + std::to_string(seed));
+    Logger::log("Decode with obfuscated seed " + std::to_string(seed), "Steganographer");
 
     ReadSequence read_sequencer{image, real_seed};
 }
