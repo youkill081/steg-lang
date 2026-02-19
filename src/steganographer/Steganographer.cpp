@@ -105,7 +105,7 @@ uint32_t Steganographer::read_seed(Image& image, uint32_t seed_size)
     return seed;
 }
 
-void Steganographer::encode(Image& image, const ByteBuffer& data)
+void Steganographer::encode(Image& image, const ByteBuffer& data, data_type type)
 {
     std::cout << data << std::endl;
 
@@ -118,7 +118,7 @@ void Steganographer::encode(Image& image, const ByteBuffer& data)
     Logger::log("Write with obfuscated seed : " + std::to_string(seed), "Steganographer");
 
     WriteSequence write_sequencer{image, real_seed};
-    write_sequencer.write_sequence({});
+    write_sequencer.write_sequence(data, type);
 }
 
 void Steganographer::decode(Image& image)

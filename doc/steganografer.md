@@ -131,7 +131,7 @@ Les 32 prochains bit seront le CR32 calculer pour le header.
 Les prochains bits seront utiliser par le header. Le header est le suivant :
 ```c++
 struct header {
-  uint_8 version; // current version of protocole (current 0b1)
+  uint8_t version; // current version of protocole (current 0b1)
   uint32_t data_size_byte; // contains number of bits of data stored in image
   uint8_t data_type;  // contains type of data stored in image
   uint32_t data_crc32; // contains CRC32 of data stored in image

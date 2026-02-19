@@ -28,7 +28,7 @@ void ByteBuffer::push_bit(bool bit)
 /*
  * AI implémentation of crc32 algorith
  */
-uint8_t ByteBuffer::get_crc32()
+uint8_t ByteBuffer::get_crc32() const
 {
     static uint32_t table[256];
     static bool table_computed = false;

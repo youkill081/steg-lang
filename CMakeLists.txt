@@ -26,6 +26,7 @@ set(SOURCES
         src/steganographer/sequences/ReadSequence.h
         src/steganographer/ByteBuffer.cpp
         src/steganographer/ByteBuffer.h
+        src/steganographer/header.hpp
 )
 
 add_executable(${APP_NAME} ${SOURCES})

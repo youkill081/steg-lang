@@ -34,7 +34,7 @@ public:
     }
 
     void push_bit(bool bit); // Used to fill buffer bit by bit
-    uint8_t get_crc32(); // calculate crc32 of the bytebuffer
+    uint8_t get_crc32() const; // calculate crc32 of the bytebuffer
 
     void write_uint8(uint8_t value);
     void write_uint32(uint32_t value);
