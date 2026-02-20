@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../ByteBuffer.h"
+#include <ByteBuffer.h>
 #include "../header.hpp"
 #include "../SequenceManager.h"
 

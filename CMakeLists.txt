@@ -6,6 +6,10 @@ set(APP_NAME stegnocode)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Add subdirectories
+add_subdirectory(libs/stegcommon)
+add_subdirectory(stegasm)
+
 set(SOURCES
         main.cpp
         src/images/pixel.h
@@ -24,8 +28,6 @@ set(SOURCES
         src/steganographer/constant.h
         src/steganographer/sequences/ReadSequence.cpp
         src/steganographer/sequences/ReadSequence.h
-        src/steganographer/ByteBuffer.cpp
-        src/steganographer/ByteBuffer.h
         src/steganographer/header.hpp
         src/utils/Parameters.cpp
         src/utils/Parameters.h
@@ -39,5 +41,9 @@ set(SOURCES
 
 add_executable(${APP_NAME} ${SOURCES})
 
-target_include_directories(${APP_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb)
+target_link_libraries(${APP_NAME} PRIVATE stegcommon)
+target_include_directories(${APP_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/stegcommon
+)
 

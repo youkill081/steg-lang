@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../utils/Parameters.h"
-#include "../steganographer/ByteBuffer.h"
+#include "ByteBuffer.h"
 
 class HandlerError final : public std::runtime_error
 {
