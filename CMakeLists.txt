@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Add subdirectories
 add_subdirectory(libs/stegcommon)
 add_subdirectory(stegasm)
+add_subdirectory(test)
 
 # Bibliothèque statique contenant tout le code du steganographer
 set(LIB_SOURCES
@@ -48,13 +49,6 @@ target_include_directories(stegnocode_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/stegcommon
 )
 
-# Exécutable principal
 add_executable(${APP_NAME} main.cpp)
 target_link_libraries(${APP_NAME} PRIVATE stegnocode_lib)
-
-# Add tests (optional, can be disabled with -DBUILD_TESTS=OFF)
-option(BUILD_TESTS "Build tests" ON)
-if(BUILD_TESTS)
-    add_subdirectory(test)
-endif()
 
