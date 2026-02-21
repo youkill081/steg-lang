@@ -2,9 +2,9 @@
 
 ## Registres et donnée
 
-Cet assembleur auras 6 registres 
-R0, R1, R2, R3, R4, R5
-Chaqu'un des registre seras sur 16 bits non signé. 
+Cet assembleur auras 8 registres 
+R0, R1, R2, R3, R4, R5, R6, R7
+Chaqu'un de ces registre stockeras des valeurs de 16 bits non signé 
 
 Nous avons donc une possibilité de 65536 addresses en RAM. 
 Chaque mot en mémoire RAM feras 16 bit.
@@ -39,20 +39,23 @@ struct variable :
 Les instructions seront ensuite écrites les unes après les autres ; elle seront écrite dans la section .text du fichier assembleur.   
 Les instruction serons toutes alignées sur 32 bits ; on utilise le codage suivant :
 
-| Opération | Reg X(1)  | Reg X(2)  |   data1   | 
-|:---------:|:---------:|:---------:|:---------:|
-|  8 bits   |  4 bits   |  4 bits   |  16 bits  |
-|  bit 1-8  | bit 9 -12 | bit 13-16 | bit 17-32 |
+| Opération | Reg X(1) |  flag  | Reg X(2)  |   data1   | 
+|:---------:|:--------:|:------:|:---------:|:---------:|
+|  8 bits   |  3 bits  | 2 bits |  3 bits   |  16 bits  |
+|  bit 1-8  | bit 9-11 | 12-13  | bit 14-16 | bit 17-32 |
+
+Les deux bit de flag permettrons de savoir si data1 et data2 dois être interprété comme une addresse ou comme une valeur.  
+Le premier bit serviras à data1 le second à data2. Si le bit est a 0 data devras être interprété comme une valeur, si il est a 1 il seras alors considérés comme une addresse.  
 
 Certaines opération aurons besoin de plus data ou registre pour fonctionner ;
 elles seront alors suivis par un second block uint32 sous ce format :
 
-| Reg X(3) | Reg X(4) | Reg X(5) | Reg X(6) |   data2   |
-|:--------:|:--------:|:--------:|:--------:|:---------:|
-|  4 bits  |  4 bits  |  4 bits  |  4 bits  |  16 bit   |
-| bit 1-4  | bit 5-8  | bit 9-12 |  13-16   | bit 17-32 |
+| Reg X(3) | Reg X(4) | Reg X(5) | Reg X(6)  | Reg X(7)  | None  |   data2   |
+|:--------:|:--------:|:--------:|:---------:|:---------:|:-----:|:---------:|
+|  3 bits  |  3 bits  |  3 bits  |  3 bits   |  3 bits   | 1 bit |  16 bit   |
+| bit 1-3  | bit 4-6  | bit 7-9  | bit 10-12 | bit 13-15 |  16   | bit 17-32 |
 
-Les opérations peuvents donc utiliser au maximum 6 registres et 2 datas.  
+Les opérations peuvents donc utiliser au maximum 7 registres et 2 datas.  
 
 ### Liste des opérandes
  
@@ -60,7 +63,7 @@ Toutes les opération auront des signatures fixe ; cet a dire qu'on connaits leu
 
 | Opération  | Codage | Registre(s) et Data(s) |                                                   Description                                                    |
 |:----------:|:------:|:----------------------:|:----------------------------------------------------------------------------------------------------------------:|
-|   LOADA    |  0x1   |    RegX(1) ; data1     |               Charge une donnée depuis une addresse **hardcoder** (data1) dans le registre RegX(1)               |
+|   LOADA    |  0x1   |    RegX(1) ; data1     |                             Charge une donnée depuis data1 dans le registre RegX(1)                              |
 |   LOADR    |  0x2   |   RegX(1) ; RegX(2)    |       Charge une donnée depuis une addresse **stocker dans un registre** RegX(2) dans le registre RegX(1)        |
 |   STOREA   |  0x3   |    RegX(1) ; data1     |            Charge une donnée en RAM depuis un registre RegX(1) vers une addresse **hardcoder** data1             |
 |   STORER   |  0x4   |   RegX(1) ; RegX(2)    | Charge une donnée en RAM depuis un registre RegX(1) vers une addresse **stocker dans un autre registre** RegX(2) |
