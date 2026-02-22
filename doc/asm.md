@@ -84,4 +84,7 @@ Toutes les opération auront des signatures fixe ; cet a dire qu'on connaits leu
 | DISPLAY_B  |  0x14  |        RegX(1)         |                             Affiche le contenu du registre RegX(1) comme en binaire                              |
 | DISPLAY_AB |  0x15  |        RegX(1)         |                 Affiche la valeur à l'addresse contenu dans le registre RegX(1) comme en binaire                 |
 |    HALT    |  0x16  |                        |                 Met fin au programme, la valeurs de retours seras la valeurs enregistrer dans R0                 |
+|   ALOCA    |  0x17  |     RegX(1), data1     |                        Alloues data1 mot et retourne l'addresse dans le registre RegX(1)                         |
+|   ALOCR    |  0x18  |    RegX(1), RegX(2)    |                       Alloues RegX(2) mot et retourne l'addresse dans le registre RegX(1)                        |
+|    FREE    |  0x19  |        RegX(1)         |                                   Free la mémoire allouer à l'addresse RegX(1)                                   |
 
