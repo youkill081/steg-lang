@@ -86,6 +86,8 @@ Variable Compiler::parsedLineToVariable(const ParsedLine& line)
         data.insert(data.end(), token_data.begin(), token_data.end());
     }
 
+    data.push_back('\0'); // Add null terminaison to all variables
+
     return {
         .name = variable_name,
         .value = data
