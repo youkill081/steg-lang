@@ -189,7 +189,7 @@ DataValueParsingResult Compiler::parseDataValue(std::string token, const Variabl
 
 DataValues Compiler::getDataValuesFromParsedLine(const InstructionDesc& desc, const ParsedLine& line, const VariableSet &variables)
 {
-    DataValues data;
+    DataValues data{};
     switch (desc.dataCount)
     {
     case TWO_DATA:
