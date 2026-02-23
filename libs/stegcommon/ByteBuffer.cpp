@@ -84,7 +84,7 @@ uint8_t ByteBuffer::read_uint8()
     return buffer[cursor++];
 }
 
-uint8_t ByteBuffer::read_uint16()
+uint16_t ByteBuffer::read_uint16()
 {
     uint16_t v = (buffer[cursor] << 8) | buffer[cursor + 1];
     cursor += 2;
