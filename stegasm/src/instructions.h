@@ -61,8 +61,8 @@ struct InstructionView
     // Datas
     [[nodiscard]] bool is_d1_addr() const { return (raw_data >> 52) & 0x1; }
     [[nodiscard]] bool is_d2_addr() const { return (raw_data >> 51) & 0x1; }
-    [[nodiscard]] uint16_t get_d1(const Runtime&) const;
-    [[nodiscard]] uint16_t get_d2(const Runtime&) const;
+    [[nodiscard]] uint16_t get_d1(const Runtime&, bool force_as_address=false) const;
+    [[nodiscard]] uint16_t get_d2(const Runtime&, bool force_as_address=false) const;
 
 };
 
@@ -102,6 +102,7 @@ inline void instr_ALOCA(Runtime &runtime, InstructionView view);
 inline void instr_ALOCR(Runtime &runtime, InstructionView view);
 inline void instr_FREE(Runtime &runtime, InstructionView view);
 inline void instr_DEBUG_R(Runtime &runtime, InstructionView view);
+inline void instr_DEBUG_A(Runtime &runtime, InstructionView view);
 
 constexpr std::array instructionSet =
 {
@@ -130,6 +131,7 @@ constexpr std::array instructionSet =
     InstructionDesc{ "ALOCR", 0x17, TWO_REG, NO_DATA, &instr_ALOCR },
     InstructionDesc{ "FREE", 0x18, ONE_REG, NO_DATA, &instr_FREE },
     InstructionDesc{ "DEBUG_R", 0x19, NO_REG, NO_DATA, &instr_DEBUG_R },
+    InstructionDesc{ "DEBUG_A", 0x1A, NO_REG, NO_DATA, &instr_DEBUG_A },
 };
 
 #include "check_instructions.hpp"

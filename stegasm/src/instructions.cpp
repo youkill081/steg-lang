@@ -10,19 +10,19 @@
 #include "Logger.h"
 #include "interpreter/runtime/Runtime.h"
 
-uint16_t InstructionView::get_d1(const Runtime &rt) const
+uint16_t InstructionView::get_d1(const Runtime &rt, bool force_as_address) const
 {
     const auto val = static_cast<uint16_t>((raw_data >> 32) & 0xFFFF);
-    if (is_d1_addr()) {
+    if (is_d1_addr() && not force_as_address) {
         return rt.memory.read(val);
     }
     return val;
 }
 
-uint16_t InstructionView::get_d2(const Runtime &rt) const
+uint16_t InstructionView::get_d2(const Runtime &rt, bool force_as_address) const
 {
     const auto val = static_cast<uint16_t>(raw_data & 0xFFFF);
-    if (is_d2_addr()) {
+    if (is_d2_addr() && not force_as_address) {
         return rt.memory.read(val);
     }
     return val;
@@ -47,7 +47,7 @@ inline void instr_LOADR(Runtime &runtine, InstructionView view)
 void instr_STOREA(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write(
-        view.get_d1(runtime),
+        view.get_d1(runtime, true),
         runtime.registries.read(view.r1())
     );
 }
@@ -86,7 +86,7 @@ void instr_SUB(Runtime &runtime, InstructionView view)
 
 void instr_JMP(Runtime &runtime, InstructionView view)
 {
-    Logger::log("JMP not implemented yet", "instr_JMP");
+    runtime.instruction_pointer = view.get_d1(runtime);
 }
 
 void compute_CMP(Runtime &runtime, uint16_t first_value, uint16_t second_value)
@@ -116,22 +116,26 @@ void instr_CMPA(Runtime &runtime, InstructionView view)
 
 void instr_JE(Runtime& runtime, InstructionView view)
 {
-    Logger::log("JE not implemented yet", "instr_JE");
+    if (runtime.comparison_flag.equal)
+        runtime.instruction_pointer = view.get_d1(runtime);
 }
 
 void instr_JNE(Runtime& runtime, InstructionView view)
 {
-    Logger::log("JNE not implemented yet", "instr_JNE");
+    if (not runtime.comparison_flag.equal)
+        runtime.instruction_pointer = view.get_d1(runtime);
 }
 
 void instr_JA(Runtime& runtime, InstructionView view)
 {
-    Logger::log("JA not implemented yet", "instr_JA");
+    if (not runtime.comparison_flag.greater)
+        runtime.instruction_pointer = view.get_d1(runtime);
 }
 
 void instr_JB(Runtime& runtime, InstructionView view)
 {
-    Logger::log("JB not implemented yet", "instr_JB");
+    if (not runtime.comparison_flag.lower)
+        runtime.instruction_pointer = view.get_d1(runtime);
 }
 
 void instr_DISPLAY_N(Runtime &runtime, InstructionView view)
@@ -197,4 +201,10 @@ void instr_DEBUG_R(Runtime& runtime, InstructionView view)
 {
     Logger::log("DEBUG_REGISTRIES", "instr_DEBUG_REGISTRIES");
     runtime.registries.display();
+}
+
+void instr_DEBUG_A(Runtime& runtime, InstructionView view)
+{
+    Logger::log("DEBUG_MEMORY", "instr_DEBUG_MEMORY");
+    runtime.memory.display();
 }

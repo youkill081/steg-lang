@@ -88,4 +88,5 @@ Toutes les opération auront des signatures fixe ; cet a dire qu'on connaits leu
 |   ALOCR    |  0x17  |    RegX(1), RegX(2)    |                       Alloues RegX(2) mot et retourne l'addresse dans le registre RegX(1)                        |
 |    FREE    |  0x18  |        RegX(1)         |                                   Free la mémoire allouer à l'addresse RegX(1)                                   |
 |  DEBUG_R   |  0x19  |                        |                                       Affiche l'état de tous les registres                                       |
+|  DEBUG_M   |  0x1A  |                        |                                           Affiche l'état de la mémoire                                           |
 
