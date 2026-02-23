@@ -14,8 +14,6 @@
 void Vm::run(ByteBuffer& buffer)
 {
     Runtime runtime = Loader::load(buffer);
-    std::cout << "found " << runtime.instructions.size() << " instructions" << std::endl;
-    std::cout << "----------" << std::endl;
 
     while (runtime.is_running)
     {

@@ -154,22 +154,14 @@ void instr_DISPLAY_AC(Runtime &runtime, InstructionView view)
     std::cout << static_cast<char>(runtime.memory.read(runtime.registries.read(view.r1()))) << std::endl;
 }
 
-void print_uint16_binary(uint16_t value)
-{
-    for (int i = 15; i >= 0; i--) {
-        std::cout << (value & (1 << i));
-    }
-    std::cout << std::endl;
-}
-
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view)
 {
-    print_uint16_binary(runtime.registries.read(view.r1()));
+    Logger::log_uint16_as_bit(runtime.registries.read(view.r1()));
 }
 
 void instr_DISPLAY_AB(Runtime &runtime, InstructionView view)
 {
-    print_uint16_binary(runtime.memory.read(runtime.registries.read(view.r1())));
+    Logger::log_uint16_as_bit(runtime.memory.read(runtime.registries.read(view.r1())));
 }
 
 void instr_HALT(Runtime &runtime, InstructionView view)
