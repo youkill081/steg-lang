@@ -4,8 +4,8 @@ project(stegasm)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(SOURCES
-        src/main.cpp
+# On enlève src/main.cpp de cette liste !
+set(STEGASM_LIB_SOURCES
         src/instructions.h
         src/interpreter/runtime/Runtime.h
         src/compiler/TextParser.cpp
@@ -25,9 +25,11 @@ set(SOURCES
         src/instructions.cpp
 )
 
-add_executable(stegasm ${SOURCES})
+add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})
 
-target_link_libraries(stegasm PRIVATE stegcommon)
+target_include_directories(stegasm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(stegasm_lib PUBLIC stegcommon)
 
-target_include_directories(stegasm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../libs/stegcommon)
-target_include_directories(stegasm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(stegasm src/main.cpp)
+
+target_link_libraries(stegasm PRIVATE stegasm_lib)

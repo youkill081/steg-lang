@@ -34,11 +34,15 @@ set(LIB_SOURCES
         steganographer/handlers/handlers.h
         steganographer/handlers/FileHandler.cpp
         steganographer/handlers/FileHandler.h
+        steganographer/handlers/CodeHandler.cpp
+        steganographer/handlers/CodeHandler.h
 )
 
 add_library(stegnocode_lib STATIC ${LIB_SOURCES})
 
-target_link_libraries(stegnocode_lib PUBLIC stegcommon)
+target_link_libraries(stegnocode_lib PUBLIC stegcommon) # Link stegcommon
+target_link_libraries(stegnocode_lib PUBLIC stegasm_lib) # Link stegasm
+
 target_include_directories(stegnocode_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/steganographer
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb

@@ -30,6 +30,7 @@ DataType Parameters::parse_type(const std::string &type)
 {
     if (type == std::string("string")) return STRING;
     if (type == std::string("file")) return FILE_T;
+    if (type == std::string("code")) return CODE;
 
     std::cout << "Unknown type: " << type << std::endl;
     display_help();

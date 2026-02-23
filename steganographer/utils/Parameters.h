@@ -30,7 +30,7 @@ inline std::string mode_to_string(Mode mode)
 }
 
 inline constexpr std::string_view HELP_MESSAGE = R"(Usage:
-  stegnocode encode <string|file> <options...> <input_image_path> <output_image_path>
+  stegnocode encode <string|file|code> <options...> <input_image_path> <output_image_path>
   stegnocode decode <image_path>
 )";
 
