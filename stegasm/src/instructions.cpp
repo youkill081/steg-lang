@@ -203,7 +203,7 @@ void instr_DEBUG_R(Runtime& runtime, InstructionView view)
     runtime.registries.display();
 }
 
-void instr_DEBUG_A(Runtime& runtime, InstructionView view)
+void instr_DEBUG_M(Runtime& runtime, InstructionView view)
 {
     Logger::log("DEBUG_MEMORY", "instr_DEBUG_MEMORY");
     runtime.memory.display();

@@ -102,7 +102,7 @@ inline void instr_ALOCA(Runtime &runtime, InstructionView view);
 inline void instr_ALOCR(Runtime &runtime, InstructionView view);
 inline void instr_FREE(Runtime &runtime, InstructionView view);
 inline void instr_DEBUG_R(Runtime &runtime, InstructionView view);
-inline void instr_DEBUG_A(Runtime &runtime, InstructionView view);
+inline void instr_DEBUG_M(Runtime &runtime, InstructionView view);
 
 constexpr std::array instructionSet =
 {
@@ -131,7 +131,7 @@ constexpr std::array instructionSet =
     InstructionDesc{ "ALOCR", 0x17, TWO_REG, NO_DATA, &instr_ALOCR },
     InstructionDesc{ "FREE", 0x18, ONE_REG, NO_DATA, &instr_FREE },
     InstructionDesc{ "DEBUG_R", 0x19, NO_REG, NO_DATA, &instr_DEBUG_R },
-    InstructionDesc{ "DEBUG_A", 0x1A, NO_REG, NO_DATA, &instr_DEBUG_A },
+    InstructionDesc{ "DEBUG_M", 0x1A, NO_REG, NO_DATA, &instr_DEBUG_M },
 };
 
 #include "check_instructions.hpp"
