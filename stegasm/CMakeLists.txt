@@ -29,6 +29,7 @@ add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})
 
 target_include_directories(stegasm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(stegasm_lib PUBLIC stegcommon)
+target_link_libraries(stegasm_lib PUBLIC raylib)
 
 add_executable(stegasm src/main.cpp)
 
