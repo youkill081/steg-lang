@@ -29,6 +29,11 @@ set(STEGASM_LIB_SOURCES
         src/interpreter/runtime/Utils.h
         src/interpreter/runtime/Files.cpp
         src/interpreter/runtime/Files.h
+        src/assembler/utils/VariableSet.cpp
+        src/assembler/utils/VariableSet.h
+        src/assembler/assembler_exception.h
+        src/assembler/utils/InstructionSet.cpp
+        src/assembler/utils/InstructionSet.h
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})

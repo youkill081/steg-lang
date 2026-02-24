@@ -7,6 +7,7 @@
 #include <charconv>
 #include <iostream>
 
+#include "assembler_exception.h"
 #include "utils/utils.hpp"
 
 using namespace assembler;
