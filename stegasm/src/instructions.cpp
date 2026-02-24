@@ -298,3 +298,28 @@ void instr_WINDOW_SET_TARGET_FPS(Runtime& runtime, InstructionView view)
         view.get_d1(runtime)
     );
 }
+
+void instr_WINDOW_SET_TEXT_SIZE(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_text_size(
+        view.get_d1(runtime)
+    );
+}
+
+void instr_WINDOW_SET_TEXT_COLOR(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_text_color({
+        static_cast<uint8_t>(runtime.registries.read(view.r1())),
+        static_cast<uint8_t>(runtime.registries.read(view.r2())),
+        static_cast<uint8_t>(runtime.registries.read(view.r3())),
+    });
+}
+
+void instr_WINDOW_DRAW_TEXT(Runtime& runtime, InstructionView view)
+{
+    uint16_t x = runtime.registries.read(view.r1());
+    uint16_t y = runtime.registries.read(view.r2());
+    std::string text = runtime.utils.get_string_from_address(view.get_d1(runtime));
+
+    runtime.graphical_backend.draw_text(text, x, y);
+}

@@ -102,3 +102,6 @@ De plus les op-code seront automatiquement calculer lors de la compilation.
 | WINDOW_KEY_PRESSED    |      RegX(1), data1       |      Retourne dans RegX(1) si la touche data1 a été préssée [Liste des touches ligne 572](../libs/raylib/src/raylib.h)       |
 | WINDOW_KEY_DOWN       |      RegX(1), data1       | Retourne dans RegX(1) si la touche data1 est actuellement appuyée [Liste des touches ligne 572](../libs/raylib/src/raylib.h) |
 | WINDOW_SET_TARGET_FPS |           data1           | Définit le nombre de FPS visé ; le programme va attendre X ms après l'appel de WINDOW_PRESENT pour matcher au nombre de FPS  |
+| WINDOW_SET_TEXT_SIZE  |           data1           |                              Définit la taille pour les prochains texte dessiné sur la fenêtre                               |
+| WINDOW_SET_TEXT_COLOR | RegX(1), RegX(2), RegX(3) |                              Définit la couleur pour les prochains texte dessiné sur la fenêtre                              |
+| WINDOW_DRAW_TEXT      |  RegX(1), RegX(2), data1  |                     Dessine un texte à l'addresse data1 sur la fenêtre au coordonnée x=RegX(1) y=RegX(2)                     |

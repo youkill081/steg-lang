@@ -12,6 +12,9 @@ class GraphicalBackend
 {
 private:
     bool check_inited(bool throw_if_not_inited = false);
+
+    uint16_t _text_size = 8;
+    Color _text_color = WHITE;
 public:
     // Windows Management
 
@@ -26,6 +29,10 @@ public:
 
     void clear_window(const Color &color);
     void present_window();
+
+    void set_text_size(const uint16_t size) { _text_size = size; }
+    void set_text_color(const Color &color) { _text_color = color; }
+    void draw_text(const std::string &text, int x, int y);
 
     // Input management
     bool key_down(uint16_t key);

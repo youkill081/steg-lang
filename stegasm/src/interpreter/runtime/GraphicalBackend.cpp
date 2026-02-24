@@ -65,6 +65,13 @@ void GraphicalBackend::present_window()
     EndDrawing();
 }
 
+void GraphicalBackend::draw_text(const std::string& text, int x, int y)
+{
+    check_inited(true);
+
+    DrawText(text.c_str(), x, y, _text_size, _text_color);
+}
+
 bool GraphicalBackend::key_down(uint16_t key)
 {
     check_inited(true);
