@@ -5,7 +5,6 @@
 #include "Assembler.h"
 
 #include <charconv>
-#include <iostream>
 
 #include "assembler_exception.h"
 #include "utils/utils.hpp"
@@ -52,6 +51,25 @@ std::span<const ParsedLine> Assembler::get_section_lines(
     return {};
 }
 
+void Assembler::parsed_line_to_file(const ParsedLine& line, FileSet& files)
+{
+    if (line.tokens.size() != 2)
+        throw AssemblerError("Invalid file declaration: " + line.original_line);
+    files.push_file(line.tokens[0], line.tokens[1]);
+}
+
+FileSet Assembler::parse_files(const std::vector<ParsedLine>& lines)
+{
+    const auto files_lines = get_section_lines(lines, FILES_SECTION_NAME);
+    if (files_lines.empty())
+        return {};
+
+    FileSet files{};
+    for (const auto &line : files_lines)
+        parsed_line_to_file(line, files);
+    return files;
+}
+
 std::vector<uint16_t> Assembler::token_to_data(const std::string& token, const std::string &variableName)
 {
     uint16_t result;
@@ -61,10 +79,10 @@ std::vector<uint16_t> Assembler::token_to_data(const std::string& token, const s
         return {result};
     if (ec == std::errc::invalid_argument)
     {
-        std::vector<uint16_t> result;
+        std::vector<uint16_t> end_vector;
         for (const auto &c : token)
-            result.push_back(static_cast<uint16_t>(c));
-        return result;
+            end_vector.push_back(static_cast<uint16_t>(c));
+        return end_vector;
     }
 
     if (ec == std::errc::result_out_of_range)
@@ -292,11 +310,16 @@ CompiledFile Assembler::compile_file(const std::string& path)
     {
         const auto lines = parser.parse();
 
+        FileSet files = parse_files(lines);
         VariableSet variables = parse_variables(lines);
+        for (const auto &file : files)
+            variables.push_variable({file.user_name, {file.descriptor}});
+
         InstructionSet instructions = parse_instructions(lines, variables);
         return {
+            .files = files,
             .variables = variables,
-            .instructions = instructions
+            .instructions = instructions,
         };
     } catch (const TextParserError &error)
     {
@@ -337,7 +360,7 @@ void Assembler::write_datas_flag_in_buffer(
     buffer.push_bit(second_bit_value);
 }
 
-ByteBuffer Assembler::compiled_file_to_bytebuffer(const CompiledFile& compiledFile)
+ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile)
 {
     ByteBuffer buffer;
 
@@ -351,6 +374,18 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(const CompiledFile& compiledFi
         {
             buffer.write_uint16(data);
         }
+    }
+
+    // Push Files
+    buffer.write_uint32(compiledFile.files.size());
+    for (auto &file : compiledFile.files)
+    {
+        file.file_data.reset_cursor();
+
+        buffer.write_uint16(file.descriptor);
+        buffer.write_uint32(file.file_data.remaining_uint8());
+        while (file.file_data.remaining_uint8())
+            buffer.write_uint8(file.file_data.read_uint8());
     }
 
     // Push Instructions

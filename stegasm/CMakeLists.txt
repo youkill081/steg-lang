@@ -34,6 +34,8 @@ set(STEGASM_LIB_SOURCES
         src/assembler/assembler_exception.h
         src/assembler/utils/InstructionSet.cpp
         src/assembler/utils/InstructionSet.h
+        src/assembler/utils/FileSet.cpp
+        src/assembler/utils/FileSet.h
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})

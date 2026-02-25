@@ -15,7 +15,7 @@ Toutes les opérations faites sur les registres seront non signé.
 
 ### Format du fichier binaire
 
-Ici chaque sections du binaire seras décrites dans leurs ordres dans le fichier finale. 
+Ici chaque sections du binaire seras décrites dans leurs ordres dans le fichier finale.
 
 #### Les variables
 
@@ -34,7 +34,24 @@ struct variable :
 -> uint16 nombre de mot dans la variable (appelé M)  
 -> M fois uint16 ; valeurs initials de chaque mot dans la variable  
 
-#### Codage des instructions
+#### Les fichiers
+
+Les fichiers sont des données binaire stocker directement dans le ByteCode.   
+Le développeur pourras réaliser plusieurs opération dessus à l'aide de descripteur.     
+Ne seras donc pas stocker le nom du fichiers ou son path par exemple.    
+Seul le numéro du descripteur et le ByteCode du fichier seras stocker.
+
+##### encodage des fichiers
+
+-> uint32 nombre de fichier  
+-> X fois struct fichier  
+
+struct fichier :   
+-> uint16 descripteur  
+-> uint32 nombre de mot dans le fichier  
+-> M fois uint8 ; ByteCode du fichier 
+
+#### Les instructions
 
 Les instructions seront ensuite écrites les unes après les autres ; elle seront écrite dans la section .text du fichier assembleur.   
 Les instruction serons toutes alignées sur 32 bits ; on utilise le codage suivant :

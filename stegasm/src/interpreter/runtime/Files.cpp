@@ -36,6 +36,11 @@ File::~File()
         Logger::log("Warning: Modifier file was closed without saving !");
 }
 
+const std::string& File::get_path()
+{
+    return _path;
+}
+
 File File::create_empty_file(const std::string& path)
 {
     return File(true, path);
@@ -50,6 +55,9 @@ File File::open_file(const std::string& path)
 
 void File::save()
 {
+    if (this->file_from_bytebuffer)
+        throw FileError("Can't save a file from files section !");
+
     std::ofstream file(this->_path, std::ios::binary);
     if (!file.is_open())
         throw FileError("Can't open file at path : " + this->_path);
@@ -66,6 +74,8 @@ void File::save()
 
 void File::delete_file()
 {
+    if (this->file_from_bytebuffer)
+        throw FileError("Can't delete a file from files section !");
     std::filesystem::remove(this->_path);
 }
 
@@ -142,6 +152,11 @@ descriptor Files::create_file(const std::string& path)
         this->current_descriptor++;
     this->files.emplace(this->current_descriptor, File::create_empty_file(path));
     return this->current_descriptor;
+}
+
+void Files::push_file(uint16_t descriptor, File file)
+{
+    this->files.emplace(descriptor, std::move(file));
 }
 
 void Files::close_file(descriptor descriptor)

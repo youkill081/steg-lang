@@ -22,6 +22,23 @@ void Loader::init_variables(ByteBuffer& buffer, Runtime& runtime)
     }
 }
 
+void Loader::init_files(ByteBuffer& buffer, Runtime& runtime)
+{
+    uint32_t number_of_files = buffer.read_uint32();
+    for (int i = 0; i < number_of_files; i++)
+    {
+        uint16_t descriptor = buffer.read_uint16();
+        uint32_t size = buffer.read_uint32();
+
+        ByteBuffer data;
+        for (int y = 0; y < size; y++)
+            data.write_uint8(buffer.read_uint8());
+        data.reset_cursor();
+
+        runtime.files.push_file(descriptor, File(data));
+    }
+}
+
 const InstructionDesc &get_instruction_desc(uint8_t opcode)
 {
     for (const auto &instruction : instructionSet)
@@ -58,6 +75,7 @@ Runtime Loader::load(ByteBuffer& buffer)
 
     buffer.reset_cursor();
     init_variables(buffer, runtime);
+    init_files(buffer, runtime);
     init_instructions(buffer, runtime);
     return runtime;
 }

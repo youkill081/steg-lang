@@ -15,19 +15,22 @@ using descriptor = uint16_t;
 class File
 {
 private:
-    bool modified = false;
-    bool new_file = false;
-    bool data_was_read = false;
+    bool modified = false; // True if file was modified
+    bool new_file = false; // True if file was create with create_empty_file
+    bool data_was_read = false; // True if _file_data has been filed up
+    bool file_from_bytebuffer = false; // True if file was created from a FileBuffer
 
     std::string _path;
+
     ByteBuffer _file_data{};
 
     void read_data_if_needed();
 public:
     File(const bool new_file, const std::string &path) : new_file(new_file), _path(path) {}
+    explicit File(const ByteBuffer& buffer) : file_from_bytebuffer(true), _file_data(buffer), data_was_read(true) {};
     ~File();
 
-    [[nodiscard]] const std::string &get_path() const { return _path; }
+    [[nodiscard]] const std::string &get_path();
 
     static File create_empty_file(const std::string &path);
     static File open_file(const std::string &path);
@@ -56,6 +59,7 @@ private:
 public:
     descriptor open_file(const std::string &path);
     descriptor create_file(const std::string &path);
+    void push_file(uint16_t descriptor, File file);
 
     void close_file(descriptor descriptor);
     void delete_file(descriptor descriptor);
