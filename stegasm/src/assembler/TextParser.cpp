@@ -8,6 +8,8 @@
 #include <string>
 #include <utility>
 
+using namespace assembler;
+
 std::string TextParser::remove_comments(const std::string& line)
 {
     auto pos = line.find(COMMENT_CHAR);

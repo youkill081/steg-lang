@@ -36,6 +36,8 @@ set(STEGASM_LIB_SOURCES
         src/assembler/utils/InstructionSet.h
         src/assembler/utils/FileSet.cpp
         src/assembler/utils/FileSet.h
+        src/assembler/utils/utils.h
+        src/assembler/utils/utils.cpp
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})
