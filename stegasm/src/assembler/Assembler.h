@@ -8,6 +8,7 @@
 #include "ByteBuffer.h"
 #include "utils/FileSet.h"
 #include "utils/InstructionSet.h"
+#include "utils/SubtexturesSet.h"
 #include "utils/VariableSet.h"
 
 #define SECTION_KEYWORD "section"
@@ -23,6 +24,7 @@ namespace assembler
         FileSet files;
         VariableSet variables;
         InstructionSet instructions;
+        SubtexturesSet subtextures;
     };
 
     class Assembler

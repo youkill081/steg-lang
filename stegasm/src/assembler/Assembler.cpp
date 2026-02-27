@@ -32,7 +32,8 @@ CompiledFile Assembler::compile_file(const std::string &path)
         return {
             .files = std::move(files),
             .variables = std::move(variables),
-            .instructions = std::move(instructions)
+            .instructions = std::move(instructions),
+            .subtextures = std::move(subtextures),
         };
     }
     catch (const TextParserError &error)
@@ -105,6 +106,18 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile)
         buffer.write_uint32(file.file_data.remaining_uint8());
         while (file.file_data.remaining_uint8())
             buffer.write_uint8(file.file_data.read_uint8());
+    }
+
+    // Push subtextures
+    buffer.write_uint32(compiledFile.subtextures.size());
+    for (const auto &sub : compiledFile.subtextures)
+    {
+        buffer.write_uint16(sub.origin_file.descriptor);
+        buffer.write_uint16(sub.descriptor);
+        buffer.write_uint16(sub.x);
+        buffer.write_uint16(sub.y);
+        buffer.write_uint16(sub.width);
+        buffer.write_uint16(sub.height);
     }
 
     // Push Instructions

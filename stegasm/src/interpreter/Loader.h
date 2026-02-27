@@ -12,6 +12,7 @@ class Loader
 private:
     static void init_variables(ByteBuffer &buffer, Runtime &runtime);
     static void init_files(ByteBuffer &buffer, Runtime &runtime);
+    static void init_subtextures(ByteBuffer &buffer, Runtime &runtime);
     static void init_instructions(ByteBuffer &buffer, Runtime &runtime);
 public:
     static Runtime load(ByteBuffer &buffer);

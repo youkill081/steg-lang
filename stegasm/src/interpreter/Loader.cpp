@@ -46,6 +46,20 @@ void Loader::init_files(ByteBuffer& buffer, Runtime& runtime)
     }
 }
 
+void Loader::init_subtextures(ByteBuffer& buffer, Runtime& runtime)
+{
+    uint32_t number_of_subtextures = buffer.read_uint32();
+    for (int i = 0; i < number_of_subtextures; i++)
+    {
+        uint16_t origin_file_descriptor = buffer.read_uint16();
+        uint16_t descriptor = buffer.read_uint16();
+        uint16_t x = buffer.read_uint16();
+        uint16_t y = buffer.read_uint16();
+        uint16_t width = buffer.read_uint16();
+        uint16_t height = buffer.read_uint16();
+    }
+}
+
 const InstructionDesc &get_instruction_desc(uint8_t opcode)
 {
     for (const auto &instruction : instructionSet)
@@ -83,6 +97,7 @@ Runtime Loader::load(ByteBuffer& buffer)
     buffer.reset_cursor();
     init_variables(buffer, runtime);
     init_files(buffer, runtime);
+    init_subtextures(buffer, runtime);
     init_instructions(buffer, runtime);
     return runtime;
 }

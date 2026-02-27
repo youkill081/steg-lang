@@ -53,6 +53,25 @@ struct fichier :
 -> uint32 nombre de mot dans le fichier  
 -> M fois uint8 ; ByteCode du fichier 
 
+#### Les sub_textures
+
+Les sous texture permet d'encoder nativement des spritesheet dans le binaires.  
+Elles définisses des sections d'un fichiers qui seronts considéré comme une textures à part entière.  
+
+##### encodage des subtextures
+
+-> uint32 nombre de subtextures  
+-> X fois struct subtexture  
+
+struct subtexture :   
+-> uint16 descripteur fichier d'origine
+-> uint16 descripteur de la subtexture
+-> uint16 X -> coodonée X dans l'image d'origine
+-> uint16 Y -> coodonée Y dans l'image d'origine
+-> uint16 W -> largeur dans l'image d'origine
+-> uint16 H -> hauteur dans l'image d'origine
+
+
 #### Les instructions
 
 Les instructions seront ensuite écrites les unes après les autres ; elle seront écrite dans la section .text du fichier assembleur.   
