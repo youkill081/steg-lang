@@ -6,20 +6,24 @@
 
 #include <iostream>
 
+#include "Colors.h"
+
 using namespace assembler;
 
 Linter* Linter::current = nullptr;
 
 void Linter::display_error(const LinterMessage& message)
 {
-    std::cout << "[ERROR] line " << message.line_number << ": " << message.message
-                  << "\n  >> " << message.original_line << "\n";
+    std::cout   << AnsiColors::Red << AnsiColors::Bold << "[ERROR] "
+                << AnsiColors::Reset << AnsiColors::Red << "line " << message.line_number << ": " << message.message
+                  << "\n  >> " << message.original_line << "\n" << AnsiColors::Reset;
 }
 
 void Linter::display_warning(const LinterMessage& message)
 {
-    std::cout << "[WARNING] line " << message.line_number << ": " << message.message
-                  << "\n  >> " << message.original_line << "\n";
+    std::cout   << AnsiColors::Yellow << AnsiColors::Bold << "[WARNING] "
+                << AnsiColors::Reset << AnsiColors::Yellow << "line " << message.line_number << ": " << message.message
+                  << "\n  >> " << message.original_line << "\n" << AnsiColors::Reset;
 }
 
 void Linter::error(const std::string &message, uint32_t token_index)
@@ -39,14 +43,15 @@ void Linter::inline_error(const std::string& message)
     display_error(final_message);
 }
 
-void Linter::warning(const ParsedLine &line, const std::string &message, uint32_t token_index)
+void Linter::inline_warning(const std::string& message)
 {
     auto final_message = LinterMessage{
-        .line_number = line.line_number,
-        .original_line = line.original_line,
+        .line_number = 0,
+        .original_line = "",
         .message = message,
-        .token_index = token_index };
-    current->warnings.push_back(final_message);
+        .token_index = 0
+    };
+    warnings.push_back(final_message);
     display_warning(final_message);
 }
 

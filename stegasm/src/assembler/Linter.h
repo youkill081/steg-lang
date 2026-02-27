@@ -21,7 +21,7 @@ namespace assembler
     };
 
     struct LinterError { std::string message; uint32_t token_index;};
-    struct LinterWarning {};
+    struct LinterWarning { std::string message; uint32_t token_index; };
 
     class Linter
     {
@@ -35,7 +35,7 @@ namespace assembler
     public:
         [[noreturn]] static void error(const std::string &message, uint32_t token_index = 0); // Call this function in Linter::foreach loop
         void inline_error(const std::string &message); // Call this function output Linter::foreach loop
-        static void warning(const ParsedLine &line, const std::string &message, uint32_t token_index = 0);
+        void inline_warning(const std::string &message); // Call this function output Linter::foreach loop
 
         void foreach(std::span<const ParsedLine> lines, const std::function<void(const ParsedLine&)> &callback);
 

@@ -12,6 +12,7 @@ add_library(stegcommon STATIC
         utils/utils.hpp
         utils.h
         Observable.h
+        Colorrs.h
 )
 
 target_include_directories(stegcommon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
