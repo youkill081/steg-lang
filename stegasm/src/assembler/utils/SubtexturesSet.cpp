@@ -15,7 +15,7 @@ const assembler::File& assembler::SubtexturesSet::get_file(const std::string& na
         if (file.user_name == name)
             return file;
     }
-    throw AssemblerError("File \"" + name + "\" not found !");
+    Linter::error("File \"" + name + "\" not found !");
 }
 
 void assembler::SubtexturesSet::push_subtexture_from_parsed_line(const ParsedLine &line,  const FileSet &files)
@@ -27,7 +27,7 @@ void assembler::SubtexturesSet::push_subtexture_from_parsed_line(const ParsedLin
         not token_is_uint16_value(line.tokens[3]) ||
         not token_is_uint16_value(line.tokens[4]) ||
         not token_is_uint16_value(line.tokens[5]))
-        throw AssemblerError("x, y, w, h must be integer in subtexture declaration ! -> " + line.original_line);
+        Linter::error("x, y, w, h must be integer in subtexture declaration !");
 
     const File &file = get_file(line.tokens[1], files);
     const uint16_t x = token_to_uint16(line.tokens[2]);
@@ -55,8 +55,10 @@ assembler::SubtexturesSet assembler::SubtexturesSet::from_parsed_lines(
         return {};
 
     SubtexturesSet textures{};
-    for (const auto &line : files_lines)
+    linter.foreach(files_lines, [&](const ParsedLine &line)
+    {
         textures.push_subtexture_from_parsed_line(line, files);
+    });
     return textures;
 }
 
