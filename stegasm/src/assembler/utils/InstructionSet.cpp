@@ -13,14 +13,12 @@
 
 using namespace assembler;
 
-const InstructionDesc &InstructionSet::get_instruction_desc_from_parsed_line(const ParsedLine &line)
+const InstructionDesc& InstructionSet::get_instruction_desc_from_name(const std::string& name)
 {
-    std::string instruction_name = line.tokens[0];
     for (auto &instruction : instructionSet)
-        if (isEqual(instruction_name, instruction.name))
+        if (isEqual(name, instruction.name))
             return instruction;
-    Linter::error("Unknown instruction \"" + instruction_name + "\"");
-    return instructionSet[0];
+    Linter::error("Unknown instruction \"" + name + "\"");
 }
 
 RegNames InstructionSet::string_to_reg_name(const std::string &reg_name)
@@ -84,9 +82,11 @@ DataValues InstructionSet::get_data_values_from_parsed_line(
 
 Instruction InstructionSet::parsed_line_to_instruction(const ParsedLine &line, const SymbolSet &symbols)
 {
-    const InstructionDesc &desc = get_instruction_desc_from_parsed_line(line);
+    const InstructionDesc &desc = get_instruction_desc_from_name(line.tokens[0]);
     uint32_t token_needed = static_cast<uint32_t>(desc.dataCount) + static_cast<uint32_t>(desc.regCount) + 1;
 
+    if (not desc.user_usable)
+        Linter::error("Try to use assemblers instruction in code !");
     if (line.tokens.size() != token_needed)
         Linter::error("Number of token missmatch for instruction");
 
@@ -94,6 +94,15 @@ Instruction InstructionSet::parsed_line_to_instruction(const ParsedLine &line, c
         .desc = desc,
         .registries = get_used_registries_from_parsed_line(desc, line),
         .datas = get_data_values_from_parsed_line(desc, line, symbols)
+    };
+}
+
+Instruction InstructionSet::get_eof_instruction()
+{
+    return Instruction{
+        .desc = get_instruction_desc_from_name("EOF"),
+        .registries = {},
+        .datas = {}
     };
 }
 
@@ -113,6 +122,7 @@ InstructionSet InstructionSet::from_parsed_lines(
             return;
         instructions.push_back(parsed_line_to_instruction(line, symbols));
     });
+    instructions.push_back(get_eof_instruction()); // Add EOF instruction as last instructions of file
     return instructions;
 }
 

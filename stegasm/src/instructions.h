@@ -68,6 +68,7 @@ struct InstructionView
 
 using InstructionFct = void(*)(Runtime &, InstructionView raw_data);
 
+void instr_EOF(Runtime &runtime, InstructionView view);
 void instr_LOADA(Runtime &runtime, InstructionView view);
 void instr_LOADR(Runtime &runtime, InstructionView view);
 void instr_STOREA(Runtime &runtime, InstructionView view);
@@ -136,6 +137,7 @@ struct RawInstruction
     RegCount regCount;
     DataCount dataCount;
     InstructionFct fn;
+    bool user_usable = true;
 };
 
 struct InstructionDesc
@@ -145,10 +147,12 @@ struct InstructionDesc
     RegCount regCount;
     DataCount dataCount;
     InstructionFct fn;
+    bool user_usable;
 };
 
 constexpr std::array rawInstructionSet =
 {
+    RawInstruction{"EOF", NO_REG, NO_DATA, &instr_EOF, false}, // Added by Assembler when reach and of .text sections
     RawInstruction{"LOADA", ONE_REG, ONE_DATA, &instr_LOADA},
     RawInstruction{"LOADR", TWO_REG, NO_DATA, &instr_LOADR},
     RawInstruction{"STOREA", ONE_REG, ONE_DATA, &instr_STOREA},
@@ -222,7 +226,8 @@ constexpr std::array<InstructionDesc, rawInstructionSet.size()> compute_instruct
             current_op_code++,
             rawInstructionSet[i].regCount,
             rawInstructionSet[i].dataCount,
-            rawInstructionSet[i].fn
+            rawInstructionSet[i].fn,
+            rawInstructionSet[i].user_usable
         };
     }
     return result;

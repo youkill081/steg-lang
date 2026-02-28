@@ -36,7 +36,7 @@ namespace assembler
     {
         using Base = std::vector<Instruction>;
     private:
-        static const InstructionDesc &get_instruction_desc_from_parsed_line(const ParsedLine &line);
+        static const InstructionDesc &get_instruction_desc_from_name(const std::string& name);
         static RegNames string_to_reg_name(const std::string &reg_name);
         static UsedRegistries get_used_registries_from_parsed_line(const InstructionDesc &desc, const ParsedLine &line);
         static std::string remove_brackets(const std::string &token);
@@ -44,6 +44,7 @@ namespace assembler
         static DataValueParsingResult parse_data_value(std::string token, const SymbolSet &symbols);
         static DataValues get_data_values_from_parsed_line(const InstructionDesc &desc, const ParsedLine &line, const SymbolSet &symbols);
         static Instruction parsed_line_to_instruction(const ParsedLine &line, const SymbolSet &symbols);
+        static Instruction get_eof_instruction();
     public:
         void display() const;
 

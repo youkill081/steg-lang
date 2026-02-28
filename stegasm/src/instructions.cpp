@@ -28,8 +28,14 @@ uint16_t InstructionView::get_d2(const Runtime &rt, bool force_as_address) const
     return val;
 }
 
-
 // ASM Instructions
+
+void instr_EOF(Runtime& runtime, InstructionView view)
+{
+    std::cout << "Reach EOF" << std::endl;
+    runtime.return_value = 0;
+    runtime.is_running = false;
+}
 
 inline void instr_LOADA(Runtime &runtine, InstructionView view)
 {
