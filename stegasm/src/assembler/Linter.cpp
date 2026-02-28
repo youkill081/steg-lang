@@ -40,7 +40,8 @@ void Linter::inline_error(const std::string& message)
         .token_index = 0
     };
     errors.push_back(final_message);
-    display_error(final_message);
+    if (display_error_when_occur)
+        display_error(final_message);
 }
 
 void Linter::inline_warning(const std::string& message)
@@ -52,7 +53,8 @@ void Linter::inline_warning(const std::string& message)
         .token_index = 0
     };
     warnings.push_back(final_message);
-    display_warning(final_message);
+    if (display_error_when_occur)
+        display_warning(final_message);
 }
 
 void Linter::foreach_lines(std::span<const ParsedLine> lines, const std::function<void(const ParsedLine&)> &callback)
@@ -64,7 +66,8 @@ void Linter::foreach_lines(std::span<const ParsedLine> lines, const std::functio
         catch (const LinterError &e) {
             auto message = LinterMessage{ line.line_number, line.original_line, e.message, e.token_index };
             errors.push_back(message);
-            display_error(message);
+            if (display_error_when_occur)
+                display_error(message);
         }
     }
     current = nullptr;
@@ -78,6 +81,7 @@ void Linter::error_guard(const std::function<void()>& callback)
     } catch (const LinterError &e) {
         auto message = LinterMessage{ 0, "", e.message, e.token_index };
         errors.push_back(message);
-        display_error(message);
+        if (display_error_when_occur)
+            display_error(message);
     }
 }

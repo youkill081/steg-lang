@@ -30,9 +30,13 @@ namespace assembler
         std::vector<LinterMessage> errors;
         std::vector<LinterMessage> warnings;
 
+        bool display_error_when_occur;
+
         static void display_error(const LinterMessage &message);
         static void display_warning(const LinterMessage &message);
     public:
+        explicit Linter(bool display_error_when_occur = true) : display_error_when_occur(display_error_when_occur) {}
+
         [[noreturn]] static void error(const std::string &message, uint32_t token_index = 0); // Call this function in Linter::foreach loop
         void inline_error(const std::string &message); // Call this function output Linter::foreach loop
         void inline_warning(const std::string &message); // Call this function output Linter::foreach loop
