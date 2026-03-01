@@ -64,7 +64,7 @@ void Linter::foreach_lines(std::span<const ParsedLine> lines, const std::functio
     {
         try { callback(line); }
         catch (const LinterError &e) {
-            auto message = LinterMessage{ line.line_number, line.original_line, e.message, e.token_index };
+            auto message = LinterMessage{ line.line_number, line.original_line, line, e.message, e.token_index };
             errors.push_back(message);
             if (display_error_when_occur)
                 display_error(message);
@@ -79,7 +79,7 @@ void Linter::error_guard(const std::function<void()>& callback)
     {
         callback();
     } catch (const LinterError &e) {
-        auto message = LinterMessage{ 0, "", e.message, e.token_index };
+        auto message = LinterMessage{ 0, "", {}, e.message, e.token_index };
         errors.push_back(message);
         if (display_error_when_occur)
             display_error(message);

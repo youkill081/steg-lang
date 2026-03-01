@@ -15,7 +15,10 @@ namespace assembler
     struct LinterMessage
     {
         uint32_t line_number;
+
         std::string original_line;
+        ParsedLine original_parsed_line;
+
         std::string message;
         uint32_t token_index;
     };
@@ -51,7 +54,12 @@ namespace assembler
             {
                 try { callback(line); }
                 catch (const LinterError &e) {
-                    auto message = LinterMessage{ 0, "", e.message, e.token_index };
+                    auto message = LinterMessage{
+                        0,
+                        "",
+                        {},
+                        e.message,
+                        e.token_index };
                     errors.push_back(message);
                     display_error(message);
                 }

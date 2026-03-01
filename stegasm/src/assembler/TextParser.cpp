@@ -126,6 +126,11 @@ std::vector<ParsedLine> TextParser::parse() const
     while (std::getline(*stream, line))
     {
         lineNumber++;
+
+        uint32_t col_offset = 0;
+        while (col_offset < line.size() && std::isspace(line[col_offset]))
+            col_offset++;
+
         std::string clean_string = trim(remove_comments(line));
         if (clean_string.empty())
             continue;
@@ -134,6 +139,7 @@ std::vector<ParsedLine> TextParser::parse() const
         parsed.line_number = lineNumber;
         parsed.original_line = clean_string;
         parsed.tokens = tokenize(clean_string);
+        parsed.column_offset = col_offset;
 
         result.push_back(std::move(parsed));
     }

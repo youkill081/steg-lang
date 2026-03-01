@@ -1,3 +1,7 @@
+/*
+ * Based on the example server given in lsp-framework repository
+ */
+
 #include <charconv>
 #include <chrono>
 #include <iostream>
@@ -5,7 +9,6 @@
 #include <lsp/io/standardio.h>
 #include <lsp/messagehandler.h>
 #include <lsp/messages.h>
-#include <thread>
 
 #include "assembler/Assembler.h"
 #include "assembler/Linter.h"
@@ -39,30 +42,25 @@ namespace
         printMessageMethod<MessageType>();
     }
 
-    void publishDiagnostics(lsp::MessageHandler &handler,
-                            lsp::DocumentUri uri,
-                            const std::string &source)
+    void publishDiagnostics(
+        lsp::MessageHandler &handler,
+        lsp::DocumentUri uri,
+        const std::string &source)
     {
         assembler::Linter linter(false);
-
-        try
-        {
-            assembler::Assembler::assemble_from_text(source, linter);
-        }
-        catch (const std::exception& e) {}
+        assembler::Assembler::assemble_from_text(source, linter, false);
 
         std::vector<lsp::Diagnostic> diagnostics;
 
         for (const auto& err : linter.get_errors())
         {
             const uint32_t line = err.line_number > 0 ? err.line_number - 1 : 0;
-            const uint32_t col  = err.token_index;
+            const uint32_t col  = err.token_index + err.original_parsed_line.column_offset;
 
             lsp::Diagnostic diag;
             diag.range = lsp::Range{
                 .start = lsp::Position{ .line = line, .character = col },
-                .end   = lsp::Position{ .line = line,
-                                        .character = col + static_cast<uint32_t>(err.original_line.size()) }
+                .end   = lsp::Position{ .line = line, .character = col + err.original_line.size() }
             };
 
             diag.severity = lsp::DiagnosticSeverity::Error;
@@ -74,11 +72,9 @@ namespace
             diagnostics.push_back(std::move(diag));
         }
 
-        std::cerr << diagnostics.size() << std::endl;
-
         handler.sendNotification<lsp::notifications::TextDocument_PublishDiagnostics>(
             lsp::notifications::TextDocument_PublishDiagnostics::Params{
-                .uri         = uri,
+                .uri = uri,
                 .diagnostics = std::move(diagnostics)
             }
         );
@@ -143,7 +139,7 @@ namespace
                                   [params = std::move(params)]()
                                   {
                                       auto hover = lsp::Hover{
-                                          .contents = "Le hovers coucou"
+                                          .contents = ""
                                       };
                                       return lsp::requests::TextDocument_Hover::Result(std::move(hover));
                                   }

@@ -19,9 +19,10 @@ namespace assembler
 
     struct ParsedLine
     {
-        std::size_t line_number;
-        std::string original_line;
-        std::vector<std::string> tokens;
+        std::size_t line_number = 0;
+        std::string original_line = "";
+        std::vector<std::string> tokens = {};
+        uint32_t column_offset = 0; // Number of space before beg of line
 
         mutable uint64_t line_number_in_section = 0; // Used by compiler
         mutable bool is_instruction; // Used by assembler
