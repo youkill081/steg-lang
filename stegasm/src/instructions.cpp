@@ -556,3 +556,40 @@ void instr_FILE_IS_WORD_REMAINING(Runtime& runtime, InstructionView view)
         runtime.files.get_file(runtime.registries.read(view.r2()))->has_word_remaining()
     );
 }
+
+void instr_CLOCK_CREATE(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.clocks.create_clock()
+    );
+}
+
+void instr_CLOCK_DELETE(Runtime& runtime, InstructionView view)
+{
+    runtime.clocks.delete_clock(
+        runtime.registries.read(view.r1())
+    );
+}
+
+void instr_CLOCK_GET_ELAPSED_MS(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.clocks.get_clock_time_ms(runtime.registries.read(view.r1()))
+    );
+}
+
+void instr_CLOCK_GET_ELAPSED_S(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.clocks.get_clock_time_s(runtime.registries.read(view.r1()))
+    );
+}
+
+void instr_CLOCK_RESET(Runtime& runtime, InstructionView view)
+{
+    runtime.clocks.reset_clock(runtime.registries.read(view.r1()));
+}
+

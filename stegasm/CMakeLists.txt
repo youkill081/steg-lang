@@ -51,6 +51,8 @@ set(STEGASM_LIB_SOURCES
         src/interpreter/runtime/files/Subtexture.h
         src/interpreter/runtime/files/Files.cpp
         src/interpreter/runtime/files/Files.h
+        src/interpreter/runtime/Clocks.cpp
+        src/interpreter/runtime/Clocks.h
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})

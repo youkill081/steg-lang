@@ -140,6 +140,11 @@ void instr_FILE_APPEND_BYTE(Runtime &runtime, InstructionView view);
 void instr_FILE_APPEND_WORD(Runtime &runtime, InstructionView view);
 void instr_FILE_IS_BYTE_REMAINING(Runtime &runtime, InstructionView view);
 void instr_FILE_IS_WORD_REMAINING(Runtime &runtime, InstructionView view);
+void instr_CLOCK_CREATE(Runtime &runtime, InstructionView view);
+void instr_CLOCK_DELETE(Runtime &runtime, InstructionView view);
+void instr_CLOCK_GET_ELAPSED_MS(Runtime &runtime, InstructionView view);
+void instr_CLOCK_GET_ELAPSED_S(Runtime &runtime, InstructionView view);
+void instr_CLOCK_RESET(Runtime &runtime, InstructionView view);
 
 struct RawInstruction
 {
@@ -234,6 +239,11 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"FILE_APPEND_WORD", TWO_REG, NO_DATA, &instr_FILE_APPEND_WORD},
     RawInstruction{"FILE_IS_BYTE_REMAINING", TWO_REG, NO_DATA, &instr_FILE_IS_BYTE_REMAINING},
     RawInstruction{"FILE_IS_WORD_REMAINING", TWO_REG, NO_DATA, &instr_FILE_IS_WORD_REMAINING},
+    RawInstruction{"CLOCK_CREATE", ONE_REG, NO_DATA, &instr_CLOCK_CREATE},
+    RawInstruction{"CLOCK_DELETE", ONE_REG, NO_DATA, &instr_CLOCK_DELETE},
+    RawInstruction{"CLOCK_GET_ELAPSED_MS", TWO_REG, NO_DATA, &instr_CLOCK_GET_ELAPSED_MS},
+    RawInstruction{"CLOCK_GET_ELAPSED_S", TWO_REG, NO_DATA, &instr_CLOCK_GET_ELAPSED_S},
+    RawInstruction{"CLOCK_RESET", ONE_REG, NO_DATA, &instr_CLOCK_RESET},
 };
 
 constexpr std::array<InstructionDesc, rawInstructionSet.size()> compute_instructions()

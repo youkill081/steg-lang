@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 
+#include "Clocks.h"
 #include "GraphicalBackend.h"
 #include "Memory.h"
 #include "Registries.h"
@@ -33,6 +34,7 @@ public:
     Registries registries;
     ComparisonFlag comparison_flag;
     Files files;
+    Clocks clocks;
     std::stack<uint16_t> stack{};
     GraphicalBackend graphical_backend;
     Utils utils{*this};

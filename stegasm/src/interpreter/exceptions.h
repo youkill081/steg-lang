@@ -36,3 +36,8 @@ class FileError final: public InterpreterError
 {
     using InterpreterError::InterpreterError;
 };
+
+class ClockError final: public InterpreterError
+{
+    using InterpreterError::InterpreterError;
+};
