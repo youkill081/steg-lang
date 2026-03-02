@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <random>
 
 #include "instructions.h"
 
@@ -305,6 +306,30 @@ void instr_RET(Runtime& runtime, InstructionView view)
     runtime.stack.pop();
 }
 
+void instr_PUSH(Runtime& runtime, InstructionView view)
+{
+    runtime.stack.push(runtime.registries.read(view.r1()));
+}
+
+void instr_POP(Runtime& runtime, InstructionView view)
+{
+    if (runtime.stack.empty())
+        throw InterpreterError("[POP] Try to pop empty stack");
+    runtime.registries.write(view.r1(), runtime.stack.top());
+    runtime.stack.pop();
+}
+
+void instr_RAND(Runtime& runtime, InstructionView view)
+{
+    static std::mt19937 rng(std::random_device{}());
+    static std::uniform_int_distribution<uint16_t> dist(0, UINT16_MAX);
+
+    runtime.registries.write(
+        view.r1(),
+        dist(rng)
+    );
+}
+
 void instr_WINDOW_CREATE(Runtime& runtime, InstructionView view)
 {
     uint16_t width = runtime.registries.read(view.r1());
@@ -421,6 +446,21 @@ void instr_WINDOW_DRAW_TEXTURE(Runtime& runtime, InstructionView view)
         runtime.registries.read(view.r1()),
         runtime.registries.read(view.r2())
     );
+}
+
+void instr_WINDOW_SET_TEXTURE_COLOR_MASK(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_texture_color_mask({
+        static_cast<uint8_t>(runtime.registries.read(view.r1())),
+        static_cast<uint8_t>(runtime.registries.read(view.r2())),
+        static_cast<uint8_t>(runtime.registries.read(view.r3())),
+        255 // Alpha
+    });
+}
+
+void instr_WINDOW_RESET_TEXTURE_COLOR_MASK(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.reset_texture_color_mask();
 }
 
 void instr_WINDOW_SET_ICON(Runtime& runtime, InstructionView view)

@@ -15,6 +15,7 @@
 
 #define FONT_BASE_SIZE 256
 #define FONT_TEXT_SPACING 1.0f
+#define DEFAULT_TEXTURE_COLOR_MASK WHITE
 
 class GraphicalBackend
 {
@@ -25,6 +26,7 @@ private:
     Color _text_color = WHITE;
 
     std::map<std::shared_ptr<FileBase>, Texture2D, std::owner_less<>> _textures;
+    Color _texture_color_mask = DEFAULT_TEXTURE_COLOR_MASK;
 
     void load_texture(const std::shared_ptr<FileBase> &file);
     void unload_texture(const std::shared_ptr<FileBase> &file);
@@ -64,6 +66,8 @@ public:
     void draw_text(const std::string &text, int x, int y);
     void set_font(const std::shared_ptr<FileBase> &file);
 
+    void set_texture_color_mask(const Color &color);
+    void reset_texture_color_mask() { _texture_color_mask = DEFAULT_TEXTURE_COLOR_MASK; }
     void draw_texture(const std::shared_ptr<FileBase> &file, int x, int y);
 
     // Input management

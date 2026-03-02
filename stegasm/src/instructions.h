@@ -105,6 +105,9 @@ void instr_DEBUG_R(Runtime &runtime, InstructionView view);
 void instr_DEBUG_M(Runtime &runtime, InstructionView view);
 void instr_CALL(Runtime &runtime, InstructionView view);
 void instr_RET(Runtime &runtime, InstructionView view);
+void instr_PUSH(Runtime &runtime, InstructionView view);
+void instr_POP(Runtime &runtime, InstructionView view);
+void instr_RAND(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CLOSE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_VIEWPORT_SIZE(Runtime &runtime, InstructionView view);
@@ -121,6 +124,8 @@ void instr_WINDOW_SET_TEXT_COLOR(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_FONT(Runtime &runtime, InstructionView view);
 void instr_WINDOW_DRAW_TEXT(Runtime &runtime, InstructionView view);
 void instr_WINDOW_DRAW_TEXTURE(Runtime &runtime, InstructionView view);
+void instr_WINDOW_SET_TEXTURE_COLOR_MASK(Runtime &runtime, InstructionView view);
+void instr_WINDOW_RESET_TEXTURE_COLOR_MASK(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_ICON(Runtime &runtime, InstructionView view);
 void instr_FILE_OPEN(Runtime &runtime, InstructionView view);
 void instr_FILE_CREATE(Runtime &runtime, InstructionView view);
@@ -194,6 +199,9 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"DEBUG_M", NO_REG, NO_DATA, &instr_DEBUG_M},
     RawInstruction{"CALL", NO_REG, ONE_DATA, &instr_CALL},
     RawInstruction{"RET", NO_REG, NO_DATA, &instr_RET},
+    RawInstruction{"PUSH", ONE_REG, NO_DATA, &instr_PUSH},
+    RawInstruction{"POP", ONE_REG, NO_DATA, &instr_POP},
+    RawInstruction{"RAND", ONE_REG, NO_DATA, &instr_RAND},
     RawInstruction{"WINDOW_CREATE", TWO_REG, ONE_DATA, &instr_WINDOW_CREATE},
     RawInstruction{"WINDOW_CLOSE", NO_REG, NO_DATA, &instr_WINDOW_CLOSE},
     RawInstruction{"WINDOW_SET_VIEWPORT_SIZE", TWO_REG, NO_DATA, &instr_WINDOW_SET_VIEWPORT_SIZE},
@@ -210,6 +218,8 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"WINDOW_SET_FONT", NO_REG, ONE_DATA, &instr_WINDOW_SET_FONT},
     RawInstruction{"WINDOW_DRAW_TEXT", TWO_REG, ONE_DATA, &instr_WINDOW_DRAW_TEXT},
     RawInstruction{"WINDOW_DRAW_TEXTURE", TWO_REG, ONE_DATA, &instr_WINDOW_DRAW_TEXTURE},
+    RawInstruction{"WINDOW_SET_TEXTURE_COLOR_MASK", THREE_REG, NO_DATA, &instr_WINDOW_SET_TEXTURE_COLOR_MASK},
+    RawInstruction{"WINDOW_RESET_TEXTURE_COLOR_MASK", NO_REG, NO_DATA, &instr_WINDOW_RESET_TEXTURE_COLOR_MASK},
     RawInstruction{"WINDOW_SET_ICON", NO_REG, ONE_DATA, &instr_WINDOW_SET_ICON},
     RawInstruction{"FILE_OPEN", ONE_REG, ONE_DATA, &instr_FILE_OPEN},
     RawInstruction{"FILE_CREATE", ONE_REG, ONE_DATA, &instr_FILE_CREATE},

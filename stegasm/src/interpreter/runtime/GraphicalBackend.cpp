@@ -221,6 +221,11 @@ void GraphicalBackend::set_font(const std::shared_ptr<FileBase>& file)
     _font_loaded = true;
 }
 
+void GraphicalBackend::set_texture_color_mask(const Color &color)
+{
+    _texture_color_mask = color;
+}
+
 void GraphicalBackend::draw_texture(const std::shared_ptr<FileBase> &file, int x, int y)
 {
     check_inited(true);
@@ -231,11 +236,11 @@ void GraphicalBackend::draw_texture(const std::shared_ptr<FileBase> &file, int x
     if (auto crop = file->get_crop())
     {
         Rectangle src = { (float)crop->x, (float)crop->y, (float)crop->w, (float)crop->h };
-        DrawTextureRec(_textures[file], src, { (float)x, (float)y }, WHITE);
+        DrawTextureRec(_textures[file], src, { (float)x, (float)y }, _texture_color_mask);
     }
     else
     {
-        DrawTexture(_textures[file], x, y, WHITE);
+        DrawTexture(_textures[file], x, y, _texture_color_mask);
     }
 
 }
