@@ -37,7 +37,7 @@ section .data
     block_type_5_r1 0 0 0 0 1 1 1 0 0 1 0 0 0 0 0 0
     block_type_5_r2 0 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0
     block_type_5_r3 0 1 0 0 1 1 1 0 0 0 0 0 0 0 0 0
-    block_type_5_r4 1 0 0 0 1 1 0 0 1 0 0 0 0 0 0 0
+    block_type_5_r4 0 1 0 0 0 1 1 0 0 1 0 0 0 0 0 0
 
     ; Block J
     block_type_6_is_4x4 0
