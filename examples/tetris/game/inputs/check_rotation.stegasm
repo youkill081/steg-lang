@@ -13,10 +13,22 @@ rotate_current:
     MOV R2, R0 ; R2 = number of rotation
     LOADA R1, [current_block_rotation] ; R1 = current rotation
     CALL compute_next_rotation ; R1 = next rotation
-    STOREA R1, current_block_rotation ; Store the current rotation
+
+    PUSH R1 ; Save R1
+    MOV R2, R1 ; Put R1 in R2
+    CALL is_block_valid_on_map
+
+    CMPA R0, 0 ; Block is not valid
+    JE rotate_current_abort ; Abort rotation if not valid
+
+    POP R1 ; Restore R1
+    STOREA R1, current_block_rotation ; Store the current new rotation
 
     RET
 
+rotate_current_abort:
+    POP R1
+    RET
 
 
 ; Function compute_next_rotation

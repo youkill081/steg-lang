@@ -169,3 +169,28 @@ can_current_move_right_loop:
     JE can_mode_end_false
 
     JMP can_current_move_right_loop
+
+; ---
+
+; Function purpose is identical to the previous one, but without modifying the coordinates.
+; Used by check_rotation to verify the validity of the rotation
+is_block_valid_on_map: ; R2 = Block rotation
+    LOADA R1, [current_block_type]
+
+    CALL get_block_array_from_type_rotation ; GET R1 = type, R2 = rotation RETURN R0 = array address
+    MOV R3, R0 ; save array address in R3
+
+    LOADA R4, 0
+is_block_valid_loop:
+    CALL get_next_block_coords
+
+    CMPA R4, 16 ; Reach end of loop
+    JE can_mode_end_true
+
+    CALL compute_block_position_in_map
+    CALL check_pos_available_in_map
+
+    CMPA R0, 0 ; Position is not available
+    JE can_mode_end_false
+
+    JMP is_block_valid_loop
