@@ -2,6 +2,8 @@ section .data
     move_down_clock     "."
     move_down_key_clock "."
 
+    soft_drop_count 0
+
 section .text
 init_move_down:
     CLOCK_CREATE R0
@@ -29,6 +31,10 @@ check_move_down_key:
 
     LOADA R1, [move_down_key_clock]
     CLOCK_RESET R1
+
+    LOADA R0, [soft_drop_count]
+    ADDA R0, 1
+    STOREA R0, soft_drop_count ; soft_drop_count++
 
     CALL try_move_down
 
@@ -65,6 +71,17 @@ try_move_down:
 ; -----
 
 emplace_current_block:
+    LOADA R0, [soft_drop_count]
+    MULA R0, 4          ; R0 = soft_drop_count * 4
+    MINA R0, 20         ; cap les points de drop à 20
+
+    LOADA R1, [score]
+    ADD R1, R0          ; R1 = score + drop_points
+    STOREA R1, score
+
+    LOADA R0, 0
+    STOREA R0, soft_drop_count
+
     CALL place_current_block_on_map
     CALL move_next_to_current
     RET

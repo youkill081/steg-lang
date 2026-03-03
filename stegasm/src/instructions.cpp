@@ -144,6 +144,50 @@ void instr_DIVA(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_MIN(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::min(
+            runtime.registries.read(view.r1()),
+            runtime.registries.read(view.r2())
+        )
+    );
+}
+
+void instr_MINA(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::min(
+            runtime.registries.read(view.r1()),
+            view.get_d1(runtime)
+        )
+    );
+}
+
+void instr_MAX(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::max(
+            runtime.registries.read(view.r1()),
+            runtime.registries.read(view.r2())
+        )
+    );
+}
+
+void instr_MAXA(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::max(
+            runtime.registries.read(view.r1()),
+            view.get_d1(runtime)
+        )
+    );
+}
+
 void instr_MOD(Runtime& runtime, InstructionView view)
 {
     if (runtime.registries.read(view.r2()) == 0)

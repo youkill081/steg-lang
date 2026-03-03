@@ -82,6 +82,10 @@ void instr_MUL(Runtime &runtime, InstructionView view);
 void instr_MULA(Runtime &runtime, InstructionView view);
 void instr_DIV(Runtime &runtime, InstructionView view);
 void instr_DIVA(Runtime &runtime, InstructionView view);
+void instr_MIN(Runtime &runtime, InstructionView view);
+void instr_MINA(Runtime &runtime, InstructionView view);
+void instr_MAX(Runtime &runtime, InstructionView view);
+void instr_MAXA(Runtime &runtime, InstructionView view);
 void instr_MOD(Runtime &runtime, InstructionView view);
 void instr_MODA(Runtime &runtime, InstructionView view);
 void instr_JMP(Runtime &runtime, InstructionView view);
@@ -181,6 +185,10 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"MULA", ONE_REG, ONE_DATA, &instr_MULA},
     RawInstruction{"DIV", TWO_REG, NO_DATA, &instr_DIV},
     RawInstruction{"DIVA", ONE_REG, ONE_DATA, &instr_DIVA},
+    RawInstruction{"MIN", TWO_REG, NO_DATA, &instr_MIN},
+    RawInstruction{"MINA", ONE_REG, ONE_DATA, &instr_MINA},
+    RawInstruction{"MAX", TWO_REG, NO_DATA, &instr_MAX},
+    RawInstruction{"MAXA", ONE_REG, ONE_DATA, &instr_MAXA},
     RawInstruction{"MOD", TWO_REG, NO_DATA, &instr_MOD},
     RawInstruction{"MODA", ONE_REG, ONE_DATA, &instr_MODA},
     RawInstruction{"JMP", NO_REG, ONE_DATA, &instr_JMP},

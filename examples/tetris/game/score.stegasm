@@ -1,11 +1,11 @@
 section .data
     top_score_header_string "TOP"
     top_score_string "......"
-    top_score 5163
+    top_score 10000
 
     score_header_string "SCORE"
     score_string "......"
-    score 152
+    score 0
 
 section .text
 ; Display Two Scores
