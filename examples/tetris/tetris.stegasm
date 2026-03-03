@@ -9,6 +9,7 @@ section .import
     "examples/tetris/game/level.stegasm"
     "examples/tetris/game/inputs/check_rotation.stegasm"
     "examples/tetris/game/inputs/check_right_left.stegasm"
+    "examples/tetris/game/inputs/check_move_down.stegasm"
 
     "examples/tetris/game/map.stegasm"
 
@@ -26,12 +27,7 @@ section .data
     test_string "...."
     default_string_size 13
 
-    test_clock 1
-
 section .text
-    CLOCK_CREATE R0
-    STOREA R0 test_clock
-
     LOADA R0, 1280 ; window size X
     LOADA R1, 1125 ; window size Y
     WINDOW_CREATE R0 R1 window_title
@@ -46,30 +42,10 @@ section .text
     WINDOW_SET_TEXT_SIZE [default_string_size]
     WINDOW_SET_FONT tetrisNesFont
 
+    CALL init_move_down
     CALL choose_random_next_block ; Choose first block
     CALL move_next_to_current ; Put the next block on the current one and generate another one
 window_loop:
-
-; JUST A TEST FOR BLOCK DOWN
-    LOADA R0, [test_clock]
-
-    CLOCK_GET_ELAPSED_MS R1 R0
-    CMPA R1, 250
-    JB pass
-
-    CLOCK_RESET R0
-
-    CALL can_current_move_down
-    CMPA R0, 0
-    JE next
-
-    CALL move_current_down
-    JMP pass
-next:
-    CALL move_next_to_current
-pass:
-; END OF TEST FOR BLOCK DOWN
-
     CALL close_if_should_close
     CALL clear_window ; Clear Window
 
@@ -83,6 +59,7 @@ pass:
 
     CALL check_rotation
     CALL check_right_left
+    CALL check_move_down
 
     ; Draw blocks
     CALL draw_map

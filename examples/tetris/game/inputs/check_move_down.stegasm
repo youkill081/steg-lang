@@ -1,0 +1,62 @@
+section .data
+    move_down_clock "."
+
+section .text
+init_move_down:
+    CLOCK_CREATE R0
+    STOREA R0 move_down_clock
+    RET
+
+check_move_down:
+    CALL check_move_down_clock
+    CALL check_move_down_key
+    RET
+
+; -----
+
+check_move_down_key:
+    WINDOW_KEY_PRESSED R1 264
+    CMPA R1, 0
+    JE ret ; If key is not pressed, return
+
+    CALL check_move_down_reset_clock
+
+    CALL can_current_move_down
+    CMPA R0, 0 ; If can't move down
+    JE emplace_current_block ; Emplace the block in the map
+    CALL move_current_down ; Move the block down
+    RET
+
+; -----
+
+check_move_down_clock:
+    LOADA R1, [move_down_clock]
+
+    CLOCK_GET_ELAPSED_MS R2 R1
+    CMPA R2, 500
+    JB check_move_down_clock_end ; if R2 < 500ms passed, end
+
+    CALL check_move_down_reset_clock ; reset clock
+
+    CALL can_current_move_down
+    CMPA R0, 0 ; If can't move down
+    JE emplace_current_block ; Emplace the block in the map
+
+    CALL move_current_down ; Move the block down
+    RET
+
+check_move_down_clock_end:
+    RET
+
+; -----
+
+check_move_down_reset_clock:
+    LOADA R1, [move_down_clock]
+    CLOCK_RESET R1
+    RET
+
+; -----
+
+emplace_current_block:
+    CALL move_next_to_current
+    RET
