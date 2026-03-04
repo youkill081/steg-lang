@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD 23)
 add_subdirectory(libs/lsp-framework)
 add_subdirectory(libs/stegcommon)
 add_subdirectory(libs/raylib)
-add_subdirectory(libs/json)
 
 add_subdirectory(stegasm)
 add_subdirectory(stegasmlsp)

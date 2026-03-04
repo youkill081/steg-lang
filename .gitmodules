@@ -7,9 +7,6 @@
 [submodule "libs/raylib"]
 	path = libs/raylib
 	url = git@github.com:raysan5/raylib.git
-[submodule "libs/json"]
-	path = libs/json
-	url = git@github.com:nlohmann/json.git
 [submodule "libs/lsp-framework"]
 	path = libs/lsp-framework
 	url = git@github.com:leon-bckl/lsp-framework.git
