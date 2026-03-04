@@ -32,6 +32,10 @@ int main(int ac, char** av)
 
             const std::unique_ptr<IHandler> handler = handler_factory(data_type);
             handler->decode(params, result.data);
+
+            std::cout << "Press Enter to leave..." << std::endl;
+            std::cin.get();
+            return 0;
         }
     }
     catch (const ParametersError &)
@@ -40,8 +44,9 @@ int main(int ac, char** av)
     }
     catch (const std::exception &e)
     {
-        Logger::log(std::string("Error -> ") + e.what());
+        std::cout << "This image do not contains data ! (" << e.what() << ")" << std::endl;
+        std::cout << "Press Enter to leave..." << std::endl;
+        std::cin.get();
+        return 2;
     }
-
-    return 42;
 }
