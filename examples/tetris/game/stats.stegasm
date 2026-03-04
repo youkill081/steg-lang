@@ -1,0 +1,185 @@
+section .data
+    stat_title "STATISTICS"
+
+    stat_block_T 0
+    stat_block_T_string "..."
+
+    stat_block_J 0
+    stat_block_J_string "..."
+
+    stat_block_S 0
+    stat_block_S_string "..."
+
+    stat_block_O 0
+    stat_block_O_string "..."
+
+    stat_block_Z 0
+    stat_block_Z_string "..."
+
+    stat_block_L 0
+    stat_block_L_string "..."
+
+    stat_block_I 0
+    stat_block_I_string "..."
+
+section .text
+display_stats:
+    ; Display Title
+
+    WINDOW_SET_TEXT_SIZE 10 ; Title text size
+
+    LOADA R1 15 ; X
+    LOADA R2 63 ; Y
+    WINDOW_DRAW_TEXT R1 R2 stat_title
+
+    ; Set text color and size
+
+    LOADA R0 246
+    LOADA R1 54
+    LOADA R2 20
+    WINDOW_SET_TEXT_COLOR R0 R1 R2
+    WINDOW_SET_TEXT_SIZE 10
+
+    ; Draw T
+
+    CALL set_bocks_common_values
+    LOADA R1 5 ; T = type 5
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 19 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_T_string ; The string
+    LOADA R2, [stat_block_T] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 79 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_T_string
+
+    ; Draw J
+
+    CALL set_bocks_common_values
+    LOADA R1 6 ; J = type 5
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 38 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_J_string ; The string
+    LOADA R2, [stat_block_J] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 98 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_J_string
+
+    ; Draw S
+
+    CALL set_bocks_common_values
+    LOADA R3 1 ; Set a different skin
+    LOADA R1 3 ; S = type 3
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 57 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_S_string ; The string
+    LOADA R2, [stat_block_S] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 117 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_S_string
+
+    ; Draw O
+
+    CALL set_bocks_common_values
+    LOADA R3 1 ; Set a different skin
+    LOADA R1 1 ; O = type 1
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 76 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_O_string ; The string
+    LOADA R2, [stat_block_O] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 136 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_O_string
+
+    ; Draw Z
+
+    CALL set_bocks_common_values
+    LOADA R1 4 ; Z = type 4
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 95 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_Z_string ; The string
+    LOADA R2, [stat_block_Z] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 155 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_Z_string
+
+    ; Draw L
+
+    CALL set_bocks_common_values
+    LOADA R1 7 ; L = type 7
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 114 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_L_string ; The string
+    LOADA R2, [stat_block_L] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 174 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_L_string
+
+    ; Draw I
+
+    CALL set_bocks_common_values
+    LOADA R3 1 ; Set a different skin
+    LOADA R1 2 ; I = type 2
+    LOADA R6 65461 ; Padding X -> Height value to create overflow and draw at the left of the map
+    LOADA R7 133 ; Padding Y
+    CALL draw_alive_block
+
+    CALL set_text_common_values
+    LOADA R0, stat_block_I_string ; The string
+    LOADA R2, [stat_block_I] ; The stat
+    CALL number_to_string
+
+    LOADA R0 56 ; Text X
+    LOADA R1 193 ; Text Y
+    WINDOW_DRAW_TEXT R0 R1 stat_block_I_string
+
+    ; Reset text values
+
+    LOADA R0 255
+    LOADA R1 255
+    LOADA R2 255
+    WINDOW_SET_TEXT_COLOR R0 R1 R2
+    WINDOW_SET_TEXT_SIZE [default_string_size]
+
+    RET
+
+
+set_bocks_common_values:
+    LOADA R4 0 ; X
+    LOADA R5 3 ; Y
+    LOADA R2 1 ; First rotation
+    LOADA R3 2 ; Second skin
+    RET
+
+set_text_common_values:
+    LOADA R1, 3 ; Number of digits
+    RET

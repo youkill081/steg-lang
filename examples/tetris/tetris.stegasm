@@ -8,6 +8,7 @@ section .import
     "examples/tetris/game/score.stegasm"
     "examples/tetris/game/level.stegasm"
     "examples/tetris/game/game_over.stegasm"
+    "examples/tetris/game/stats.stegasm"
     "examples/tetris/game/inputs/check_rotation.stegasm"
     "examples/tetris/game/inputs/check_right_left.stegasm"
     "examples/tetris/game/inputs/check_move_down.stegasm"
@@ -62,6 +63,7 @@ window_loop:
     CALL display_broken_lines
     CALL display_scores
     CALL display_level
+    CALL display_stats
 
     LOADA R0, [game_state]
     CMPA R0, 1
