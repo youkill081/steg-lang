@@ -59,6 +59,7 @@ handle_restart_key:
     STOREA R1, game_state ; game_state = 0
 
     CALL reset_map
+    CALL restart_stats_values
 
     CALL choose_random_next_block
     CALL move_next_to_current

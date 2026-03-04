@@ -183,3 +183,16 @@ set_bocks_common_values:
 set_text_common_values:
     LOADA R1, 3 ; Number of digits
     RET
+
+; -----
+
+restart_stats_values:
+    LOADA R1 0
+    STOREA R1 stat_block_T
+    STOREA R1 stat_block_J
+    STOREA R1 stat_block_S
+    STOREA R1 stat_block_O
+    STOREA R1 stat_block_Z
+    STOREA R1 stat_block_L
+    STOREA R1 stat_block_I
+    RET
