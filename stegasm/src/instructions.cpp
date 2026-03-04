@@ -464,6 +464,7 @@ void instr_WINDOW_SET_TEXT_COLOR(Runtime& runtime, InstructionView view)
         static_cast<uint8_t>(runtime.registries.read(view.r1())),
         static_cast<uint8_t>(runtime.registries.read(view.r2())),
         static_cast<uint8_t>(runtime.registries.read(view.r3())),
+        255 // Alpha
     });
 }
 
