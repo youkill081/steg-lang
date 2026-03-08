@@ -40,7 +40,7 @@ void ReadSequence::check_checksum()
     uint32_t checksum = read_uint32();
 
     if (checksum != CHECKSUM)
-        throw std::runtime_error("ReadSequence::check_checksum: invalid checksum (not an encoded image)");
+        throw ReadSequenceError("ReadSequence::check_checksum: invalid checksum (not an encoded image)");
     Logger::log("ReadSequence::check_checksum: checksum OK !", "ReadSequence");
 }
 
@@ -52,16 +52,16 @@ ReadSequence::ReadSequence(Image& image, uint32_t seed) : SequenceManager(image,
     _header_buffer = read_byte_buffer(HEADER_SIZE_BYTE);
 
     if (_header_buffer.get_crc32() != header_crc32)
-        throw std::runtime_error("ReadSequence::ReadSequence: header CRC32 missmatch !");
+        throw ReadSequenceError("ReadSequence::ReadSequence: header CRC32 missmatch !");
     Logger::log("ReadSequence::ReadSequence: header read successfully !", "ReadSequence");
 
     _header = convert_byte_buffer_to_header(_header_buffer);
     if (_header.version != PROTOCOL_VERSION)
-        throw std::runtime_error("ReadSequence::ReadSequence: unsupported protocol version !");
+        throw ReadSequenceError("ReadSequence::ReadSequence: unsupported protocol version !");
 
     _data_buffer = read_byte_buffer(_header.data_size_byte);
     if (_data_buffer.get_crc32() != _header.data_crc32)
-        throw std::runtime_error("ReadSequence::ReadSequence: data CRC32 missmatch !");
+        throw ReadSequenceError("ReadSequence::ReadSequence: data CRC32 missmatch !");
 
     Logger::log("ReadSequence::ReadSequence: data read successfully !", "ReadSequence");
 }

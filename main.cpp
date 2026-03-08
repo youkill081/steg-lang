@@ -8,7 +8,7 @@
 #include "steganographer/handlers/IHander.h"
 #include "steganographer/images/Image.h"
 #include "steganographer/steganographer/Steganographer.h"
-#include "Logger.h"
+#include "steganographer/sequences/ReadSequence.h"
 #include "steganographer/utils/Parameters.h"
 
 int main(int ac, char** av)
@@ -42,11 +42,18 @@ int main(int ac, char** av)
     {
         return 1;
     }
-    catch (const std::exception &e)
+    catch (const ReadSequenceError &e)
     {
         std::cout << "This image do not contains data ! (" << e.what() << ")" << std::endl;
         std::cout << "Press Enter to leave..." << std::endl;
         std::cin.get();
         return 2;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "Error during execution ! -> " << e.what() << std::endl;
+        std::cout << "Press Enter to leave..." << std::endl;
+        std::cin.get();
+        return 3;
     }
 }

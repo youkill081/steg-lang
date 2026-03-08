@@ -8,6 +8,12 @@
 #include "../Header.hpp"
 #include "../SequenceManager.h"
 
+class ReadSequenceError final : public std::runtime_error
+{
+public:
+    using runtime_error::runtime_error;
+};
+
 class ReadSequence : public SequenceManager
 {
 private:
