@@ -6,7 +6,7 @@ Plusieurs exemples ici sont présents pour montrer la capacité de gestion des f
 
 [readfile.stegasm](readfile/readfile.stegasm) Ouvre un fichier dynamiquement sur le PC et affiche son contenu dans la console.  
 
-Vous pouvez le lancer avec l'image [](readfile.png):   
+Vous pouvez le lancer avec l'image [readfile.png](readfile.png):   
 ````shell
 ./stegnocode ./readfile.png
 ````
