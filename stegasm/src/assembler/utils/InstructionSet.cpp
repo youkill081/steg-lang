@@ -71,8 +71,6 @@ DataValues InstructionSet::get_data_values_from_parsed_line(
     DataValues data{};
     switch (desc.dataCount)
     {
-    case TWO_DATA:
-        data[1] = parse_data_value(line.tokens[desc.regCount + 2], symbols);
     case ONE_DATA:
         data[0] = parse_data_value(line.tokens[desc.regCount + 1], symbols);
     default:

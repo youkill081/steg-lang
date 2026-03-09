@@ -40,6 +40,17 @@ constexpr bool opcode_unique()
     return true;
 }
 
+constexpr bool instruction_have_four_data()
+{
+    for (size_t i = 0; i < instructionSet.size(); ++i)
+    {
+        if (instructionSet[i].regCount == THREE_REG && instructionSet[i].dataCount == ONE_DATA)
+            return false;
+    }
+    return true;
+}
+
 static_assert(instruction_name_contains_lower(), "InstructionSet contains lowercase letters!");
 static_assert(instruction_name_unique(), "InstructionSet names must be unique !");
 static_assert(opcode_unique(), "InstructionSet opcode must be unique !");
+static_assert(instruction_have_four_data(), "Instructions can't have three reg and one data !");

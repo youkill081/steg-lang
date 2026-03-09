@@ -220,7 +220,7 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile, Li
 
             buffer.write_uint16(instruction.datas[0].value);
 
-            if (instruction.desc.dataCount == TWO_DATA || static_cast<uint8_t>(instruction.desc.regCount) > 2)
+            if (static_cast<uint8_t>(instruction.desc.regCount) > 2)
             {
                 write_reg_x_in_buffer(3, instruction.desc.regCount, instruction.registries, buffer); // RegX(3) | 3 bit
                 write_reg_x_in_buffer(4, instruction.desc.regCount, instruction.registries, buffer); // RegX(4) | 3 bit

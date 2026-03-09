@@ -29,17 +29,13 @@ enum RegCount
     NO_REG = 0,
     ONE_REG = 1,
     TWO_REG = 2,
-    THREE_REG = 3,
-    FOUR_REG = 4,
-    FIVE_REG = 5,
-    SIX_REG = 6
+    THREE_REG = 3
 };
 
 enum DataCount
 {
     NO_DATA = 0,
-    ONE_DATA = 1,
-    TWO_DATA = 2
+    ONE_DATA = 1
 };
 
 struct InstructionView
