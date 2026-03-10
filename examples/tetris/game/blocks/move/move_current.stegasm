@@ -1,18 +1,18 @@
 section .text
 move_current_down:
-    LOADA R1, [current_block_Y]
+    LOAD R1, [current_block_Y]
     ADDA R1, 1
     STOREA R1, current_block_Y
     RET
 
 move_current_left:
-    LOADA R1, [current_block_X]
+    LOAD R1, [current_block_X]
     SUBA R1, 1
     STOREA R1, current_block_X
     RET
 
 move_current_right:
-    LOADA R1, [current_block_X]
+    LOAD R1, [current_block_X]
     ADDA R1, 1
     STOREA R1, current_block_X
     RET

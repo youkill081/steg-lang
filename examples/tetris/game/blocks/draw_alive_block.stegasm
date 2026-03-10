@@ -32,8 +32,8 @@ draw_alive_block:
     POP R4
     POP R3
 
-    LOADA R6, 0 ; cell index
-    MOV R7, R0 ; array address
+    LOAD R6, 0 ; cell index
+    LOAD R7, R0 ; array address
 
     PUSH R2 ; Save R2 - Now R2 = current cell value
 
@@ -41,7 +41,7 @@ draw_alive_block_loop:
     CMPA R6, 16
     JE draw_alive_block_end
 
-    LOADR R2, R7 ; load current cell value in R2
+    LOAD R2, [R7] ; load current cell value in R2
     CMPA R2, 0
     JE draw_alive_block_next
 
@@ -53,15 +53,15 @@ draw_alive_block_loop:
     PUSH R7
 
     ; Compute absolute grid col (X) = (cell_index % 4) + block_grid_x
-    MOV R1, R6
+    LOAD R1, R6
     MODA R1, 4
-    LOADA R4, [DAB_block_grid_x]
+    LOAD R4, [DAB_block_grid_x]
     ADD R1, R4
 
     ; Compute absolute grid row (Y) = (cell_index / 4) + block_grid_y
-    MOV R2, R6
+    LOAD R2, R6
     DIVA R2, 4
-    LOADA R5, [DAB_block_grid_y]
+    LOAD R5, [DAB_block_grid_y]
     ADD R2, R5
 
     CMPA R2, 2
@@ -74,10 +74,10 @@ draw_alive_block_loop:
 
     CALL draw_white_background_at_coordinate ; Need R0 (X), R1 (Y)
 
-    LOADA R2, [DAB_block_type]
+    LOAD R2, [DAB_block_type]
     CALL set_color_by_block_type ; Need R2 (block type)
 
-    LOADA R2, [DAB_block_skin]
+    LOAD R2, [DAB_block_skin]
     CALL draw_skin_at_coordinate ; Need R0 (X), R1 (Y), R2 (skin number)
 
 bypass_draw_current_block:

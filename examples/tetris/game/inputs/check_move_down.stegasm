@@ -24,15 +24,15 @@ check_move_down_key:
     CMPA R1, 0
     JE check_move_down_key_end ; If key is not pressed, return
 
-    LOADA R1, [move_down_key_clock]
+    LOAD R1, [move_down_key_clock]
     CLOCK_GET_ELAPSED_MS R2, R1
     CMPA R2, 75
     JB check_move_down_key_end ; if < 75ms passed, end
 
-    LOADA R1, [move_down_key_clock]
+    LOAD R1, [move_down_key_clock]
     CLOCK_RESET R1
 
-    LOADA R0, [soft_drop_count]
+    LOAD R0, [soft_drop_count]
     ADDA R0, 1
     STOREA R0, soft_drop_count ; soft_drop_count++
 
@@ -45,12 +45,12 @@ check_move_down_key_end:
 
 check_move_down_clock:
     CALL get_current_speed ; R0 = current_speed in MS
-    LOADA R1, [move_down_clock]
+    LOAD R1, [move_down_clock]
     CLOCK_GET_ELAPSED_MS R2, R1
     CMPR R2, R0
     JB check_move_down_clock_end ; if < 500ms passed, end
 
-    LOADA R1, [move_down_clock]
+    LOAD R1, [move_down_clock]
     CLOCK_RESET R1
 
     CALL try_move_down
@@ -72,15 +72,15 @@ try_move_down:
 ; -----
 
 emplace_current_block:
-    LOADA R0, [soft_drop_count]
+    LOAD R0, [soft_drop_count]
     MULA R0, 4          ; R0 = soft_drop_count * 4
     MINA R0, 20         ; cap les points de drop à 20
 
-    LOADA R1, [score]
+    LOAD R1, [score]
     ADD R1, R0          ; R1 = score + drop_points
     STOREA R1, score
 
-    LOADA R0, 0
+    LOAD R0, 0
     STOREA R0, soft_drop_count
 
     CALL increase_current_block_stat

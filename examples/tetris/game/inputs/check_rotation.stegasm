@@ -7,15 +7,15 @@ check_rotation:
     RET
 
 rotate_current:
-    LOADA R1, [current_block_type] ;
+    LOAD R1, [current_block_type] ;
     CALL get_block_type_rotation_count ; Put number of rotation in R0
 
-    MOV R2, R0 ; R2 = number of rotation
-    LOADA R1, [current_block_rotation] ; R1 = current rotation
+    LOAD R2, R0 ; R2 = number of rotation
+    LOAD R1, [current_block_rotation] ; R1 = current rotation
     CALL compute_next_rotation ; R1 = next rotation
 
     PUSH R1 ; Save R1
-    MOV R2, R1 ; Put R1 in R2
+    LOAD R2, R1 ; Put R1 in R2
     CALL is_block_valid_on_map
 
     CMPA R0, 0 ; Block is not valid

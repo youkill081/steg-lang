@@ -16,18 +16,18 @@ init_animation:
 ; IN  R1 → index de ligne (2..21)
 ; OUT R0 → 1 si complète, 0 sinon
 is_row_complete:
-    MOV R2, R1
+    LOAD R2, R1
     MULA R2, 10
-    LOADA R3, map
+    LOAD R3, map
     ADD R3, R2 ; R3 starting address of line
 
-    LOADA R5, 0 ; Current col R5 = colonne courante
+    LOAD R5, 0 ; Current col R5 = colonne courante
 
 is_row_complete_loop:
     CMPA R5, 10
     JE is_row_complete_yes
 
-    LOADR R6, R3 ; R6 = cell value
+    LOAD R6, [R3] ; R6 = cell value
     CMPA R6, 0
     JE is_row_complete_no ; empty cell = not complete
 
@@ -36,11 +36,11 @@ is_row_complete_loop:
     JMP is_row_complete_loop
 
 is_row_complete_no:
-    LOADA R0, 0
+    LOAD R0, 0
     RET
 
 is_row_complete_yes:
-    LOADA R0, 1
+    LOAD R0, 1
     RET
 
 ; ---
@@ -49,8 +49,8 @@ is_row_complete_yes:
 ; Update lines_cleared
 find_complete_rows:
     ; Reset pending_rows to 255 255 255 255
-    LOADA R0, pending_rows
-    LOADA R1, 255
+    LOAD R0, pending_rows
+    LOAD R1, 255
     STORER R1, R0
     ADDA R0, 1
     STORER R1, R0
@@ -59,11 +59,11 @@ find_complete_rows:
     ADDA R0, 1
     STORER R1, R0
 
-    LOADA R1, 0
+    LOAD R1, 0
     STOREA R1, lines_cleared
 
-    LOADA R6, 0 ; R6 = current slot
-    LOADA R7, 21 ; R7 = current line (21 == bottom line)
+    LOAD R6, 0 ; R6 = current slot
+    LOAD R7, 21 ; R7 = current line (21 == bottom line)
 
 find_rows_loop:
     CMPA R7, 1
@@ -73,7 +73,7 @@ find_rows_loop:
 
     PUSH R6
     PUSH R7
-    MOV R1, R7
+    LOAD R1, R7
     CALL is_row_complete
     POP R7
     POP R6
@@ -82,13 +82,13 @@ find_rows_loop:
     JE find_rows_next
 
     ; pending_rows[R6] = R7
-    LOADA R2, pending_rows
+    LOAD R2, pending_rows
     ADD R2, R6
     STORER R7, R2
 
     ; lines_cleared++
-    LOADA R3, lines_cleared
-    LOADR R3, R3
+    LOAD R3, lines_cleared
+    LOAD R3, [R3]
     ADDA R3, 1
     STOREA R3, lines_cleared
 
@@ -108,8 +108,8 @@ find_rows_done:
 ; Fill the top line with 0
 ; Clobbers : R0..R7
 apply_line_clear:
-    LOADA R6, 21 ; R6 = write_row (destination)
-    LOADA R7, 21 ; R7 = read_row  (source)
+    LOAD R6, 21 ; R6 = write_row (destination)
+    LOAD R7, 21 ; R7 = read_row  (source)
 
 compact_loop:
     CMPA R7, 1
@@ -117,7 +117,7 @@ compact_loop:
 
     PUSH R6
     PUSH R7
-    MOV R1, R7
+    LOAD R1, R7
     CALL is_row_complete
     POP R7
     POP R6
@@ -131,8 +131,8 @@ compact_loop:
 
     PUSH R6
     PUSH R7
-    MOV R1, R7 ; R1 = source
-    MOV R2, R6 ; R2 = destination
+    LOAD R1, R7 ; R1 = source
+    LOAD R2, R6 ; R2 = destination
     CALL copy_row
     POP R7
     POP R6
@@ -150,7 +150,7 @@ compact_fill_top:
     JE apply_done
 
     PUSH R6
-    MOV R1, R6
+    LOAD R1, R6
     CALL clear_row
     POP R6
 
@@ -166,23 +166,23 @@ apply_done:
 ; IN R2 → Destination line
 ; Clobbers : R3 R4 R5 R6 R7
 copy_row:
-    MOV R3, R1
+    LOAD R3, R1
     MULA R3, 10
-    LOADA R4, map
+    LOAD R4, map
     ADD R4, R3 ; R4 = ptr source
 
-    MOV R3, R2
+    LOAD R3, R2
     MULA R3, 10
-    LOADA R5, map
+    LOAD R5, map
     ADD R5, R3 ; R5 = ptr destination
 
-    LOADA R6, 0 ; R6 = column
+    LOAD R6, 0 ; R6 = column
 
 copy_row_loop:
     CMPA R6, 10
     JE copy_row_end
 
-    LOADR R7, R4
+    LOAD R7, [R4]
     STORER R7, R5
 
     ADDA R4, 1
@@ -198,13 +198,13 @@ copy_row_end:
 ; IN R1 → index de ligne
 ; Clobbers : R2 R3 R4 R5
 clear_row:
-    MOV R2, R1
+    LOAD R2, R1
     MULA R2, 10
-    LOADA R3, map
+    LOAD R3, map
     ADD R3, R2 ; R3 = ptr beg of line
 
-    LOADA R4, 0 ; R4 = colonne
-    LOADA R5, 0 ; Empty value
+    LOAD R4, 0 ; R4 = colonne
+    LOAD R5, 0 ; Empty value
 
 clear_row_loop:
     CMPA R4, 10
@@ -227,31 +227,31 @@ clear_row_end:
 add_score_for_lines:
     CMPA R1, 1
     JNE score_try_2
-    LOADA R2, 100
+    LOAD R2, 100
     JMP score_apply
 
 score_try_2:
     CMPA R1, 2
     JNE score_try_3
-    LOADA R2, 300
+    LOAD R2, 300
     JMP score_apply
 
 score_try_3:
     CMPA R1, 3
     JNE score_try_4
-    LOADA R2, 500
+    LOAD R2, 500
     JMP score_apply
 
 score_try_4:
-    LOADA R2, 800
+    LOAD R2, 800
 
 score_apply:
-    LOADA R3, [level]
+    LOAD R3, [level]
     ADDA R3, 1 ; Add 1 to handle level 0
     MUL R2, R3 ; Multiply with current level
 
-    LOADA R3, score
-    LOADR R3, R3
+    LOAD R3, score
+    LOAD R3, [R3]
     ADD R3, R2
     STOREA R3, score ; Store
     RET
@@ -265,20 +265,20 @@ score_apply:
 check_lines_after_lock:
     CALL find_complete_rows
 
-    LOADA R0, [lines_cleared]
+    LOAD R0, [lines_cleared]
     CMPA R0, 0
     JE lock_no_lines
 
-    LOADA R1, [broken_lines]
+    LOAD R1, [broken_lines]
     ADD R1, R0
     STOREA R1, broken_lines ; broken_lines += lines_cleared
 
     CALL start_line_clear_anim ; Reset the clock for the animation
-    LOADA R1, 1
+    LOAD R1, 1
     STOREA R1, game_state
 
-    LOADA R1, lines_cleared
-    LOADR R1, R1
+    LOAD R1, lines_cleared
+    LOAD R1, [R1]
     CALL add_score_for_lines
     RET
 

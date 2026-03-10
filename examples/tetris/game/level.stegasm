@@ -13,18 +13,18 @@ section .data
 
 section .text
 display_level:
-    LOADA R0, level_number
-    LOADA R1, 2 ; Number of digits
-    LOADA R2, [level]
+    LOAD R0, level_number
+    LOAD R1, 2 ; Number of digits
+    LOAD R2, [level]
     CALL number_to_string
 
     WINDOW_SET_TEXT_SIZE [level_text_size]
 
-    LOADA R0, 193
-    LOADA R1, 151
+    LOAD R0, 193
+    LOAD R1, 151
     WINDOW_DRAW_TEXT R0 R1 level_header_string
 
-    LOADA R0, 211
+    LOAD R0, 211
     ADDA R1, 10
     WINDOW_DRAW_TEXT R0 R1 level_number
 
@@ -33,20 +33,20 @@ display_level:
     RET
 
 update_level:
-    LOADA R0, [broken_lines]
+    LOAD R0, [broken_lines]
     DIVA R0, 10
     STOREA R0, level
     RET
 
 ; Put in R0 the speed of the current level
 get_current_speed:
-    LOADA R0, speed_table
+    LOAD R0, speed_table
 
-    LOADA R1, [level]
+    LOAD R1, [level]
     MINA R1, 17 ; clamp to 17 ;  number of value in speed_table
 
     ADD R0, R1
-    LOADR R0, R0
+    LOAD R0, [R0]
     RET
 
 ; ---
@@ -55,20 +55,20 @@ get_current_speed:
 set_level_color:
     PUSH R1
 
-    LOADA R1, [level]
+    LOAD R1, [level]
     MODA R1, 10
 
-    LOADA R3, red_level_table
+    LOAD R3, red_level_table
     ADD R3, R1
-    LOADR R3, R3
+    LOAD R3, [R3]
 
-    LOADA R4, green_level_table
+    LOAD R4, green_level_table
     ADD R4, R1
-    LOADR R4, R4
+    LOAD R4, [R4]
 
-    LOADA R5, blue_level_table
+    LOAD R5, blue_level_table
     ADD R5, R1
-    LOADR R5, R5
+    LOAD R5, [R5]
 
     POP R1
 

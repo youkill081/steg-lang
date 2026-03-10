@@ -3,16 +3,16 @@ section .data
 
 section .text
 draw_next_block:
-    LOADA R1 193
-    LOADA R2 97
+    LOAD R1 193
+    LOAD R2 97
 
     WINDOW_SET_TEXT_SIZE 10
     WINDOW_DRAW_TEXT R1 R2 next_block_string
     WINDOW_SET_TEXT_SIZE [default_string_size]
 
-    LOADA R1, [next_block_type]
-    LOADA R2, [next_block_rotation]
-    LOADA R3, [next_block_skin]
+    LOAD R1, [next_block_type]
+    LOAD R2, [next_block_rotation]
+    LOAD R3, [next_block_skin]
 
     CALL get_block_type_is_4x4
 
@@ -21,17 +21,17 @@ draw_next_block:
     JMP draw_next_block_set_4x4_coords ; Is 4x4
 
 draw_next_block_set_3x3_coords:
-    LOADA R4, 12
-    LOADA R5, 10
-    LOADA R6, 4
-    LOADA R7, 0
+    LOAD R4, 12
+    LOAD R5, 10
+    LOAD R6, 4
+    LOAD R7, 0
     JMP draw_next_block_end
 
 draw_next_block_set_4x4_coords:
-    LOADA R4, 12
-    LOADA R5, 10
-    LOADA R6, 0
-    LOADA R7, 1
+    LOAD R4, 12
+    LOAD R5, 10
+    LOAD R6, 0
+    LOAD R7, 1
     JMP draw_next_block_end
 
 draw_next_block_end:

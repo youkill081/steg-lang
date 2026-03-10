@@ -8,13 +8,13 @@ section .text
 ; -----------
 
 init_can_move_loop: ; Set R3 = array address ; R4 = current_index_in_loop ;
-    LOADA R1, [current_block_type]
-    LOADA R2, [current_block_rotation]
+    LOAD R1, [current_block_type]
+    LOAD R2, [current_block_rotation]
 
     CALL get_block_array_from_type_rotation ; GET R1 = type, R2 = rotation RETURN R0 = array address
-    MOV R3, R0 ; save array address in R3
+    LOAD R3, R0 ; save array address in R3
 
-    LOADA R4, 0
+    LOAD R4, 0
     RET
 
 ; ---
@@ -23,7 +23,7 @@ get_next_block_coords: ; iterate over all blocks and put coordinate in R5 = X ; 
     CMPA R4, 16
     JE get_next_block_coords_end ; End of array, end
 
-    LOADR R7, R3 ; Load current value in R7
+    LOAD R7, [R3] ; Load current value in R7
     CMPA R7, 1
     JE get_next_block_coords_compute_coords ; Compute coords and end
 
@@ -33,10 +33,10 @@ get_next_block_coords: ; iterate over all blocks and put coordinate in R5 = X ; 
     JMP get_next_block_coords
 
 get_next_block_coords_compute_coords:
-    MOV R5, R4
+    LOAD R5, R4
     MODA R5, 4 ; R5/X = index % 4
 
-    MOV R6, R4
+    LOAD R6, R4
     DIVA R6, 4 ; R6/Y = index / 4
 
     ADDA R4, 1 ; Next block index
@@ -64,10 +64,10 @@ check_is_outside_map: ; R5 = X ; R6 = Y ;
     JMP check_outside_map_end_not_outside
 
 check_outside_map_end_is_outside:
-    LOADA R0, 1
+    LOAD R0, 1
     RET
 check_outside_map_end_not_outside:
-    LOADA R0, 0
+    LOAD R0, 0
     RET
 
 ; ---
@@ -80,23 +80,23 @@ check_pos_available_in_map: ; R5 = X ; R6 = Y ;
     CMPA R0, 1
     JE pos_not_available
 
-    MOV R4, R6 ; R4 = Y
+    LOAD R4, R6 ; R4 = Y
     MULA R4, 10 ; R4 = Y*10
     ADD R4, R5 ; R4 = X + Y*10
 
-    LOADA R3, map
+    LOAD R3, map
     ADD R3, R4 ; R3 = Final address
 
-    LOADR R3, R3 ; Load value in R3
+    LOAD R3, [R3] ; Load value in R3
     CMPA R3, 0
 
     JE pos_available
 
 pos_not_available:
-    LOADA R0, 0
+    LOAD R0, 0
     JMP pos_end
 pos_available:
-    LOADA R0, 1
+    LOAD R0, 1
 pos_end:
     POP R4
     POP R3
@@ -105,10 +105,10 @@ pos_end:
 ; ---
 
 can_mode_end_true:
-    LOADA R0, 1
+    LOAD R0, 1
     RET
 can_mode_end_false:
-    LOADA R0, 0
+    LOAD R0, 0
     RET
 
 ; -----------
@@ -175,12 +175,12 @@ can_current_move_right_loop:
 ; Function purpose is identical to the previous one, but without modifying the coordinates.
 ; Used by check_rotation to verify the validity of the rotation
 is_block_valid_on_map: ; R2 = Block rotation
-    LOADA R1, [current_block_type]
+    LOAD R1, [current_block_type]
 
     CALL get_block_array_from_type_rotation ; GET R1 = type, R2 = rotation RETURN R0 = array address
-    MOV R3, R0 ; save array address in R3
+    LOAD R3, R0 ; save array address in R3
 
-    LOADA R4, 0
+    LOAD R4, 0
 is_block_valid_loop:
     CALL get_next_block_coords
 

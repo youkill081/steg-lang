@@ -3,7 +3,7 @@
 
 section .text
 display_string:
-    LOADR R2 R1 ; Load current char in R2
+    LOAD R2 [R1] ; Load current char in R2
     CMPA R2 0
     JE end ; If current char is 0 jump to end
 

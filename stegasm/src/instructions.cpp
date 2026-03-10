@@ -20,6 +20,32 @@ uint32_t InstructionView::get_data(const Runtime& rt) const
     return val;
 }
 
+uint32_t InstructionView::get_r1(const Runtime& rt) const
+{
+    uint16_t value = rt.registries.read(this->r1());
+    if (is_r1_addr())
+        return rt.memory.read(value);
+    return value;
+}
+
+uint32_t InstructionView::get_r2(const Runtime& rt) const
+{
+
+    uint16_t value = rt.registries.read(this->r2());
+    if (is_r2_addr())
+        return rt.memory.read(value);
+    return value;
+}
+
+uint32_t InstructionView::get_r3(const Runtime& rt) const
+{
+    uint16_t value = rt.registries.read(this->r3());
+    if (is_r3_addr())
+        return rt.memory.read(value);
+    return value;
+}
+
+
 // ASM Instructions
 
 void instr_EOF(Runtime& runtime, InstructionView view)
@@ -29,7 +55,7 @@ void instr_EOF(Runtime& runtime, InstructionView view)
     runtime.is_running = false;
 }
 
-inline void instr_LOADA(Runtime &runtine, InstructionView view)
+inline void instr_LOADD(Runtime &runtine, InstructionView view)
 {
     runtine.registries.write(view.r1(), view.get_data(runtine));
 }
@@ -38,11 +64,11 @@ inline void instr_LOADR(Runtime &runtine, InstructionView view)
 {
     runtine.registries.write(
         view.r1(),
-        runtine.memory.read(runtine.registries.read(view.r2()))
+        view.get_r2(runtine)
     );
 }
 
-void instr_STOREA(Runtime &runtime, InstructionView view)
+void instr_STORED(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write(
         view.get_data(runtime),
@@ -54,15 +80,7 @@ void instr_STORER(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write(
         runtime.registries.read(view.r2()),
-        runtime.registries.read(view.r1())
-    );
-}
-
-void instr_MOV(Runtime &runtime, InstructionView view)
-{
-    runtime.registries.write(
-        view.r1(),
-        runtime.registries.read(view.r2())
+        view.get_r1(runtime)
     );
 }
 

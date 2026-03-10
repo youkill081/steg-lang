@@ -57,12 +57,15 @@ struct InstructionView
 
     [[nodiscard]] bool is_r1_addr() const { return (header() >> 21) & 0x1; }
     [[nodiscard]] RegNames r1() const { return static_cast<RegNames>((header() >> 16) & 0x1F); }
+    [[nodiscard]] uint32_t get_r1(const Runtime& rt) const;
 
     [[nodiscard]] bool is_r2_addr() const { return (header() >> 15) & 0x1; }
     [[nodiscard]] RegNames r2() const { return static_cast<RegNames>((header() >> 10) & 0x1F); }
+    [[nodiscard]] uint32_t get_r2(const Runtime& rt) const;
 
     [[nodiscard]] bool is_r3_addr() const { return (header() >> 9) & 0x1; }
     [[nodiscard]] RegNames r3() const { return static_cast<RegNames>((header() >> 4) & 0x1F); }
+    [[nodiscard]] uint32_t get_r3(const Runtime& rt) const;
 
     [[nodiscard]] uint8_t data_type() const { return static_cast<uint8_t>(header() & 0x3); }
     [[nodiscard]] uint32_t get_raw_data() const { return static_cast<uint32_t>(raw_data & 0xFFFFFFFF); }
@@ -72,11 +75,10 @@ struct InstructionView
 using InstructionFct = void(*)(Runtime &, InstructionView raw_data);
 
 void instr_EOF(Runtime &runtime, InstructionView view);
-void instr_LOADA(Runtime &runtime, InstructionView view);
+void instr_LOADD(Runtime &runtime, InstructionView view);
 void instr_LOADR(Runtime &runtime, InstructionView view);
-void instr_STOREA(Runtime &runtime, InstructionView view);
+void instr_STORED(Runtime &runtime, InstructionView view);
 void instr_STORER(Runtime &runtime, InstructionView view);
-void instr_MOV(Runtime &runtime, InstructionView view);
 void instr_ADD(Runtime &runtime, InstructionView view);
 void instr_ADDA(Runtime &runtime, InstructionView view);
 void instr_SUB(Runtime &runtime, InstructionView view);
@@ -209,11 +211,12 @@ struct InstructionDesc
 constexpr std::array rawInstructionSet =
 {
     RawInstruction{"EOF", false, InstructionHandler(&instr_EOF)},
-    RawInstruction{"LOADA", true, InstructionHandler(&instr_LOADA, REG, ONE_DATA)},
-    RawInstruction{"LOADR", true, InstructionHandler(&instr_LOADR, REG, REG)},
-    RawInstruction{"STOREA", true, InstructionHandler(&instr_STOREA, REG, ONE_DATA)},
+    RawInstruction{"LOAD", true,
+        InstructionHandler(&instr_LOADD, REG, ONE_DATA),
+        InstructionHandler(&instr_LOADR, REG, REG_ADDRESS),
+        InstructionHandler(&instr_LOADR, REG, REG)},
+    RawInstruction{"STOREA", true, InstructionHandler(&instr_STORED, REG, ONE_DATA)},
     RawInstruction{"STORER", true, InstructionHandler(&instr_STORER, REG, REG)},
-    RawInstruction{"MOV", true, InstructionHandler(&instr_MOV, REG, REG)},
     RawInstruction{"ADD", true, InstructionHandler(&instr_ADD, REG, REG)},
     RawInstruction{"ADDA", true, InstructionHandler(&instr_ADDA, REG, ONE_DATA)},
     RawInstruction{"SUB", true, InstructionHandler(&instr_SUB, REG, REG)},

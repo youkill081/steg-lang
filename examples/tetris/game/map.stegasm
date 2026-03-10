@@ -31,18 +31,18 @@ section .text
 ; R0 -> X pixel coordinate
 ; R1 -> Y pixel coordinate
 compute_block_position_from_coords:
-    MOV R3, R1 ; R3 = col
+    LOAD R3, R1 ; R3 = col
     MULA R3, 8
     ADDA R3, [map_x_padding]
 
     ; compute Y = row * 8 + map_y_padding
-    MOV R4, R2 ; R4 = row
+    LOAD R4, R2 ; R4 = row
     SUBA R4, 2 ; Sub 2 due to 2 invisibles cells above the map
     MULA R4, 8
     ADDA R4, [map_y_padding]
 
-    MOV R0, R3 ; result X
-    MOV R1, R4 ; result Y
+    LOAD R0, R3 ; result X
+    LOAD R1, R4 ; result Y
     RET
 
 ; compute_block_position_from_index
@@ -54,45 +54,45 @@ compute_block_position_from_index:
     ; Convert index -> col,row
     ; col = index % 10
     ; row = index / 10
-    MOV R2, R1 ; R2 = index (we'll use R2/R3 as temps)
+    LOAD R2, R1 ; R2 = index (we'll use R2/R3 as temps)
     MODA R2, 10 ; R2 = col
-    MOV R3, R1
+    LOAD R3, R1
     DIVA R3, 10 ; R3 = row
 
-    MOV R1, R2
-    MOV R2, R3
+    LOAD R1, R2
+    LOAD R2, R3
     CALL compute_block_position_from_coords
 
     RET
 
 
 draw_map:
-    LOADA R6, 20 ; R6 = starting cell index (skip top 2 rows = 20 cells)
-    LOADA R7, map
+    LOAD R6, 20 ; R6 = starting cell index (skip top 2 rows = 20 cells)
+    LOAD R7, map
     ADDA R7, 20
 
 draw_map_loop:
     CMPA R6, 220
     JE draw_map_end
 
-    LOADR R5, R7 ; R5 = current cell value
+    LOAD R5, [R7] ; R5 = current cell value
     CMPA R5, 0
     JE draw_map_next
 
 
-    MOV R1, R6 ; Put current map index in R1
+    LOAD R1, R6 ; Put current map index in R1
     CALL compute_block_position_from_index ; R0 = coords X, R1 = coords Y
 
     ; Decode : R2 = block type (color), R3 = skin
-    MOV R2, R5
+    LOAD R2, R5
     DIVA R2, 10
-    MOV R3, R5
+    LOAD R3, R5
     MODA R3, 10
 
     CALL draw_white_background_at_coordinate ; Need R0 (X), R1 (Y)
     CALL set_color_by_block_type ; Need R2 (block type)
 
-    MOV R2, R3
+    LOAD R2, R3
     CALL draw_skin_at_coordinate ; Need R0 (X), R1 (Y), R2 (skin number)
 
 draw_map_next:
@@ -107,9 +107,9 @@ draw_map_end:
 ; ----
 
 reset_map:
-    LOADA R0, 0
-    LOADA R1, map
-    LOADA R2, 0 ; always 0
+    LOAD R0, 0
+    LOAD R1, map
+    LOAD R2, 0 ; always 0
 reset_map_loop:
     CMPA R0, 220
     JE reset_map_end

@@ -7,14 +7,14 @@ section .text
 ; Display Lines ;
 
 display_broken_lines:
-    LOADA R0, lines_string
+    LOAD R0, lines_string
     ADDA R0, 6 ; Move pointer to the number
 
-    LOADA R1, 3 ; Number of digits
-    LOADA R2,  [broken_lines] ; Number of broken lines
+    LOAD R1, 3 ; Number of digits
+    LOAD R2,  [broken_lines] ; Number of broken lines
     CALL number_to_string
 
-    LOADA R0, 104
-    LOADA R1, 15
+    LOAD R0, 104
+    LOAD R1, 15
     WINDOW_DRAW_TEXT R0 R1 lines_string
     RET

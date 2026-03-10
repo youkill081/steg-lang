@@ -1,18 +1,18 @@
 section .text
 choose_random_next_block: ; update : next_block_type ; next_block_rotation ; next_block_skin
-    LOADA R0, [number_of_block_type]
+    LOAD R0, [number_of_block_type]
     RAND R1
     MOD R1, R0
     ADDA R1, 1
     STOREA R1 next_block_type ; next_block_type = ( random % number_of_block_type ) + 1
 
-    LOADA R0, [number_of_block_skin]
+    LOAD R0, [number_of_block_skin]
     RAND R1
     MOD R1, R0
     ADDA R1, 1
     STOREA R1 next_block_skin ; next_block_skin = ( random % number_of_block_skin ) + 1
 
-    LOADA R0, 1
+    LOAD R0, 1
     STOREA R0 next_block_rotation
 
     RET

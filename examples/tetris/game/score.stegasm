@@ -11,21 +11,21 @@ section .text
 ; Display Two Scores
 display_scores:
     ; Convert top_score in top_score_string ;
-    LOADA R0, top_score_string
-    LOADA R1, 6 ; Number of digits
-    LOADA R2, [top_score]
+    LOAD R0, top_score_string
+    LOAD R1, 6 ; Number of digits
+    LOAD R2, [top_score]
     CALL number_to_string
 
     ; Convert score in score_string ;
-    LOADA R0, score_string
-    LOADA R1, 6 ; Number of digits
-    LOADA R2, [score]
+    LOAD R0, score_string
+    LOAD R1, 6 ; Number of digits
+    LOAD R2, [score]
     CALL number_to_string
 
 
     ; Display top_score strings ;
-    LOADA R0, 193
-    LOADA R1, 19
+    LOAD R0, 193
+    LOAD R1, 19
     WINDOW_DRAW_TEXT R0 R1 top_score_header_string
 
     ADDA R1, 11
@@ -33,8 +33,8 @@ display_scores:
 
 
     ; Display score strings ;
-    LOADA R0, 193
-    LOADA R1, 46
+    LOAD R0, 193
+    LOAD R1, 46
     WINDOW_DRAW_TEXT R0 R1 score_header_string
 
     ADDA R1, 11

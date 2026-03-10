@@ -7,46 +7,46 @@ section .data
 section .text
 ; Set the game over
 set_game_over:
-    LOADA R1, 2 ; game over flag
+    LOAD R1, 2 ; game over flag
     STOREA R1, game_state
 
     RET
 
 handle_game_over:
-    LOADA R1, 2
+    LOAD R1, 2
     CMPA R1, [game_state]
     JNE game_over_end ; Return if game is not over
 
     CALL handle_restart_key
     CALL handle_tab_key
 
-    LOADA R1 [hide_game_hover_text]
+    LOAD R1 [hide_game_hover_text]
     CMPA R1, 1 ; Skip next part if menu is hidden
     JE game_over_end
 
     ; Draw game over main string
 
-    LOADA R1 255 ; Red
-    LOADA R2 0 ; Green
-    LOADA R3 0 ; Blue
+    LOAD R1 255 ; Red
+    LOAD R2 0 ; Green
+    LOAD R3 0 ; Blue
     WINDOW_SET_TEXT_COLOR R1, R2, R3
 
     WINDOW_SET_TEXT_SIZE 40
 
-    LOADA R1 25 ; X
-    LOADA R2 78 ; Y
+    LOAD R1 25 ; X
+    LOAD R2 78 ; Y
     WINDOW_DRAW_TEXT R1, R2 game_over_string
 
     ; Draw game over main second string
 
-    LOADA R1 255 ; Red
-    LOADA R2 255 ; Green
-    LOADA R3 255 ; Blue
+    LOAD R1 255 ; Red
+    LOAD R2 255 ; Green
+    LOAD R3 255 ; Blue
     WINDOW_SET_TEXT_COLOR R1, R2, R3 ; Set color white
 
     WINDOW_SET_TEXT_SIZE 20
-    LOADA R1 30; X
-    LOADA R2 118 ; Y
+    LOAD R1 30; X
+    LOAD R2 118 ; Y
     WINDOW_DRAW_TEXT R1, R2 game_over_string2
 
     WINDOW_SET_TEXT_SIZE [default_string_size] ; Reset to default text size
@@ -60,7 +60,7 @@ handle_tab_key:
     CMPA R1, 1
     JNE game_over_end ; Return if key is not pressed
 
-    LOADA R1 [hide_game_hover_text]
+    LOAD R1 [hide_game_hover_text]
     ADDA R1 1
     MODA R1 2
     STOREA R1, hide_game_hover_text
@@ -73,7 +73,7 @@ handle_restart_key:
     CMPA R1, 1
     JNE game_over_end ; Return if key is not pressed
 
-    LOADA R1 0
+    LOAD R1 0
     STOREA R1, score ; score = 0
     STOREA R1, level ; level = 0
     STOREA R1, broken_lines ; broken_lines = 0

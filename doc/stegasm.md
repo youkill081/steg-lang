@@ -102,16 +102,15 @@ Si data != NO_DATA, alors un second block suit pour stocker la data:
 
 ### Liste des opérandes
 
-Toutes les opérations auront des signatures fixes ; c'est-à-dire que l'on connaît leur nombre de registres et de données.
-De plus, les op-codes seront automatiquement calculés lors de la compilation.
 
 | Opération                       | Registre(s) et Donnée(s)  |                                                                             Description                                                                             |
 |:--------------------------------|:-------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| LOADA                           |      RegX(1) ; data1      |                                                       Charge une donnée depuis data1 dans le registre RegX(1)                                                       |
-| LOADR                           |     RegX(1) ; RegX(2)     |                                 Charge une donnée depuis une adresse **stockée dans un registre** RegX(2) dans le registre RegX(1)                                  |
+| LOAD                            |        LOAD R1, R2        |                                                                   Copie le contenu de R2 dans R1                                                                    |
+| LOAD                            |       LOAD R1, [R2]       |                                                    Copie la valeur située à l'adresse (contenue dans R2) dans R1                                                    |
+| LOAD                            |       LOAD R1, #500       |                                                               Charge la valeur immédiate 500 dans R1                                                                |
+| LOAD                            |      LOAD R1, [500]       |                                                         Charge la valeur située à l'adresse RAM 500 dans R1                                                         |
 | STOREA                          |      RegX(1) ; data1      |                                   Enregistre une donnée en RAM depuis un registre RegX(1) vers une adresse **codée en dur** data1                                   |
 | STORER                          |     RegX(1) ; RegX(2)     |                         Enregistre une donnée en RAM depuis un registre RegX(1) vers une adresse **stockée dans un autre registre** RegX(2)                         |
-| MOV                             |     RegX(1) ; RegX(2)     |                                                         Déplace la valeur du registre RegX(2) vers RegX(1)                                                          |
 | ADD                             |     RegX(1) ; RegX(2)     |                                                 Additionne RegX(1) avec RegX(2) et stocke le résultat dans RegX(1)                                                  |
 | ADDA                            |      RegX(1), data1       |                                                  Additionne RegX(1) avec data1 et stocke le résultat dans RegX(1)                                                   |
 | SUB                             |     RegX(1) ; RegX(2)     |                                                   Soustrait RegX(2) de RegX(1) et stocke le résultat dans RegX(1)                                                   |
