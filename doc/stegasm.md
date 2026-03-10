@@ -79,23 +79,26 @@ struct subtexture :
 Les instructions seront ensuite écrites les unes après les autres ; elles seront écrites dans la section `.text` du fichier assembleur.
 Les instructions seront toutes alignées sur 32 bits ; on utilise le codage suivant :
 
-| Opération | RegX(1)  |  Flag  |  RegX(2)  |   data1   | 
-|:---------:|:--------:|:------:|:---------:|:---------:|
-|  8 bits   |  3 bits  | 2 bits |  3 bits   |  16 bits  |
-|  bit 1-8  | bit 9-11 | 12-13  | bit 14-16 | bit 17-32 |
+| Opération | Handler Number | RegX(1) is address |  RegX(1)   | RegX(2) is address |  RegX(2)   | RegX(3) is address |  RegX(3)   | number_of_registry | data_type  |
+|:---------:|:--------------:|:------------------:|:----------:|:------------------:|:----------:|:------------------:|:----------:|:------------------:|------------|
+|  8 bits   |     2 bit      |       1 bit        |   5 bits   |       1 bit        |   5 bits   |       1 bit        |   5 bits   |       2 bits       | 2 bits     |
+| bits 1-8  |   bits 9-10    |       bit 11       | bits 12-16 |       bit 17       | bits 18-22 |       bit 23       | bits 24-28 |     bits 29-30     | bits 31-32 |
 
-Les deux bits de flag permettront de savoir si `data1` et `data2` doivent être interprétés comme une adresse ou comme une valeur.
-Le premier bit s'applique à `data1`, le second à `data2`. Si le bit est à 0, la donnée devra être interprétée comme une valeur ; si il est à 1, elle sera alors considérée comme une adresse.
+Avec data_type : 
 
-Certaines opérations auront besoin de plus de données ou de registres pour fonctionner ;
-elles seront alors suivies d'un second bloc uint32 sous ce format :
+|    |                 |
+|----|-----------------|
+| 00 | NO_DATA         |
+| 01 | Data is value   |
+| 10 | Data is address |
 
-| RegX(3) | RegX(4) | RegX(5) |  RegX(6)  |  RegX(7)  | None  |   data2   |
-|:-------:|:-------:|:-------:|:---------:|:---------:|:-----:|:---------:|
-| 3 bits  | 3 bits  | 3 bits  |  3 bits   |  3 bits   | 1 bit |  16 bits  |
-| bit 1-3 | bit 4-6 | bit 7-9 | bit 10-12 | bit 13-15 |  16   | bit 17-32 |
+Si data != NO_DATA, alors un second block suit pour stocker la data:
 
-Les opérations peuvent donc utiliser au maximum 7 registres et 2 données.
+| data      |
+|-----------|
+| 32 bits   |
+| bits 1-32 |
+
 
 ### Liste des opérandes
 

@@ -28,14 +28,6 @@ RegNames InstructionSet::string_to_reg_name(const std::string &reg_name)
     return stringToRegistry.at(reg_name);
 }
 
-UsedRegistries InstructionSet::get_used_registries_from_parsed_line(const InstructionDesc &desc, const ParsedLine &line)
-{
-    UsedRegistries registries;
-    for (uint32_t i = 1; i < static_cast<uint32_t>(desc.regCount) + 1; i++)
-        registries[i - 1] = string_to_reg_name(line.tokens[i]);
-    return registries;
-}
-
 std::string InstructionSet::remove_brackets(const std::string &token)
 {
     if (not token_is_in_brackets(token))
@@ -48,50 +40,83 @@ bool InstructionSet::token_is_in_brackets(const std::string &token)
     return token[0] == '[' && token[token.size() - 1] == ']';
 }
 
-DataValueParsingResult InstructionSet::parse_data_value(std::string token, const SymbolSet &symbols)
+uint16_t InstructionSet::parse_data_value(std::string token, const SymbolSet &symbols)
 {
-    bool is_in_bracket = token_is_in_brackets(token);
-    if (is_in_bracket)
-        token = remove_brackets(token);
 
     if (token_is_uint16_value(token))
-        return { .is_address = is_in_bracket, .value = token_to_uint16(token) };
+        return token_to_uint16(token);
 
     if (!symbols.contains(token))
         Linter::error("Unknown symbol \"" + token + "\"");
 
-    return { .is_address = is_in_bracket, .value = symbols.at(token).value };
+    return symbols.at(token).value;
 }
 
-DataValues InstructionSet::get_data_values_from_parsed_line(
-    const InstructionDesc &desc,
-    const ParsedLine &line,
-    const SymbolSet &symbols)
+bool InstructionSet::is_registry(const std::string& reg_name)
 {
-    DataValues data{};
-    switch (desc.dataCount)
+    return stringToRegistry.contains(reg_name);
+}
+
+InstructionParameters InstructionSet::parse_data_and_registries_from_line(const ParsedLine &line, const SymbolSet &symbols)
+{
+    InstructionParameters datas_registries{};
+
+    if (line.tokens.size() > 4)
+        Linter::error("Too much token for instruction");
+    for (int i = 1; i <= line.tokens.size() - 1; i++)
     {
-    case ONE_DATA:
-        data[0] = parse_data_value(line.tokens[desc.regCount + 1], symbols);
-    default:
-        return data;
+        std::string token = line.tokens[i];
+        const bool is_address = token_is_in_brackets(token);
+        if (is_address)
+            token = remove_brackets(token);
+
+        if (is_registry(token))
+        {
+            RegTypes reg_type = is_address ? REG_ADDRESS : REG;
+            datas_registries.registries[i - 1] = {.type = reg_type, .registry = string_to_reg_name(token)};
+        } else
+        {
+            if (i != line.tokens.size() - 1)
+                Linter::error("Misplaced data !");
+            datas_registries.data_value = {
+                .data_count = ONE_DATA,
+                .value = parse_data_value(token, symbols),
+                .is_address = is_address
+            };
+        }
     }
+
+    return datas_registries;
+}
+
+HandlerNumber InstructionSet::get_handler_number(const InstructionDesc &desc, const InstructionParameters &data_registries)
+{
+    for (std::size_t i = 0; i < desc.handler_count; i++)
+    {
+        if (desc.handlers[i].first_reg_type == data_registries.registries[0].type &&
+            desc.handlers[i].second_reg_type == data_registries.registries[1].type &&
+            desc.handlers[i].third_reg_type == data_registries.registries[2].type &&
+            desc.handlers[i].data_type == data_registries.data_value.data_count
+        )
+        {
+            return static_cast<HandlerNumber>(i);
+        }
+    }
+    Linter::error("No compatible handler found for given instruction");
 }
 
 Instruction InstructionSet::parsed_line_to_instruction(const ParsedLine &line, const SymbolSet &symbols)
 {
     const InstructionDesc &desc = get_instruction_desc_from_name(line.tokens[0]);
-    uint32_t token_needed = static_cast<uint32_t>(desc.dataCount) + static_cast<uint32_t>(desc.regCount) + 1;
-
     if (not desc.user_usable)
         Linter::error("Try to use assemblers instruction in code !");
-    if (line.tokens.size() != token_needed)
-        Linter::error("Number of token missmatch for instruction");
 
+    InstructionParameters data_registries = parse_data_and_registries_from_line(line, symbols);
+    HandlerNumber handler_number = get_handler_number(desc, data_registries);
     return {
         .desc = desc,
-        .registries = get_used_registries_from_parsed_line(desc, line),
-        .datas = get_data_values_from_parsed_line(desc, line, symbols)
+        .handler_number = handler_number,
+        .instruction_parameters = data_registries,
     };
 }
 
@@ -99,8 +124,8 @@ Instruction InstructionSet::get_eof_instruction()
 {
     return Instruction{
         .desc = get_instruction_desc_from_name("EOF"),
-        .registries = {},
-        .datas = {}
+        .handler_number = HANDLER_0,
+        .instruction_parameters = {},
     };
 }
 
@@ -146,11 +171,11 @@ void InstructionSet::display() const
     for (const auto &instruction : *this)
     {
         std::cout << instruction.desc.name << " registrie(s) -> ";
-        for (int i = 0; i < instruction.desc.regCount; i++)
-            std::cout << registryToString.at(instruction.registries[i]) << " ";
-        std::cout << "data(s) -> ";
-        for (int i = 0; i < instruction.desc.dataCount; i++)
-            std::cout << "\"" << instruction.datas[i].value << "\"" << (instruction.datas[i].is_address ? " as address " : " as constant ");
+        // for (int i = 0; i < instruction.desc.regCount; i++)
+        //     std::cout << registryToString.at(instruction.registries[i]) << " ";
+        // std::cout << "data(s) -> ";
+        // for (int i = 0; i < instruction.desc.dataCount; i++)
+        //     std::cout << "\"" << instruction.datas[i].value << "\"" << (instruction.datas[i].is_address ? " as address " : " as constant ");
         std::cout << std::endl;
     }
 }

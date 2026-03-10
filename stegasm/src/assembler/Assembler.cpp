@@ -120,38 +120,38 @@ void Assembler::compile_file(CompiledFile &compiled_file, TextParser &parser, Li
     }
 }
 
-void Assembler::write_reg_x_in_buffer(
-    uint8_t reg_x,
-    const RegCount& reg_count,
-    const UsedRegistries& registries,
-    ByteBuffer& buffer
-) {
-    if (reg_x <= static_cast<uint8_t>(reg_count))
-    {
-        const uint8_t reg = registries[reg_x - 1];
-        const uint8_t write_reg = static_cast<uint8_t>(reg & 0b111);
+// void Assembler::write_reg_x_in_buffer(
+//     uint8_t reg_x,
+//     const RegCount& reg_count,
+//     const UsedRegistries& registries,
+//     ByteBuffer& buffer
+// ) {
+//     if (reg_x <= static_cast<uint8_t>(reg_count))
+//     {
+//         const uint8_t reg = registries[reg_x - 1];
+//         const uint8_t write_reg = static_cast<uint8_t>(reg & 0b111);
+//
+//         buffer.push_bit((write_reg >> 2) & 0x1);
+//         buffer.push_bit((write_reg >> 1) & 0x1);
+//         buffer.push_bit((write_reg >> 0) & 0x1);
+//     } else {
+//         buffer.push_bit(0);
+//         buffer.push_bit(0);
+//         buffer.push_bit(0);
+//     }
+// }
 
-        buffer.push_bit((write_reg >> 2) & 0x1);
-        buffer.push_bit((write_reg >> 1) & 0x1);
-        buffer.push_bit((write_reg >> 0) & 0x1);
-    } else {
-        buffer.push_bit(0);
-        buffer.push_bit(0);
-        buffer.push_bit(0);
-    }
-}
-
-void Assembler::write_datas_flag_in_buffer(
-    const DataCount& data_count,
-    const DataValues& data_parsing_result,
-    ByteBuffer& buffer)
-{
-    const bool first_bit_value = static_cast<uint8_t>(data_count) >= 1 && data_parsing_result[0].is_address;
-    const bool second_bit_value = static_cast<uint8_t>(data_count) >= 2 && data_parsing_result[1].is_address;
-
-    buffer.push_bit(first_bit_value);
-    buffer.push_bit(second_bit_value);
-}
+// void Assembler::write_datas_flag_in_buffer(
+//     const DataCount& data_count,
+//     const DataValues& data_parsing_result,
+//     ByteBuffer& buffer)
+// {
+//     const bool first_bit_value = static_cast<uint8_t>(data_count) >= 1 && data_parsing_result[0].is_address;
+//     const bool second_bit_value = static_cast<uint8_t>(data_count) >= 2 && data_parsing_result[1].is_address;
+//
+//     buffer.push_bit(first_bit_value);
+//     buffer.push_bit(second_bit_value);
+// }
 
 ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile, Linter &linter)
 {
@@ -206,32 +206,58 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile, Li
             buffer.write_uint16(sub.height);
         }
 
-        // Push Instructions
-        for (const auto &instruction : compiledFile.instructions)
+        for (const auto& instruction : compiledFile.instructions)
         {
             buffer.write_uint8(instruction.desc.opcode);
 
-            // Registry And Flag
-            write_reg_x_in_buffer(1, instruction.desc.regCount, instruction.registries, buffer); // RegX(1) | 3 bit
-            write_datas_flag_in_buffer(instruction.desc.dataCount, instruction.datas, buffer); // Data Flag | 2 bit
-            write_reg_x_in_buffer(2, instruction.desc.regCount, instruction.registries, buffer); // RegX(2) | 3 bit
+            buffer.push_bit((instruction.handler_number >> 1) & 1);
+            buffer.push_bit(instruction.handler_number & 1);
 
-            // 8 bit was wrote, ByteBuffer flushed
-
-            buffer.write_uint16(instruction.datas[0].value);
-
-            if (static_cast<uint8_t>(instruction.desc.regCount) > 2)
+            // 3 à 8. RegX(1), RegX(2) et RegX(3) (6 bits par registre : 1 bit d'état + 5 bits d'ID)
+            for (int i = 0; i < 3; ++i)
             {
-                write_reg_x_in_buffer(3, instruction.desc.regCount, instruction.registries, buffer); // RegX(3) | 3 bit
-                write_reg_x_in_buffer(4, instruction.desc.regCount, instruction.registries, buffer); // RegX(4) | 3 bit
-                write_reg_x_in_buffer(5, instruction.desc.regCount, instruction.registries, buffer); // RegX(5) | 3 bit
-                write_reg_x_in_buffer(6, instruction.desc.regCount, instruction.registries, buffer); // RegX(6) | 3 bit
-                write_reg_x_in_buffer(7, instruction.desc.regCount, instruction.registries, buffer); // RegX(7) | 3 bit
-                buffer.push_bit(0); // 1 bit
+                auto reg_type = instruction.instruction_parameters.registries[i].type;
+                auto reg_name = instruction.instruction_parameters.registries[i].registry;
 
-                // 16 bit was wrote, ByteBuffer flushed
+                buffer.push_bit(reg_type == REG_ADDRESS);
 
-                buffer.write_uint16(instruction.datas[1].value);
+                buffer.push_bit((reg_name >> 4) & 1);
+                buffer.push_bit((reg_name >> 3) & 1);
+                buffer.push_bit((reg_name >> 2) & 1);
+                buffer.push_bit((reg_name >> 1) & 1);
+                buffer.push_bit((reg_name >> 0) & 1);
+            }
+
+            uint8_t number_of_registry = 0;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (instruction.instruction_parameters.registries[i].type != REG_NO)
+                {
+                    number_of_registry++;
+                }
+            }
+            buffer.push_bit((number_of_registry >> 1) & 1);
+            buffer.push_bit(number_of_registry & 1);
+
+            uint8_t data_type = 0b00;
+            if (instruction.instruction_parameters.data_value.data_count == ONE_DATA)
+            {
+                if (instruction.instruction_parameters.data_value.is_address)
+                {
+                    data_type = 0b10; // 2 = Adresse
+                }
+                else
+                {
+                    data_type = 0b01; // 1 = Valeur brute
+                }
+            }
+
+            buffer.push_bit((data_type >> 1) & 1);
+            buffer.push_bit(data_type & 1);
+
+            if (instruction.instruction_parameters.data_value.data_count != NO_DATA)
+            {
+                buffer.write_uint32(instruction.instruction_parameters.data_value.value);
             }
         }
     });

@@ -13,11 +13,11 @@ set(STEGASM_LIB_SOURCES
         src/assembler/Assembler.cpp
         src/assembler/Assembler.h
         src/instruction_utils.hpp
-        src/interpreter/Loader.cpp
-        src/interpreter/Loader.h
+#        src/interpreter/Loader.cpp
+#        src/interpreter/Loader.h
         src/interpreter/runtime/Memory.h
-        src/interpreter/Vm.cpp
-        src/interpreter/Vm.h
+#        src/interpreter/Vm.cpp
+#        src/interpreter/Vm.h
         src/interpreter/runtime/Memory.cpp
         src/interpreter/exceptions.h
         src/interpreter/runtime/Registries.cpp
