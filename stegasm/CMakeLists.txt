@@ -4,7 +4,6 @@ project(stegasm)
 
 set(CMAKE_CXX_STANDARD 23)
 
-# On enlève src/main.cpp de cette liste !
 set(STEGASM_LIB_SOURCES
         src/instructions.h
         src/interpreter/runtime/Runtime.h
