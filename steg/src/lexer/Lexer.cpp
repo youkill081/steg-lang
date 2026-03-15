@@ -231,31 +231,9 @@ void Lexer::compute()
     _has_compute = true;
 }
 
-void Lexer::init_browser()
+std::span<const LexerToken> Lexer::tokens() const
 {
-    if (!_has_compute)
-        compute();
-    _browse_index = 0;
-}
-
-const LexerToken& Lexer::get_next()
-{
-    return _tokens[_browse_index++];
-}
-
-bool Lexer::has_next() const
-{
-    return _browse_index < _tokens.size();
-}
-
-const LexerToken& Lexer::peek_x(std::size_t offset)
-{
-    return _tokens[_browse_index + offset];
-}
-
-bool Lexer::has_peek_x(std::size_t offset) const
-{
-    return _browse_index + offset < _tokens.size();
+    return _tokens; // Convert vector to span
 }
 
 void Lexer::display() const

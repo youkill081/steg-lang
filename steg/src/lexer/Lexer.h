@@ -7,6 +7,7 @@
 #include "./lexer_definitions.h"
 #include "TextParser.h"
 
+#include <span>
 #include <vector>
 
 namespace compilator
@@ -29,23 +30,18 @@ namespace compilator
 
         std::size_t _browse_index = 0;
 
-        LexerToken _parse_identifier_keyword(std::size_t line, std::size_t column) const;
-        LexerToken _parse_string(std::size_t line, std::size_t column) const;
-        LexerToken _parse_number(std::size_t line, std::size_t column) const;
-        LexerToken _parse_symbol(std::size_t line, std::size_t column) const;
+        [[nodiscard]] LexerToken _parse_identifier_keyword(std::size_t line, std::size_t column) const;
+        [[nodiscard]] LexerToken _parse_string(std::size_t line, std::size_t column) const;
+        [[nodiscard]] LexerToken _parse_number(std::size_t line, std::size_t column) const;
+        [[nodiscard]] LexerToken _parse_symbol(std::size_t line, std::size_t column) const;
 
-        LexerToken _compute_next_token() const;
+        [[nodiscard]] LexerToken _compute_next_token() const;
         void _skip_space_and_comment() const;
     public:
         explicit Lexer(TextParser &parser) : _parser(parser) {}
         void compute();
 
-        void init_browser();
-        const LexerToken &get_next();
-        bool has_next() const;
-
-        const LexerToken &peek_x(std::size_t offset = 0);
-        bool has_peek_x(std::size_t offset = 0) const;
+        [[nodiscard]] std::span<const LexerToken> tokens() const;
 
         void display() const;
     };
