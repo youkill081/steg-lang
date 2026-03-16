@@ -133,13 +133,13 @@ namespace compiler
     {
     public:
         ASTIndexExpressionNode(
-            std::unique_ptr<ASTExpressionNode> array,
+            std::unique_ptr<ASTIdentifierExpressionNode> array,
             std::unique_ptr<ASTExpressionNode> index
         ) : array(std::move(array)), index(std::move(index)) {}
 
         void display(std::size_t left_padding) override;
 
-        std::unique_ptr<ASTExpressionNode> array;
+        std::unique_ptr<ASTIdentifierExpressionNode> array;
         std::unique_ptr<ASTExpressionNode> index;
     };
 
@@ -147,7 +147,11 @@ namespace compiler
     {
     public:
         enum assignmentType {
-            ASSIGN
+            ASSIGN,
+            ADD_ASSIGN,
+            SUB_ASSIGN,
+            MUL_ASSIGN,
+            DIV_ASSIGN
         };
 
         ASTAssignExpressionStatement(
@@ -219,6 +223,10 @@ namespace compiler
     };
 
     static inline std::map<ASTAssignExpressionStatement::assignmentType, std::string_view> ASTAssignExpressionStatement_type_to_string = {
-        {ASTAssignExpressionStatement::ASSIGN, "ASSIGN"}
+        {ASTAssignExpressionStatement::ASSIGN, "ASSIGN"},
+        {ASTAssignExpressionStatement::ADD_ASSIGN, "ADD_ASSIGN"},
+        {ASTAssignExpressionStatement::SUB_ASSIGN, "SUB_ASSIGN"},
+        {ASTAssignExpressionStatement::MUL_ASSIGN, "MUL_ASSIGN"},
+        {ASTAssignExpressionStatement::DIV_ASSIGN, "DIV_ASSIGN"}
     };
 }

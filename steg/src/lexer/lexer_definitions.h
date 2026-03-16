@@ -63,6 +63,10 @@ namespace compiler
         TOKEN_PUNCTUATION_ARROW,
 
         TOKEN_ASSIGNMENT,
+        TOKEN_ADD_ASSIGNMENT,
+        TOKEN_SUB_ASSIGNMENT,
+        TOKEN_MUL_ASSIGNMENT,
+        TOKEN_DIV_ASSIGNMENT,
 
         TOKEN_INTEGER,
         TOKEN_IDENTIFIER, // Variable identifier, for example
@@ -103,6 +107,10 @@ namespace compiler
 
         // Assigment
         TokenEntry{"=", TOKEN_ASSIGNMENT},
+        TokenEntry{"+=", TOKEN_ADD_ASSIGNMENT},
+        TokenEntry{"-=", TOKEN_SUB_ASSIGNMENT},
+        TokenEntry{"*=", TOKEN_MUL_ASSIGNMENT},
+        TokenEntry{"/=", TOKEN_DIV_ASSIGNMENT},
 
         // Operator
         TokenEntry{"+", TOKEN_OPERATOR_PLUS},

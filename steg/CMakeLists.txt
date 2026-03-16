@@ -38,6 +38,7 @@ set(STEG_LIB_SOURCES
         src/parser/expressions/parse_binary.h
         src/parser/expressions/parse_expressions_utils.h
         src/parser/expressions/parse_primary.h
+        src/parser/expressions/parser_assignments.h
 )
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})

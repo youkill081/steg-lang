@@ -31,12 +31,30 @@ namespace compiler
             );
         }));
 
+    /* Index Expression */
+
+    inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseIndexExpression =
+        as_expression( map ( seq (
+            parseToken<TOKEN_IDENTIFIER>,
+            parseToken<TOKEN_PUNCTUATION_LEFT_SQUARE_BRACKET> >> compiler::ref(parseLayer1) << parseToken<TOKEN_PUNCTUATION_RIGHT_SQUARE_BRACKET> ),
+            [](auto data)
+            {
+                auto [identifier, index] = std::move(data);
+                std::unique_ptr<ASTIdentifierExpressionNode> expressionIdentifier =
+                    std::make_unique<ASTIdentifierExpressionNode>(std::move(identifier.value));
+                return std::make_unique<ASTIndexExpressionNode>(
+                    std::move(expressionIdentifier),
+                    std::move(index)
+                );
+            })
+        );
+
     /* Function call */
 
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseFirstFunctionCallParameter
-        = compiler::ref(parseLayer0);
+        = compiler::ref(parseLayer1);
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseFunctionCallParameter
-        = parseToken<TOKEN_PUNCTUATION_COMMA> >> compiler::ref(parseLayer0);
+        = parseToken<TOKEN_PUNCTUATION_COMMA> >> compiler::ref(parseLayer1);
 
     inline Parser<std::vector<std::unique_ptr<ASTExpressionNode>>, TokenSpan> parseFunctionCallParameters =
         map(parseToken<TOKEN_PUNCTUATION_LEFT_PARENTHESIS> >>

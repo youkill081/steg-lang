@@ -20,10 +20,10 @@ namespace compiler
 
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseExpression;
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parsePrimary;
-    extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLayer0;
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLayer1;
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLayer2;
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLayer3;
+    extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLayer4;
 
     template <typename P>
     auto as_expression(P p) {
@@ -42,5 +42,19 @@ namespace compiler
             );
         }
         return std::move(left);
+    };
+
+    inline auto foldAssign = [](auto data) -> std::unique_ptr<ASTExpressionNode> {
+        auto [leftSide, optAssign] = std::move(data);
+
+        if (!optAssign.has_value()) {
+            return std::move(leftSide);
+        }
+
+        return std::make_unique<ASTAssignExpressionStatement>(
+            std::move(leftSide),
+            optAssign->op,
+            std::move(optAssign->value)
+        );
     };
 }
