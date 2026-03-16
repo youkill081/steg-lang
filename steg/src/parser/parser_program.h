@@ -64,17 +64,18 @@ namespace compilator
 
     inline Parser<std::unique_ptr<ASTFunctionProgramNode>, TokenSpan> parseFunction =
         map(seq(
+                optional(parseToken<TOKEN_KEYWORD_EXPORT>),
                 parseFunctionDeclaration,
                 parseFunctionParameters,
                 parseFunctionReturnType
             ), [](auto data)
             {
                 return std::make_unique<ASTFunctionProgramNode>(
-                    std::move(std::get<0>(data).value),
-                    std::move(std::get<1>(data)),
+                    std::move(std::get<1>(data).value),
                     std::move(std::get<2>(data)),
+                    std::move(std::get<3>(data)),
                     std::make_unique<ASTBlockStatementNode>(std::vector<std::unique_ptr<ASTStatementNode>>{}),
-                    true
+                    std::get<0>(data).has_value()
                 );
             });
 
