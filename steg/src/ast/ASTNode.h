@@ -14,7 +14,7 @@ namespace compiler
     protected:
         static void display_indent(std::size_t left_padding)
         {
-            std::cout << std::string(left_padding, ' ');
+            std::cout << std::string(left_padding * 3, ' ');
         }
 
         static void display_name(const std::string &name, std::size_t left_padding)

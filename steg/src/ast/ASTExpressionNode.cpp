@@ -36,6 +36,8 @@ void compiler::ASTLiteralExpressionNode::display(std::size_t left_padding)
     display_name("Literal", left_padding);
 
     type->display(left_padding + 1);
+    display_indent(left_padding + 1);
+    std::cout << "Value: " << value << std::endl;
 }
 
 void compiler::ASTIdentifierExpressionNode::display(std::size_t left_padding)
