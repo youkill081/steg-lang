@@ -25,6 +25,15 @@ set(STEG_LIB_SOURCES
         src/parser/parser_utils.h
         src/parser/parser_program.h
         src/parser/parser_expressions.h
+        src/parser/statements/parse_block.h
+        src/parser/statements/parse_statements.h
+        src/parser/statements/parse_if.h
+        src/parser/statements/parse_variables.h
+        src/parser/statements/parse_while.h
+        src/parser/statements/parse_for.h
+        src/parser/statements/parse_return.h
+        src/parser/statements/parse_break_continue.h
+        src/parser/statements/parse_expression_statement.h
 )
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})

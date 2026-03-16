@@ -12,7 +12,7 @@
 #include "ASTNode.h"
 #include "ASTStatementNode.h"
 
-namespace compilator
+namespace compiler
 {
     class ASTProgramNode : public ASTNode
         {};
@@ -53,32 +53,16 @@ namespace compilator
         bool is_exported;
     };
 
-    class ASTVariableProgramNode final : public ASTProgramNode
-    {
-    public:
-        ASTVariableProgramNode(
-            const std::string &name,
-            std::unique_ptr<ASTTypeNode> type,
-            std::unique_ptr<ASTExpressionNode> expression
-        ) : name(name), type(std::move(type)), expression(std::move(expression)) {}
-
-        std::string name;
-        std::unique_ptr<ASTTypeNode> type;
-        std::unique_ptr<ASTExpressionNode> expression; // Optional expression to init the variable
-
-        void display(std::size_t left_padding) override;
-    };
-
     class ASTMainProgramNode final : public ASTProgramNode
     {
     public:
         ASTMainProgramNode(
             std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions,
-            std::vector<std::unique_ptr<ASTVariableProgramNode>> global_variables
+            std::vector<std::unique_ptr<ASTVariableStatement>> global_variables
         ) : functions(std::move(functions)), global_variables(std::move(global_variables)) {}
 
         std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions;
-        std::vector<std::unique_ptr<ASTVariableProgramNode>> global_variables;
+        std::vector<std::unique_ptr<ASTVariableStatement>> global_variables;
 
         void display(std::size_t left_padding) override;
     };

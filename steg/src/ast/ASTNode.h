@@ -7,7 +7,7 @@
 #include <memory>
 #include <iostream>
 
-namespace compilator
+namespace compiler
 {
     class ASTNode
     {

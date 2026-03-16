@@ -8,7 +8,7 @@
 #include <memory>
 #include "ast/ASTProgramNode.h"
 
-namespace compilator
+namespace compiler
 {
     /* ASTTypeNode parser */
     inline auto parseUINT8 = map(parseToken<TOKEN_TYPE_UINT8>, [](auto) { return std::make_unique<ASTTypeNode>(ASTTypeNode::UINT8); });
@@ -34,6 +34,5 @@ namespace compilator
             ),
             tokens.subspan(1)
         }};
-
     };
 }

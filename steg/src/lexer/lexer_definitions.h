@@ -8,16 +8,19 @@
 #include <array>
 #include <string_view>
 
-namespace compilator
+namespace compiler
 {
     enum LexerTokensTypes
     {
         TOKEN_KEYWORD_FUNCTION,
         TOKEN_KEYWORD_IF,
+        TOKEN_KEYWORD_ELSE,
         TOKEN_KEYWORD_WHILE,
         TOKEN_KEYWORD_RETURN,
         TOKEN_KEYWORD_FOR,
         TOKEN_KEYWORD_EXPORT,
+        TOKEN_KEYWORD_BREAK,
+        TOKEN_KEYWORD_CONTINUE,
 
         TOKEN_TYPE_UINT8,
         TOKEN_TYPE_INT8,
@@ -76,10 +79,13 @@ namespace compilator
         // Keywords
         TokenEntry{"fn", TOKEN_KEYWORD_FUNCTION},
         TokenEntry{"if", TOKEN_KEYWORD_IF},
+        TokenEntry{"else", TOKEN_KEYWORD_ELSE},
         TokenEntry{"while", TOKEN_KEYWORD_WHILE},
         TokenEntry{"return", TOKEN_KEYWORD_RETURN},
         TokenEntry{"for", TOKEN_KEYWORD_FOR},
         TokenEntry{"export", TOKEN_KEYWORD_EXPORT},
+        TokenEntry{"break", TOKEN_KEYWORD_BREAK},
+        TokenEntry{"continue", TOKEN_KEYWORD_CONTINUE},
 
         // Types
         TokenEntry{"uint8", TOKEN_TYPE_UINT8},

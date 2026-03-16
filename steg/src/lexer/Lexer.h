@@ -10,7 +10,7 @@
 #include <span>
 #include <vector>
 
-namespace compilator
+namespace compiler
 {
     struct LexerToken
     {

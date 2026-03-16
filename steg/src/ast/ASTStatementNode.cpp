@@ -4,7 +4,7 @@
 
 #include "ASTStatementNode.h"
 
-void compilator::ASTBlockStatementNode::display(std::size_t left_padding)
+void compiler::ASTBlockStatementNode::display(std::size_t left_padding)
 {
     display_name("Block", left_padding);
 
@@ -14,13 +14,15 @@ void compilator::ASTBlockStatementNode::display(std::size_t left_padding)
     }
 }
 
-void compilator::ASTBlockIfStatementNode::display(std::size_t left_padding)
+void compiler::ASTIfStatementNode::display(std::size_t left_padding)
 {
     display_name("If", left_padding);
 
     display_indent(left_padding);
     std::cout << "Condition" << std::endl;
     condition->display(left_padding + 1);
+
+    then_statement->display(left_padding + 1);
 
     if (false_statement) {
         display_indent(left_padding);
@@ -29,7 +31,21 @@ void compilator::ASTBlockIfStatementNode::display(std::size_t left_padding)
     }
 }
 
-void compilator::ASTWhileStatementNode::display(std::size_t left_padding)
+void compiler::ASTVariableStatement::display(std::size_t left_padding)
+{
+    display_name("Variable", left_padding);
+
+    display_indent(left_padding);
+    std::cout << "name: " << name << std::endl;
+
+    type->display(left_padding + 1);
+    if (expression)
+        expression->display(left_padding + 1);
+    else
+        std::cout << "No expression" << std::endl;
+}
+
+void compiler::ASTWhileStatementNode::display(std::size_t left_padding)
 {
     display_name("While", left_padding);
 
@@ -42,7 +58,7 @@ void compilator::ASTWhileStatementNode::display(std::size_t left_padding)
     body_statement->display(left_padding + 1);
 }
 
-void compilator::ASTForStatementNode::display(std::size_t left_padding)
+void compiler::ASTForStatementNode::display(std::size_t left_padding)
 {
     display_name("For", left_padding);
 
@@ -63,7 +79,7 @@ void compilator::ASTForStatementNode::display(std::size_t left_padding)
     body_statement->display(left_padding + 1);
 }
 
-void compilator::ASTReturnStatement::display(std::size_t left_padding)
+void compiler::ASTReturnStatement::display(std::size_t left_padding)
 {
     display_name("Return", left_padding);
 
@@ -77,17 +93,17 @@ void compilator::ASTReturnStatement::display(std::size_t left_padding)
     }
 }
 
-void compilator::ASTBreakStatement::display(std::size_t left_padding)
+void compiler::ASTBreakStatement::display(std::size_t left_padding)
 {
     display_name("Break", left_padding);
 }
 
-void compilator::ASTContinueStatement::display(std::size_t left_padding)
+void compiler::ASTContinueStatement::display(std::size_t left_padding)
 {
     display_name("Continue", left_padding);
 }
 
-void compilator::ASTExpressionStatement::display(std::size_t left_padding)
+void compiler::ASTExpressionStatement::display(std::size_t left_padding)
 {
     display_name("Expression", left_padding);
     expression->display(left_padding + 1);

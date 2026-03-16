@@ -10,7 +10,7 @@
 #include "ASTNode.h"
 #include "ASTExpressionNode.h"
 
-namespace compilator
+namespace compiler
 {
     class ASTStatementNode : public ASTNode
         {};
@@ -26,20 +26,20 @@ namespace compilator
         std::vector<std::unique_ptr<ASTStatementNode>> statements;
     };
 
-    class ASTBlockIfStatementNode final : public ASTStatementNode
+    class ASTIfStatementNode final : public ASTStatementNode
     {
     public:
-        ASTBlockIfStatementNode(
+        ASTIfStatementNode(
             std::unique_ptr<ASTExpressionNode> condition,
-            std::unique_ptr<ASTStatementNode> then_statement,
-            std::unique_ptr<ASTStatementNode> false_statement
+            std::unique_ptr<ASTBlockStatementNode> then_statement,
+            std::unique_ptr<ASTBlockStatementNode> false_statement
         ) : condition(std::move(condition)), then_statement(std::move(then_statement)), false_statement( std::move(false_statement)) {}
 
         void display(std::size_t left_padding) override;
 
         std::unique_ptr<ASTExpressionNode> condition;
-        std::unique_ptr<ASTStatementNode> then_statement;
-        std::unique_ptr<ASTStatementNode> false_statement; // For the else, this is optionnal
+        std::unique_ptr<ASTBlockStatementNode> then_statement;
+        std::unique_ptr<ASTBlockStatementNode> false_statement; // For the else, this is optionnal
     };
 
     class ASTWhileStatementNode final : public ASTStatementNode
@@ -97,6 +97,22 @@ namespace compilator
     {
     public:
         ASTContinueStatement() = default;
+        void display(std::size_t left_padding) override;
+    };
+
+    class ASTVariableStatement final : public ASTStatementNode
+    {
+    public:
+        ASTVariableStatement(
+            const std::string &name,
+            std::unique_ptr<ASTTypeNode> type,
+            std::unique_ptr<ASTExpressionNode> expression
+        ) : name(name), type(std::move(type)), expression(std::move(expression)) {}
+
+        std::string name;
+        std::unique_ptr<ASTTypeNode> type;
+        std::unique_ptr<ASTExpressionNode> expression; // Optional expression to init the variable
+
         void display(std::size_t left_padding) override;
     };
 

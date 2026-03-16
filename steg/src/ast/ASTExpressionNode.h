@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace compilator
+namespace compiler
 {
     class ASTExpressionNode : public ASTNode
         {};

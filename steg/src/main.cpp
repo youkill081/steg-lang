@@ -11,12 +11,10 @@
 #include "parser/monadic/monadic.hpp"
 #include "parser/monadic/string_parser.h"
 
-using namespace compilator;
+using namespace compiler;
 
 int main()
 {
-    try
-    {
         TextParser parser = TextParser::from_file("C:/Users/Roumite/CLionProjects/stegnocode/steg/examples/test.steg");
         Lexer lexer(parser);
 
@@ -31,11 +29,7 @@ int main()
             std::cout << "Il n'y a pas de prametre";
         else
             result->value->display(0);
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+
 
     return 0;
 }

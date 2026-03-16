@@ -9,7 +9,7 @@
 
 #include "exceptions.h"
 
-using namespace compilator;
+using namespace compiler;
 
 TextParser TextParser::from_file(const std::string &filepath)
 {

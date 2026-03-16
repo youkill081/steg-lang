@@ -10,7 +10,7 @@
 
 #include "exceptions.h"
 
-using namespace compilator;
+using namespace compiler;
 
 std::optional<LexerTokensTypes> lookup_keyword_or_symbol(const std::string_view &text) {
     for (const auto &entry : KEYWORDS) {

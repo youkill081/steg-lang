@@ -10,7 +10,7 @@
 #include "lexer/lexer_definitions.h"
 #include "monadic/monadic.hpp"
 
-namespace compilator
+namespace compiler
 {
     template <LexerTokensTypes token_type>
     constexpr auto parseToken = [](TokenSpan tokens) -> std::optional<Result<LexerToken, TokenSpan>>

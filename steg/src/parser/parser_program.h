@@ -5,14 +5,12 @@
 #pragma once
 
 #include "parser_utils.h"
-
 #include <memory>
-
 #include "ast/ASTProgramNode.h"
-
 #include "parser_expressions.h"
+#include "statements/parse_block.h"
 
-namespace compilator
+namespace compiler
 {
     /* Function parameters */
     inline Parser<std::unique_ptr<ASTParameterProgramNode>, TokenSpan>
@@ -40,7 +38,7 @@ namespace compilator
         ), [](auto data)
         {
             auto params_vec = std::move(std::get<1>(data));
-            auto last_param = std::move(std::get<0>(data));
+            auto first_param = std::move(std::get<0>(data));
 
             std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters;
 
@@ -48,9 +46,9 @@ namespace compilator
             {
                 parameters.push_back(std::move(parameter));
             }
-            if (last_param.has_value())
+            if (first_param.has_value())
             {
-                parameters.insert(parameters.begin(), std::move(*last_param)); // It's the first parameter
+                parameters.insert(parameters.begin(), std::move(*first_param)); // It's the first parameter
             }
 
             return parameters;
@@ -67,44 +65,30 @@ namespace compilator
                 optional(parseToken<TOKEN_KEYWORD_EXPORT>),
                 parseFunctionDeclaration,
                 parseFunctionParameters,
-                parseFunctionReturnType
+                parseFunctionReturnType,
+                parseBlock
             ), [](auto data)
             {
                 return std::make_unique<ASTFunctionProgramNode>(
                     std::move(std::get<1>(data).value),
                     std::move(std::get<2>(data)),
                     std::move(std::get<3>(data)),
-                    std::make_unique<ASTBlockStatementNode>(std::vector<std::unique_ptr<ASTStatementNode>>{}),
+                    std::move(std::get<4>(data)),
                     std::get<0>(data).has_value()
                 );
             });
-
-    /* Variables  */
-
-    inline Parser<std::unique_ptr<ASTVariableProgramNode>, TokenSpan> parseVariableDeclaration =
-        map (seq(
-            parseType, (parseToken<TOKEN_IDENTIFIER> << parseToken<TOKEN_ASSIGNMENT>), (parseExpression << parseToken<TOKEN_PUNCTUATION_SEMICOLON>)),
-            [](auto data)
-            {
-                return std::make_unique<ASTVariableProgramNode>(
-                    std::move(std::get<1>(data).value),
-                    std::move(std::get<0>(data)),
-                    std::move(std::get<2>(data))
-                );
-            }
-        );
 
     /* Main Program Node*/
 
     inline Parser<std::unique_ptr<ASTMainProgramNode>, TokenSpan> parseMainProgram =
     map(many(
-        map(parseFunction, [](auto f) -> std::unique_ptr<ASTProgramNode> { return std::move(f); })
+        map(parseFunction, [](auto f) -> std::unique_ptr<ASTNode> { return std::move(f); })
         |
-        map(parseVariableDeclaration, [](auto v) -> std::unique_ptr<ASTProgramNode> { return std::move(v); })
-    ), [](std::vector<std::unique_ptr<ASTProgramNode>> nodes)
+            map(parseVariableDeclarationWithSemicolon, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
+    ), [](std::vector<std::unique_ptr<ASTNode>> nodes)
     {
         std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions;
-        std::vector<std::unique_ptr<ASTVariableProgramNode>> global_variables;
+        std::vector<std::unique_ptr<ASTVariableStatement>> global_variables;
 
         for (auto &node : nodes)
         {
@@ -113,10 +97,10 @@ namespace compilator
                 node.release();
                 functions.push_back(std::unique_ptr<ASTFunctionProgramNode>(f));
             }
-            else if (auto* v = dynamic_cast<ASTVariableProgramNode*>(node.get()))
+            else if (auto* v = dynamic_cast<ASTVariableStatement*>(node.get()))
             {
                 node.release();
-                global_variables.push_back(std::unique_ptr<ASTVariableProgramNode>(v));
+                global_variables.push_back(std::unique_ptr<ASTVariableStatement>(v));
             }
         }
 

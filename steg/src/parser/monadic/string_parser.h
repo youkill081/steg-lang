@@ -8,7 +8,7 @@
 
 #include "monadic.hpp"
 
-namespace compilator
+namespace compiler
 {
     template <FixedString S>
     constexpr auto parseString = [](const CharSpan input) -> std::optional<Result<std::string_view, CharSpan>>

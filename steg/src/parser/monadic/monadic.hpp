@@ -16,7 +16,7 @@
 
 
 
-namespace compilator
+namespace compiler
 {
     using CharSpan = std::span<const char>;
 
@@ -220,6 +220,15 @@ namespace compilator
                 std::cout << "Erreur -> " << error_message_string << std::endl;
             }
             return res;
+        };
+    }
+
+    template<typename P>
+    auto ref(P& parser)
+    {
+        return [&parser](auto input)
+        {
+            return parser(input);
         };
     }
 

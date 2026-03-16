@@ -4,7 +4,7 @@
 
 #include "ASTExpressionNode.h"
 
-void compilator::ASTBinaryExpressionNode::display(std::size_t left_padding)
+void compiler::ASTBinaryExpressionNode::display(std::size_t left_padding)
 {
     display_name("Binary", left_padding);
 
@@ -14,7 +14,7 @@ void compilator::ASTBinaryExpressionNode::display(std::size_t left_padding)
     right->display(left_padding + 1);
 }
 
-void compilator::ASTUnaryExpressionNode::display(std::size_t left_padding)
+void compiler::ASTUnaryExpressionNode::display(std::size_t left_padding)
 {
     display_name("Unary", left_padding);
 
@@ -23,7 +23,7 @@ void compilator::ASTUnaryExpressionNode::display(std::size_t left_padding)
     expression->display(left_padding + 1);
 }
 
-void compilator::ASTTypeNode::display(std::size_t left_padding)
+void compiler::ASTTypeNode::display(std::size_t left_padding)
 {
     display_name("Type", left_padding);
 
@@ -31,14 +31,14 @@ void compilator::ASTTypeNode::display(std::size_t left_padding)
     std::cout << "Type: " << ASTTypeNode_type_to_string[type] << std::endl;
 }
 
-void compilator::ASTLiteralExpressionNode::display(std::size_t left_padding)
+void compiler::ASTLiteralExpressionNode::display(std::size_t left_padding)
 {
     display_name("Literal", left_padding);
 
     type->display(left_padding + 1);
 }
 
-void compilator::ASTIdentifierExpressionNode::display(std::size_t left_padding)
+void compiler::ASTIdentifierExpressionNode::display(std::size_t left_padding)
 {
     display_name("Identifier", left_padding);
 
@@ -46,7 +46,7 @@ void compilator::ASTIdentifierExpressionNode::display(std::size_t left_padding)
     std::cout << "Name: " << name << std::endl;
 }
 
-void compilator::ASTCallExpressionNode::display(std::size_t left_padding)
+void compiler::ASTCallExpressionNode::display(std::size_t left_padding)
 {
     display_name("Call", left_padding);
 
@@ -58,7 +58,7 @@ void compilator::ASTCallExpressionNode::display(std::size_t left_padding)
         argument->display(left_padding + 1);
 }
 
-void compilator::ASTIndexExpressionNode::display(std::size_t left_padding)
+void compiler::ASTIndexExpressionNode::display(std::size_t left_padding)
 {
     display_name("Index", left_padding);
 
@@ -66,7 +66,7 @@ void compilator::ASTIndexExpressionNode::display(std::size_t left_padding)
     index->display(left_padding + 1);
 }
 
-void compilator::ASTAssignExpressionStatement::display(std::size_t left_padding)
+void compiler::ASTAssignExpressionStatement::display(std::size_t left_padding)
 {
     display_name("Assign", left_padding);
 
@@ -82,14 +82,14 @@ void compilator::ASTAssignExpressionStatement::display(std::size_t left_padding)
     value->display(left_padding + 1);
 }
 
-void compilator::ASTAddressOfExpressionNode::display(std::size_t left_padding)
+void compiler::ASTAddressOfExpressionNode::display(std::size_t left_padding)
 {
     display_name("Address of", left_padding);
 
     expression->display(left_padding + 1);
 }
 
-void compilator::ASTDereferenceExpressionNode::display(std::size_t left_padding)
+void compiler::ASTDereferenceExpressionNode::display(std::size_t left_padding)
 {
     display_name("Dereference", left_padding);
 

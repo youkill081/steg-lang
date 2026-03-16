@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ASTProgramNode.h"
 
-using namespace compilator;
+using namespace compiler;
 
 void ASTParameterProgramNode::display(std::size_t left_padding)
 {
@@ -39,20 +39,6 @@ void ASTFunctionProgramNode::display(std::size_t left_padding)
     display_indent(left_padding);
     std::cout << "statement: " << std::endl;
     statement->display(left_padding + 1);
-}
-
-void ASTVariableProgramNode::display(std::size_t left_padding)
-{
-    display_name("Variable", left_padding);
-
-    display_indent(left_padding);
-    std::cout << "name: " << name << std::endl;
-
-    type->display(left_padding + 1);
-    if (expression)
-        expression->display(left_padding + 1);
-    else
-        std::cout << "No expression" << std::endl;
 }
 
 void ASTMainProgramNode::display(std::size_t left_padding)
