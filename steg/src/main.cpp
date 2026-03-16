@@ -25,7 +25,7 @@ int main()
 
         auto tokens = lexer.tokens();
 
-        auto result = parseFunction(tokens);
+        auto result = parseMainProgram(tokens);
 
         if (!result)
             std::cout << "Il n'y a pas de prametre";

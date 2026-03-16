@@ -49,7 +49,10 @@ void ASTVariableProgramNode::display(std::size_t left_padding)
     std::cout << "name: " << name << std::endl;
 
     type->display(left_padding + 1);
-    expression->display(left_padding + 1);
+    if (expression)
+        expression->display(left_padding + 1);
+    else
+        std::cout << "No expression" << std::endl;
 }
 
 void ASTMainProgramNode::display(std::size_t left_padding)

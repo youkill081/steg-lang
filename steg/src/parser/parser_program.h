@@ -77,4 +77,51 @@ namespace compilator
                     true
                 );
             });
+
+    /* Variables  */
+
+    inline Parser<std::unique_ptr<ASTVariableProgramNode>, TokenSpan> parseVariableDeclaration =
+        map (seq(
+            parseType, (parseToken<TOKEN_IDENTIFIER> << parseToken<TOKEN_ASSIGNMENT>), (parseExpression << parseToken<TOKEN_PUNCTUATION_SEMICOLON>)),
+            [](auto data)
+            {
+                return std::make_unique<ASTVariableProgramNode>(
+                    std::move(std::get<1>(data).value),
+                    std::move(std::get<0>(data)),
+                    std::move(std::get<2>(data))
+                );
+            }
+        );
+
+    /* Main Program Node*/
+
+    inline Parser<std::unique_ptr<ASTMainProgramNode>, TokenSpan> parseMainProgram =
+    map(many(
+        map(parseFunction, [](auto f) -> std::unique_ptr<ASTProgramNode> { return std::move(f); })
+        |
+        map(parseVariableDeclaration, [](auto v) -> std::unique_ptr<ASTProgramNode> { return std::move(v); })
+    ), [](std::vector<std::unique_ptr<ASTProgramNode>> nodes)
+    {
+        std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions;
+        std::vector<std::unique_ptr<ASTVariableProgramNode>> global_variables;
+
+        for (auto &node : nodes)
+        {
+            if (auto *f = dynamic_cast<ASTFunctionProgramNode*>(node.get()))
+            {
+                node.release();
+                functions.push_back(std::unique_ptr<ASTFunctionProgramNode>(f));
+            }
+            else if (auto* v = dynamic_cast<ASTVariableProgramNode*>(node.get()))
+            {
+                node.release();
+                global_variables.push_back(std::unique_ptr<ASTVariableProgramNode>(v));
+            }
+        }
+
+        return std::make_unique<ASTMainProgramNode>(
+            std::move(functions),
+            std::move(global_variables)
+        );
+    });
 }

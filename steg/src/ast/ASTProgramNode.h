@@ -17,7 +17,7 @@ namespace compilator
     class ASTProgramNode : public ASTNode
         {};
 
-    class ASTParameterProgramNode final : public ASTNode
+    class ASTParameterProgramNode final : public ASTProgramNode
     {
     public:
         ASTParameterProgramNode(const std::string &name, std::unique_ptr<ASTTypeNode> type)

@@ -22,4 +22,18 @@ namespace compilator
 
     inline auto parseType = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL | parseVOID;
     inline auto parseTypeNoVoid = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL;
+
+
+    /* Expression Parser */
+    constexpr auto parseExpression = [](TokenSpan tokens) -> std::optional<Result<std::unique_ptr<ASTExpressionNode>, TokenSpan>>
+    {
+        return std::optional{ Result<std::unique_ptr<ASTExpressionNode>, TokenSpan>{
+            std::make_unique<ASTLiteralExpressionNode>(
+                "valeur",
+                std::make_unique<ASTTypeNode>(ASTTypeNode::UINT8)
+            ),
+            tokens.subspan(1)
+        }};
+
+    };
 }
