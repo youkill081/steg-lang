@@ -16,7 +16,10 @@ namespace compilator
 {
     inline auto parseParameter =
         map(
-            seq(parseTypeNoVoid, parseToken<TOKEN_IDENTIFIER>),
+            seq(
+                lint<"Unknown type %v">(parseTypeNoVoid),
+                lint<"Missing or invalid identifier">(parseToken<TOKEN_IDENTIFIER>)
+            ),
             [](auto data)
             {
                 return std::make_unique<ASTParameterProgramNode>(

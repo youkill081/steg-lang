@@ -190,6 +190,28 @@ namespace compilator
         };
     }
 
+    template <FixedString error_message, typename Parser>
+    auto lint(Parser parser)
+    {
+        return [=](auto input) {
+            auto res = parser(input);
+            if (!res)
+            {
+                std::string error_message_string = std::string(error_message.view());
+                size_t pos = error_message_string.find("%v");
+
+                if (input.size() != 0 && pos != std::string::npos)
+                {
+                    std::string token_value = std::string(input[0].value);
+                    error_message_string.replace(pos, 2, "\"" + token_value + "\"");
+                }
+
+                std::cout << "Erreur -> " << error_message_string << std::endl;
+            }
+            return res;
+        };
+    }
+
     /* operators */
 
     /*
