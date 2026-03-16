@@ -36,7 +36,7 @@ namespace compilator
             const std::string &name,
             std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters,
             std::unique_ptr<ASTTypeNode> return_type,
-            std::unique_ptr<ASTStatementNode> statement,
+            std::unique_ptr<ASTBlockStatementNode> statement,
             bool is_exported
         ) : name(name),
             parameters(std::move(parameters)),
@@ -49,7 +49,7 @@ namespace compilator
         std::string name;
         std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters;
         std::unique_ptr<ASTTypeNode> return_type;
-        std::unique_ptr<ASTStatementNode> statement;
+        std::unique_ptr<ASTBlockStatementNode> statement;
         bool is_exported;
     };
 
