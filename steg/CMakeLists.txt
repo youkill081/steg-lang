@@ -24,7 +24,7 @@ set(STEG_LIB_SOURCES
         src/parser/monadic/string_parser.h
         src/parser/parser_utils.h
         src/parser/parser_program.h
-        src/parser/parser_expressions.h
+        src/parser/expressions/parser_expressions.h
         src/parser/statements/parse_block.h
         src/parser/statements/parse_statements.h
         src/parser/statements/parse_if.h
@@ -34,6 +34,7 @@ set(STEG_LIB_SOURCES
         src/parser/statements/parse_return.h
         src/parser/statements/parse_break_continue.h
         src/parser/statements/parse_expression_statement.h
+        src/parser/expressions/parse_types.h
 )
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})
@@ -41,7 +42,7 @@ add_library(steg_lib STATIC ${STEG_LIB_SOURCES})
 target_precompile_headers(steg_lib PRIVATE
         src/parser/monadic/monadic.hpp
         src/parser/parser_utils.h
-        src/parser/parser_expressions.h
+        src/parser/expressions/parser_expressions.h
         src/parser/parser_program.h
 )
 
