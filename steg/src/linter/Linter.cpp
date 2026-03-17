@@ -7,6 +7,9 @@
 #include <fstream>
 
 #include "Linter.h"
+
+#include <unordered_map>
+
 #include "Colors.h"
 
 using namespace compiler;

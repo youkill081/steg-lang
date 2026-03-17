@@ -46,13 +46,6 @@ set(STEG_LIB_SOURCES
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})
 
-target_precompile_headers(steg_lib PRIVATE
-        src/parser/monadic/monadic.hpp
-        src/parser/parser_utils.h
-        src/parser/expressions/parse_expressions.h
-        src/parser/parser_program.h
-)
-
 target_include_directories(steg_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(steg_lib PUBLIC stegcommon)
 target_link_libraries(steg_lib PUBLIC raylib)
