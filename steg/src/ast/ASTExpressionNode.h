@@ -83,6 +83,7 @@ namespace compiler
             UINT32,
             INT32,
             BOOL,
+            STRING,
             VOID
         };
 
@@ -199,6 +200,7 @@ namespace compiler
         {ASTTypeNode::Types::UINT32, "UINT32"},
         {ASTTypeNode::Types::INT32, "INT32"},
         {ASTTypeNode::Types::BOOL, "BOOL"},
+        {ASTTypeNode::Types::STRING, "STRING"},
         {ASTTypeNode::Types::VOID, "VOID"}
     };
 

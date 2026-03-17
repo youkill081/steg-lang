@@ -13,7 +13,7 @@
 namespace compiler
 {
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parsePrimary =
-        parseParenthesizedExpr | parseLiteral | parseFunctionCall  | parseIndexExpression | parseIdentifier;
+        parseParenthesizedExpr | parseLiteral | parseBool | parseStringLiteral | parseFunctionCall  | parseIndexExpression | parseIdentifier;
 
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseUnary =
         parseNegationUnary | parseAddressOfUnary  | parseDereferenceUnary | parsePrimary;

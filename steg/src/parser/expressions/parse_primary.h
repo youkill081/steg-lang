@@ -31,8 +31,30 @@ namespace compiler
             );
         }));
 
-    /* Index Expression */
+    /* Bool */
+    inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseBool =
+        as_expression(map(parseToken<TOKEN_BOOL_TRUE>, [](LexerToken token) {
+            return std::make_unique<ASTLiteralExpressionNode>(
+                "true",
+                std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL)
+            );
+    })) | as_expression(map(parseToken<TOKEN_BOOL_FALSE>, [](LexerToken token) {
+        return std::make_unique<ASTLiteralExpressionNode>(
+            "false",
+            std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL)
+        );
+    }));
 
+    /* String */
+    inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseStringLiteral =
+       as_expression(map(parseToken<TOKEN_STRING>, [](LexerToken token) {
+           return std::make_unique<ASTLiteralExpressionNode>(
+               token.value,
+               std::make_unique<ASTTypeNode>(ASTTypeNode::STRING)
+           );
+    }));
+
+    /* Index Expression */
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseIndexExpression =
         as_expression( map ( seq (
             parseToken<TOKEN_IDENTIFIER>,
