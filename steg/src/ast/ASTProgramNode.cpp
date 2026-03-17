@@ -7,6 +7,14 @@
 
 using namespace compiler;
 
+void ASTFileProgramNode::display(std::size_t left_padding)
+{
+    display_name("File", left_padding);
+
+    display_indent(left_padding);
+    std::cout << "name: \"" << name << "\" path: \"" << path << "\"" << std::endl;
+}
+
 void ASTImportProgramNode::display(std::size_t left_padding)
 {
     display_name("Import", left_padding);
@@ -76,9 +84,15 @@ void ASTMainProgramNode::display(std::size_t left_padding)
 
     display_indent(left_padding);
     std::cout << "Imports : " << std::endl;
-    std::cout << imports.size() << std::endl;
     for (const auto &import : imports)
     {
         import->display(left_padding + 1);
+    }
+
+    display_indent(left_padding);
+    std::cout << "Files : " << std::endl;
+    for (const auto &file : files)
+    {
+        file->display(left_padding + 1);
     }
 }

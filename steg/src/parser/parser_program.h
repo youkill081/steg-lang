@@ -84,18 +84,42 @@ parseFunctionParameters =
                 );
             });
 
+
+    /* Files */
+
+    inline Parser<std::unique_ptr<ASTFileProgramNode>, TokenSpan> parseAFile =
+            map (
+                seq(parseToken<TOKEN_IDENTIFIER> << lintedParseToken<TOKEN_PUNCTUATION_COLON>, lintedParseToken<TOKEN_STRING>),
+                [](auto data)
+                {
+                    auto [name, path] = std::move(data);
+                    return std::make_unique<ASTFileProgramNode>(name.value, path.value);
+                });
+
+
+    inline Parser<std::unique_ptr<ASTFilesProgramNode>, TokenSpan> parseFiles =
+        map (parseToken<TOKEN_KEYWORD_FILES> >> lintedParseToken<TOKEN_PUNCTUATION_LEFT_BRACKET> >> many(parseAFile) << lintedParseToken<TOKEN_PUNCTUATION_RIGHT_BRACKET>,
+            [](auto data)
+            {
+                return std::make_unique<ASTFilesProgramNode>(
+                    std::move(data)
+                );
+            });
+
     /* Import */
 
     inline Parser<std::unique_ptr<ASTImportProgramNode>, TokenSpan> parseImport =
         map(seq(
-                parseToken<TOKEN_KEYWORD_IMPORT> >> lintedParseToken<TOKEN_PUNCTUATION_LEFT_BRACKET> >> many( optional(parseToken<TOKEN_PUNCTUATION_COMMA>) >> parseToken<TOKEN_IDENTIFIER> ),
-                lintedParseToken<TOKEN_PUNCTUATION_RIGHT_BRACKET> >> lintedParseToken<TOKEN_KEYWORD_FROM> >> lintedParseToken<TOKEN_STRING>
+                parseToken<TOKEN_KEYWORD_IMPORT> >> lintedParseToken<TOKEN_PUNCTUATION_LEFT_BRACKET> >> many(
+                    optional(parseToken<TOKEN_PUNCTUATION_COMMA>) >> parseToken<TOKEN_IDENTIFIER>),
+                lintedParseToken<TOKEN_PUNCTUATION_RIGHT_BRACKET> >> lintedParseToken<TOKEN_KEYWORD_FROM> >>
+                lintedParseToken<TOKEN_STRING>
             ), [](auto data)
             {
                 auto [function_variables, aze] = std::move(data);
 
                 std::vector<std::string> function_variables_vec;
-                for (const auto &token : function_variables)
+                for (const auto& token : function_variables)
                     function_variables_vec.push_back(token.value);
 
                 return std::make_unique<ASTImportProgramNode>(
@@ -106,11 +130,16 @@ parseFunctionParameters =
 
     /* Main Program Node*/
 
-    using function_stop = StopSet<TOKEN_KEYWORD_IMPORT>;
-    using function_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT>;
+    using function_stop = StopSet<TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>;
+    using function_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT,
+                                  TOKEN_KEYWORD_FILES>;
 
-    using import_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT>;
-    using import_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT>;
+    using import_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_FILES>;
+    using import_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>
+    ;
+
+    using files_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT>;
+    using files_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>;
 
     inline Parser<std::unique_ptr<ASTMainProgramNode>, TokenSpan> parseMainProgram =
     map(many(
@@ -123,11 +152,16 @@ parseFunctionParameters =
             lint_checkpoint<import_stop, import_sync, ASTErrorNode>(
                 map(parseImport, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
             )
+        |
+            lint_checkpoint<files_stop, files_sync, ASTErrorNode>(
+                map(parseFiles, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
+            )
     ), [](std::vector<std::unique_ptr<ASTNode>> nodes)
     {
         std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions;
         std::vector<std::unique_ptr<ASTVariableStatement>> global_variables;
         std::vector<std::unique_ptr<ASTImportProgramNode>> imports;
+        std::vector<std::unique_ptr<ASTFileProgramNode>> files;
 
         for (auto &node : nodes)
         {
@@ -145,13 +179,20 @@ parseFunctionParameters =
             {
                 node.release();
                 imports.push_back(std::unique_ptr<ASTImportProgramNode>(l));
+            } else if (auto* f = dynamic_cast<ASTFilesProgramNode*>(node.get()))
+            {
+                node.release();
+                for (auto& file : f->files)
+                    files.push_back(std::move(file));
+                delete f;
             }
         }
 
         return std::make_unique<ASTMainProgramNode>(
             std::move(functions),
             std::move(global_variables),
-            std::move(imports)
+            std::move(imports),
+            std::move(files)
         );
     });
 }

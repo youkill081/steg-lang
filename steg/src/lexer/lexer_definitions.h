@@ -23,6 +23,7 @@ namespace compiler
         TOKEN_KEYWORD_CONTINUE,
         TOKEN_KEYWORD_IMPORT,
         TOKEN_KEYWORD_FROM,
+        TOKEN_KEYWORD_FILES,
 
         TOKEN_TYPE_UINT8,
         TOKEN_TYPE_INT8,
@@ -62,6 +63,7 @@ namespace compiler
         TOKEN_PUNCTUATION_RIGHT_SQUARE_BRACKET,
         TOKEN_PUNCTUATION_COMMA,
         TOKEN_PUNCTUATION_SEMICOLON,
+        TOKEN_PUNCTUATION_COLON,
         TOKEN_PUNCTUATION_ARROW,
 
         TOKEN_ASSIGNMENT,
@@ -81,6 +83,7 @@ namespace compiler
         LexerTokensTypes type;
     };
 
+
     constexpr std::array KEYWORDS = {
         // Keywords
         TokenEntry{"fn", TOKEN_KEYWORD_FUNCTION},
@@ -94,6 +97,7 @@ namespace compiler
         TokenEntry{"continue", TOKEN_KEYWORD_CONTINUE},
         TokenEntry{"import", TOKEN_KEYWORD_IMPORT},
         TokenEntry{"from", TOKEN_KEYWORD_FROM},
+        TokenEntry{"files", TOKEN_KEYWORD_FILES},
 
         // Types
         TokenEntry{"uint8", TOKEN_TYPE_UINT8},
@@ -145,9 +149,9 @@ namespace compiler
         TokenEntry{"]", TOKEN_PUNCTUATION_RIGHT_SQUARE_BRACKET},
         TokenEntry{",", TOKEN_PUNCTUATION_COMMA},
         TokenEntry{";", TOKEN_PUNCTUATION_SEMICOLON},
+        TokenEntry{":", TOKEN_PUNCTUATION_COLON},
         TokenEntry{"->", TOKEN_PUNCTUATION_ARROW},
     };
-
     inline std::map<LexerTokensTypes, std::string_view> token_type_to_string = {
         {TOKEN_KEYWORD_FUNCTION, "TOKEN_KEYWORD_FUNCTION"},
         {TOKEN_KEYWORD_IF, "TOKEN_KEYWORD_IF"},
@@ -160,6 +164,7 @@ namespace compiler
         {TOKEN_KEYWORD_CONTINUE, "TOKEN_KEYWORD_CONTINUE"},
         {TOKEN_KEYWORD_IMPORT, "TOKEN_KEYWORD_IMPORT"},
         {TOKEN_KEYWORD_FROM, "TOKEN_KEYWORD_FROM"},
+        {TOKEN_KEYWORD_FILES, "TOKEN_KEYWORD_FILES"},
         {TOKEN_TYPE_UINT8, "TOKEN_TYPE_UINT8"},
         {TOKEN_TYPE_INT8, "TOKEN_TYPE_INT8"},
         {TOKEN_TYPE_UINT16, "TOKEN_TYPE_UINT16"},
@@ -194,6 +199,7 @@ namespace compiler
         {TOKEN_PUNCTUATION_RIGHT_SQUARE_BRACKET, "TOKEN_PUNCTUATION_RIGHT_SQUARE_BRACKET"},
         {TOKEN_PUNCTUATION_COMMA, "TOKEN_PUNCTUATION_COMMA"},
         {TOKEN_PUNCTUATION_SEMICOLON, "TOKEN_PUNCTUATION_SEMICOLON"},
+        {TOKEN_PUNCTUATION_COLON, "TOKEN_PUNCTUATION_COLON"},
         {TOKEN_PUNCTUATION_ARROW, "TOKEN_PUNCTUATION_ARROW"},
         {TOKEN_ASSIGNMENT, "TOKEN_ASSIGNMENT"},
         {TOKEN_ADD_ASSIGNMENT, "TOKEN_ADD_ASSIGNMENT"},
