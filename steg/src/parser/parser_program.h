@@ -130,30 +130,41 @@ parseFunctionParameters =
 
     /* Main Program Node*/
 
-    using function_stop = StopSet<TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>;
-    using function_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT,
-                                  TOKEN_KEYWORD_FILES>;
+    // Stop sets
+    using AllTypes = StopSet<
+        TOKEN_TYPE_UINT8, TOKEN_TYPE_INT8, TOKEN_TYPE_UINT16,
+        TOKEN_TYPE_INT16, TOKEN_TYPE_UINT32, TOKEN_TYPE_INT32, TOKEN_TYPE_BOOL>;
 
-    using import_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_FILES>;
-    using import_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>
-    ;
+    using function_stop = ConcatStopSet<StopSet<TOKEN_KEYWORD_FILES, TOKEN_KEYWORD_IMPORT>, AllTypes>::type;
+    using import_stop = ConcatStopSet<StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_FILES>, AllTypes>::type;
+    using files_stop = ConcatStopSet<StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT>, AllTypes>::type;
+    using globals_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>;
 
-    using files_stop = StopSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT>;
-    using files_sync = SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>;
+    // Resync sets
+    using AllTypesSyncSet = SyncSet<
+        TOKEN_TYPE_UINT8, TOKEN_TYPE_INT8, TOKEN_TYPE_UINT16,
+        TOKEN_TYPE_INT16, TOKEN_TYPE_UINT32, TOKEN_TYPE_INT32, TOKEN_TYPE_BOOL>;
+
+    using main_sync = ConcatSyncSet<
+        SyncSet<TOKEN_KEYWORD_FUNCTION, TOKEN_KEYWORD_EXPORT, TOKEN_KEYWORD_IMPORT, TOKEN_KEYWORD_FILES>,
+        AllTypesSyncSet
+    >::type;
 
     inline Parser<std::unique_ptr<ASTMainProgramNode>, TokenSpan> parseMainProgram =
     map(many(
-    lint_checkpoint<function_stop, function_sync, ASTErrorNode>(
+        lint_checkpoint<globals_stop, main_sync, ASTErrorNode>(
+            map(parseVariableDeclarationWithSemicolon, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
+        )
+        |
+        lint_checkpoint<function_stop, main_sync, ASTErrorNode>(
         map(parseFunction, [](auto f) -> std::unique_ptr<ASTNode> { return std::move(f); })
         )
         |
-            map(parseVariableDeclarationWithSemicolon, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
-        |
-            lint_checkpoint<import_stop, import_sync, ASTErrorNode>(
+            lint_checkpoint<import_stop, main_sync, ASTErrorNode>(
                 map(parseImport, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
             )
         |
-            lint_checkpoint<files_stop, files_sync, ASTErrorNode>(
+            lint_checkpoint<files_stop, main_sync, ASTErrorNode>(
                 map(parseFiles, [](auto v) -> std::unique_ptr<ASTNode> { return std::move(v); })
             )
     ), [](std::vector<std::unique_ptr<ASTNode>> nodes)

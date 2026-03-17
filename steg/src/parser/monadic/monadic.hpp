@@ -234,8 +234,24 @@ namespace compiler
     template <LexerTokensTypes... tokens>
     struct StopSet {};
 
+    template <typename S1, typename S2>
+    struct ConcatStopSet;
+
+    template <LexerTokensTypes... A, LexerTokensTypes... B>
+    struct ConcatStopSet<StopSet<A...>, StopSet<B...>> {
+        using type = StopSet<A..., B...>;
+    };
+
     template <LexerTokensTypes... tokens>
     struct SyncSet {};
+
+    template <typename S1, typename S2>
+    struct ConcatSyncSet;
+
+    template <LexerTokensTypes... A, LexerTokensTypes... B>
+    struct ConcatSyncSet<SyncSet<A...>, SyncSet<B...>> {
+        using type = SyncSet<A..., B...>;
+    };
 
     template <typename TStopSet, typename TSyncSet, typename TErrorNode, typename Parser>
     auto lint_checkpoint(Parser parser) {
@@ -258,19 +274,15 @@ namespace compiler
             auto res = parser(input);
             if (res) return res;
 
-            // Token "stop pur" (ex: '}') → on laisse le parseur parent le gérer
             if (((input[0].type == stop_tokens) || ...))
                 return std::nullopt;
 
-            // On avance d'au moins un token (le début était cassé)
             auto current_input = input.subspan(1);
 
             while (!current_input.empty())
             {
-                // Stop pur → on s'arrête AVANT
                 if (((current_input[0].type == stop_tokens) || ...))
                     break;
-                // Sync → on s'arrête ICI pour réessayer
                 if (((current_input[0].type == sync_tokens) || ...))
                     break;
                 current_input = current_input.subspan(1);
