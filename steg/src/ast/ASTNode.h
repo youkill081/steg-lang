@@ -9,6 +9,8 @@
 
 namespace compiler
 {
+    class ASTVisitor;
+
     class ASTNode
     {
     protected:
@@ -26,6 +28,7 @@ namespace compiler
         virtual ~ASTNode() = default;
 
         virtual void display(std::size_t left_padding = 0) = 0;
+        virtual void accept(ASTVisitor* visitor) = 0;
     };
 
     class ASTErrorNode final : public ASTNode
@@ -36,5 +39,7 @@ namespace compiler
             display_indent(left_padding);
             std::cout << "Error" << std::endl;
         };
+
+        void accept(ASTVisitor* visitor) override;
     };
 }

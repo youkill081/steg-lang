@@ -3,6 +3,12 @@
 //
 
 #include "ASTStatementNode.h"
+#include "ASTVisitor.h"
+
+void compiler::ASTStatementError::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
 
 void compiler::ASTBlockStatementNode::display(std::size_t left_padding)
 {
@@ -12,6 +18,16 @@ void compiler::ASTBlockStatementNode::display(std::size_t left_padding)
     {
         statement->display(left_padding + 1);
     }
+}
+
+void compiler::ASTBlockStatementNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+void compiler::ASTErrorNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void compiler::ASTIfStatementNode::display(std::size_t left_padding)
@@ -31,6 +47,11 @@ void compiler::ASTIfStatementNode::display(std::size_t left_padding)
     }
 }
 
+void compiler::ASTIfStatementNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void compiler::ASTVariableStatement::display(std::size_t left_padding)
 {
     display_name("Variable", left_padding);
@@ -45,6 +66,11 @@ void compiler::ASTVariableStatement::display(std::size_t left_padding)
         std::cout << "No expression" << std::endl;
 }
 
+void compiler::ASTVariableStatement::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void compiler::ASTWhileStatementNode::display(std::size_t left_padding)
 {
     display_name("While", left_padding);
@@ -56,6 +82,11 @@ void compiler::ASTWhileStatementNode::display(std::size_t left_padding)
     display_indent(left_padding);
     std::cout << "Body" << std::endl;
     body_statement->display(left_padding + 1);
+}
+
+void compiler::ASTWhileStatementNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void compiler::ASTForStatementNode::display(std::size_t left_padding)
@@ -79,6 +110,11 @@ void compiler::ASTForStatementNode::display(std::size_t left_padding)
     body_statement->display(left_padding + 1);
 }
 
+void compiler::ASTForStatementNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void compiler::ASTReturnStatement::display(std::size_t left_padding)
 {
     display_name("Return", left_padding);
@@ -93,9 +129,19 @@ void compiler::ASTReturnStatement::display(std::size_t left_padding)
     }
 }
 
+void compiler::ASTReturnStatement::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void compiler::ASTBreakStatement::display(std::size_t left_padding)
 {
     display_name("Break", left_padding);
+}
+
+void compiler::ASTBreakStatement::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void compiler::ASTContinueStatement::display(std::size_t left_padding)
@@ -103,8 +149,18 @@ void compiler::ASTContinueStatement::display(std::size_t left_padding)
     display_name("Continue", left_padding);
 }
 
+void compiler::ASTContinueStatement::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void compiler::ASTExpressionStatement::display(std::size_t left_padding)
 {
     display_name("Expression", left_padding);
     expression->display(left_padding + 1);
+}
+
+void compiler::ASTExpressionStatement::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }

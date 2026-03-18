@@ -44,6 +44,7 @@ namespace compiler
         ) : left(std::move(left)), right(std::move(right)), op_type(op_type) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> left;
         std::unique_ptr<ASTExpressionNode> right;
@@ -65,6 +66,7 @@ namespace compiler
         ) : expression(std::move(expression)), op_type(op_type) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> expression;
         unaryOperationType op_type;
@@ -89,6 +91,7 @@ namespace compiler
 
         ASTTypeNode(const Types type) : type(type) {}
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
         Types type;
     };
 
@@ -100,6 +103,7 @@ namespace compiler
             : value(value), type(std::move(type)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::string value;
         std::unique_ptr<ASTTypeNode> type;
@@ -111,6 +115,7 @@ namespace compiler
     public:
         ASTIdentifierExpressionNode(const std::string &name) : name(name) {}
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
         std::string name;
     };
 
@@ -124,6 +129,7 @@ namespace compiler
         ) : callee(std::move(callee)), args(std::move(args)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTIdentifierExpressionNode> callee;
         std::vector<std::unique_ptr<ASTExpressionNode>> args;
@@ -139,6 +145,7 @@ namespace compiler
         ) : array(std::move(array)), index(std::move(index)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTIdentifierExpressionNode> array;
         std::unique_ptr<ASTExpressionNode> index;
@@ -162,6 +169,7 @@ namespace compiler
         ) : target(std::move(target)), op(op), value(std::move(value)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> target;
         assignmentType op;
@@ -175,6 +183,7 @@ namespace compiler
             : expression(std::move(expr)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> expression;
     };
@@ -186,6 +195,7 @@ namespace compiler
             : expression(std::move(expr)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> expression;
     };

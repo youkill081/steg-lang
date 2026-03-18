@@ -23,6 +23,7 @@ namespace compiler
         ASTFileProgramNode(const std::string &name, const std::string &path) : name(name), path(path) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::string name;
         std::string path;
@@ -38,6 +39,7 @@ namespace compiler
         {
             std::cout << "Only a wrapper node, shouldn't be displayed..."  << std::endl;
         };
+        void accept(ASTVisitor* visitor) override;
 
         std::vector<std::unique_ptr<ASTFileProgramNode>> files;
     };
@@ -49,6 +51,7 @@ namespace compiler
             : functions_variables(std::move(functions)), path(path) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::vector<std::string> functions_variables;
         std::string path;
@@ -61,6 +64,7 @@ namespace compiler
             : name(name), type(std::move(type)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::string name;
         std::unique_ptr<ASTTypeNode> type;
@@ -82,6 +86,7 @@ namespace compiler
             is_exported(is_exported) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::string name;
         std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters;
@@ -107,5 +112,6 @@ namespace compiler
         std::vector<std::unique_ptr<ASTFileProgramNode>> files;
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
     };
 }

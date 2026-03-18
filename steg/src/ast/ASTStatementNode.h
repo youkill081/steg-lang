@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <map>
 #include <vector>
 
 #include "ASTNode.h"
@@ -24,6 +23,7 @@ namespace compiler
             display_indent(left_padding);
             std::cout << "Error" << std::endl;
         };
+        void accept(ASTVisitor* visitor) override;
     };
 
     class ASTBlockStatementNode final : public ASTStatementNode
@@ -33,6 +33,7 @@ namespace compiler
             statements(std::move(statement)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::vector<std::unique_ptr<ASTStatementNode>> statements;
     };
@@ -47,6 +48,7 @@ namespace compiler
         ) : condition(std::move(condition)), then_statement(std::move(then_statement)), false_statement( std::move(false_statement)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> condition;
         std::unique_ptr<ASTBlockStatementNode> then_statement;
@@ -60,6 +62,7 @@ namespace compiler
             : condition(std::move(condition)), body_statement( std::move(body_statement)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> condition;
         std::unique_ptr<ASTStatementNode> body_statement;
@@ -79,6 +82,7 @@ namespace compiler
             body_statement( std::move(body_statement)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
 
         std::unique_ptr<ASTExpressionNode> init_expression;
         std::unique_ptr<ASTExpressionNode> condition_expression;
@@ -94,6 +98,8 @@ namespace compiler
             : expression(std::move(expression)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
+
         std::unique_ptr<ASTExpressionNode> expression; // The return expression is optional
     };
 
@@ -102,6 +108,7 @@ namespace compiler
     public:
         ASTBreakStatement() = default;
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
     };
 
     class ASTContinueStatement final : public ASTStatementNode
@@ -109,6 +116,7 @@ namespace compiler
     public:
         ASTContinueStatement() = default;
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
     };
 
     class ASTVariableStatement final : public ASTStatementNode
@@ -125,6 +133,7 @@ namespace compiler
         std::unique_ptr<ASTExpressionNode> expression; // Optional expression to init the variable
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
     };
 
     class ASTExpressionStatement final : public ASTStatementNode
@@ -134,6 +143,7 @@ namespace compiler
             : expression(std::move(expression)) {}
 
         void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
         std::unique_ptr<ASTExpressionNode> expression;
     };
 }

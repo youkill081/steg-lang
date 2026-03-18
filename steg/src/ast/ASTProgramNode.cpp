@@ -5,6 +5,8 @@
 #include <iostream>
 #include "ASTProgramNode.h"
 
+#include "ASTVisitor.h"
+
 using namespace compiler;
 
 void ASTFileProgramNode::display(std::size_t left_padding)
@@ -13,6 +15,16 @@ void ASTFileProgramNode::display(std::size_t left_padding)
 
     display_indent(left_padding);
     std::cout << "name: \"" << name << "\" path: \"" << path << "\"" << std::endl;
+}
+
+void ASTFileProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
+void ASTFilesProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void ASTImportProgramNode::display(std::size_t left_padding)
@@ -30,6 +42,11 @@ void ASTImportProgramNode::display(std::size_t left_padding)
     std::cout << std::endl;
 }
 
+void ASTImportProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
+}
+
 void ASTParameterProgramNode::display(std::size_t left_padding)
 {
     display_name("Parameter", left_padding);
@@ -38,6 +55,11 @@ void ASTParameterProgramNode::display(std::size_t left_padding)
     std::cout << "name: " << name << std::endl;
 
     type->display(left_padding + 1);
+}
+
+void ASTParameterProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void ASTFunctionProgramNode::display(std::size_t left_padding)
@@ -62,6 +84,11 @@ void ASTFunctionProgramNode::display(std::size_t left_padding)
     display_indent(left_padding);
     std::cout << "statement: " << std::endl;
     statement->display(left_padding + 1);
+}
+
+void ASTFunctionProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
 
 void ASTMainProgramNode::display(std::size_t left_padding)
@@ -95,4 +122,9 @@ void ASTMainProgramNode::display(std::size_t left_padding)
     {
         file->display(left_padding + 1);
     }
+}
+
+void ASTMainProgramNode::accept(ASTVisitor* visitor)
+{
+    visitor->visit(this);
 }
