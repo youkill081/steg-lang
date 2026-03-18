@@ -12,10 +12,11 @@
 namespace compiler
 {
     inline Parser<std::unique_ptr<ASTBlockStatementNode>, TokenSpan> parseBlock =
-        map(parseToken<TOKEN_PUNCTUATION_LEFT_BRACKET> >> parseStatements << parseToken<
-                TOKEN_PUNCTUATION_RIGHT_BRACKET>,
+        map(seq(parseToken<TOKEN_PUNCTUATION_LEFT_BRACKET>, parseStatements << parseToken<
+                TOKEN_PUNCTUATION_RIGHT_BRACKET>),
             [](auto data)
             {
-                return std::make_unique<ASTBlockStatementNode>(std::move(data));
+                auto [open, statements] = std::move(data);
+                return std::make_unique<ASTBlockStatementNode>(std::move(statements), open);
             });
 }

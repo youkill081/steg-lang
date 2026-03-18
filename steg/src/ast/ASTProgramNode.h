@@ -15,25 +15,30 @@
 namespace compiler
 {
     class ASTProgramNode : public ASTNode
-        {};
+    {
+    public:
+        ASTProgramNode(const LexerToken& token) { this->token = token; }
+    };
 
     class ASTFileProgramNode final : public ASTProgramNode
     {
     public:
-        ASTFileProgramNode(const std::string &name, const std::string &path) : name(name), path(path) {}
+        ASTFileProgramNode(const std::string &name, const std::string &path, const LexerToken &token, const LexerToken &path_token)
+            : ASTProgramNode(token), name(name), path(path), path_token(path_token) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
 
         std::string name;
         std::string path;
+        LexerToken path_token;
     };
 
     class ASTFilesProgramNode final : public ASTProgramNode
     {
     public:
-        ASTFilesProgramNode(std::vector<std::unique_ptr<ASTFileProgramNode>> files)
-            : files(std::move(files)) {}
+        ASTFilesProgramNode(std::vector<std::unique_ptr<ASTFileProgramNode>> files, const LexerToken& token)
+            : ASTProgramNode(token), files(std::move(files)) {}
 
         void display(std::size_t left_padding) override
         {
@@ -47,8 +52,8 @@ namespace compiler
     class ASTImportProgramNode final : public ASTProgramNode
     {
     public:
-        ASTImportProgramNode(std::vector<std::string> functions, const std::string& path)
-            : functions_variables(std::move(functions)), path(path) {}
+        ASTImportProgramNode(std::vector<std::string> functions, const std::string& path, const LexerToken& token)
+            : ASTProgramNode(token), functions_variables(std::move(functions)), path(path) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -60,8 +65,8 @@ namespace compiler
     class ASTParameterProgramNode final : public ASTProgramNode
     {
     public:
-        ASTParameterProgramNode(const std::string &name, std::unique_ptr<ASTTypeNode> type)
-            : name(name), type(std::move(type)) {}
+        ASTParameterProgramNode(const std::string &name, std::unique_ptr<ASTTypeNode> type, const LexerToken& token)
+            : ASTProgramNode(token), name(name), type(std::move(type)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -78,8 +83,10 @@ namespace compiler
             std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters,
             std::unique_ptr<ASTTypeNode> return_type,
             std::unique_ptr<ASTBlockStatementNode> statement,
-            bool is_exported
-        ) : name(name),
+            bool is_exported,
+            const LexerToken& token
+        ) : ASTProgramNode(token),
+            name(name),
             parameters(std::move(parameters)),
             return_type(std::move(return_type)),
             statement(std::move(statement)),
@@ -102,8 +109,9 @@ namespace compiler
             std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions,
             std::vector<std::unique_ptr<ASTVariableStatement>> global_variables,
             std::vector<std::unique_ptr<ASTImportProgramNode>> imports,
-            std::vector<std::unique_ptr<ASTFileProgramNode>> files
-        ) : functions(std::move(functions)), global_variables(std::move(global_variables)),
+            std::vector<std::unique_ptr<ASTFileProgramNode>> files,
+            const LexerToken& token
+        ) : ASTProgramNode(token), functions(std::move(functions)), global_variables(std::move(global_variables)),
             imports(std::move(imports)), files(std::move(files)) {}
 
         std::vector<std::unique_ptr<ASTFunctionProgramNode>> functions;

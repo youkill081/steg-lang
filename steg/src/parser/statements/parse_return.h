@@ -18,7 +18,8 @@ namespace compiler
         {
             auto [keyword, value] = std::move(data);
             return std::make_unique<ASTReturnStatement>(
-                value.has_value() ? std::move(*value) : nullptr
+                value.has_value() ? std::move(*value) : nullptr,
+                keyword
             );
         });
 }

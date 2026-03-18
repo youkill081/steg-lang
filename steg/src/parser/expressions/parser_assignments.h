@@ -14,6 +14,7 @@ namespace compiler
     struct AssignPart {
         ASTAssignExpressionStatement::assignmentType op;
         std::unique_ptr<ASTExpressionNode> value;
+        LexerToken op_token;
     };
 
     inline Parser<AssignPart, TokenSpan> parseAssignPart = map(
@@ -21,7 +22,8 @@ namespace compiler
         [](auto data) {
             return AssignPart{
                 ASTAssignExpressionStatement::ASSIGN,
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             };
         }
     );
@@ -31,7 +33,8 @@ namespace compiler
         [](auto data) {
             return AssignPart{
                 ASTAssignExpressionStatement::ADD_ASSIGN,
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             };
         }
     );
@@ -41,7 +44,8 @@ namespace compiler
         [](auto data) {
             return AssignPart{
                 ASTAssignExpressionStatement::SUB_ASSIGN,
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             };
         }
     );
@@ -51,7 +55,8 @@ namespace compiler
         [](auto data) {
             return AssignPart{
                 ASTAssignExpressionStatement::MUL_ASSIGN,
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             };
         }
     );
@@ -61,7 +66,8 @@ namespace compiler
         [](auto data) {
             return AssignPart{
                 ASTAssignExpressionStatement::DIV_ASSIGN,
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             };
         }
     );

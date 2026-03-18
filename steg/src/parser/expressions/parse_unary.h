@@ -16,7 +16,8 @@ namespace compiler
             [](auto pair) -> std::unique_ptr<ASTExpressionNode> {
                 return std::make_unique<ASTUnaryExpressionNode>(
                     std::move(std::get<1>(pair)),
-                    ASTUnaryExpressionNode::NEGATION
+                    ASTUnaryExpressionNode::NEGATION,
+                    std::get<0>(pair)
                 );
             }
         );
@@ -27,7 +28,8 @@ namespace compiler
             [](auto pair) -> std::unique_ptr<ASTExpressionNode>
             {
                 return std::make_unique<ASTAddressOfExpressionNode>(
-                    std::move(std::get<1>(pair))
+                    std::move(std::get<1>(pair)),
+                    std::get<0>(pair)
                 );
             }
         );
@@ -38,7 +40,8 @@ namespace compiler
             [](auto pair) -> std::unique_ptr<ASTExpressionNode>
             {
                 return std::make_unique<ASTDereferenceExpressionNode>(
-                    std::move(std::get<1>(pair))
+                    std::move(std::get<1>(pair)),
+                    std::get<0>(pair)
                 );
             }
         );

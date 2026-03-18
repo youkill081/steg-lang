@@ -297,7 +297,7 @@ namespace compiler
             }
 
             return std::optional<FullResultType>{
-                FullResultType{std::make_unique<TErrorNode>(), current_input}
+                FullResultType{std::make_unique<TErrorNode>(LexerToken::dummy()), current_input}
             };
         };
     }

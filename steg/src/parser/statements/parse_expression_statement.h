@@ -12,6 +12,9 @@ namespace compiler
     inline Parser<std::unique_ptr<ASTExpressionStatement>, TokenSpan> parseExpressionStatement =
         map(parseExpression, [](auto data)
         {
-            return std::make_unique<ASTExpressionStatement>(std::move(data));
+            return std::make_unique<ASTExpressionStatement>(
+                std::move(data),
+                LexerToken::dummy()
+            );
         });
 }

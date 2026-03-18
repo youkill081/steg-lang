@@ -18,7 +18,8 @@ namespace compiler
                 return std::make_unique<ASTVariableStatement>(
                     std::move(std::get<1>(data).value),
                     std::move(std::get<0>(data)),
-                    std::move(std::get<2>(data))
+                    std::move(std::get<2>(data)),
+                    std::get<1>(data)
                 );
             }
         );

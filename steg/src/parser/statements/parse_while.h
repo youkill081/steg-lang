@@ -15,14 +15,15 @@ namespace compiler
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseCondition; // declared in parseIf
 
     inline Parser<std::unique_ptr<ASTWhileStatementNode>, TokenSpan> parseWhileStatement =
-        map ( seq (parseToken<TOKEN_KEYWORD_WHILE> >> compiler::ref(parseCondition), compiler::ref(parseBlock) ),
+        map ( seq (parseToken<TOKEN_KEYWORD_WHILE>, compiler::ref(parseCondition), compiler::ref(parseBlock) ),
             [](auto data)
             {
-                auto [condition, body] = std::move(data);
+                auto [while_token, condition, body] = std::move(data);
 
                 return std::make_unique<ASTWhileStatementNode>(
                     std::move(condition),
-                    std::move(body)
+                    std::move(body),
+                    while_token
                 );
             }
     );

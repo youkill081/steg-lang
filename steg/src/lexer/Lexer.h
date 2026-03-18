@@ -22,7 +22,21 @@ namespace compiler
         std::string value;
         std::size_t line_number;
         std::size_t column_number;
+
+        static const LexerToken dummy()
+        {
+            return LexerToken{
+                .type = TOKEN_NO_TYPE,
+                .category = TOKEN_CATH_NO_CATH,
+                .path = "",
+                .value = "",
+                .line_number = 1,
+                .column_number = 1
+            };
+        }
     };
+
+
 
     class Lexer
     {

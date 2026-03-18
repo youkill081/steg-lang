@@ -11,10 +11,15 @@
 #include <string>
 #include <vector>
 
+#include "lexer/Lexer.h"
+
 namespace compiler
 {
     class ASTExpressionNode : public ASTNode
-        {};
+    {
+    public:
+        ASTExpressionNode(const LexerToken& token) { this->token = token; }
+    };
 
 
     class ASTBinaryExpressionNode final : public ASTExpressionNode
@@ -40,8 +45,9 @@ namespace compiler
         ASTBinaryExpressionNode(
             std::unique_ptr<ASTExpressionNode> left,
             std::unique_ptr<ASTExpressionNode> right,
-            const binaryOperationType op_type
-        ) : left(std::move(left)), right(std::move(right)), op_type(op_type) {}
+            const binaryOperationType op_type,
+            const LexerToken& token
+        ) : ASTExpressionNode(token), left(std::move(left)), right(std::move(right)), op_type(op_type) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -62,8 +68,9 @@ namespace compiler
 
         ASTUnaryExpressionNode(
             std::unique_ptr<ASTExpressionNode> expression,
-            const unaryOperationType op_type
-        ) : expression(std::move(expression)), op_type(op_type) {}
+            const unaryOperationType op_type,
+            const LexerToken& token
+        ) : ASTExpressionNode(token), expression(std::move(expression)), op_type(op_type) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -89,7 +96,7 @@ namespace compiler
             VOID
         };
 
-        ASTTypeNode(const Types type) : type(type) {}
+        ASTTypeNode(const Types type, const LexerToken &token) : type(type) { this->token = token; }
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
         Types type;
@@ -99,8 +106,8 @@ namespace compiler
     class ASTLiteralExpressionNode final : public ASTExpressionNode
     {
     public:
-        ASTLiteralExpressionNode(const std::string &value, std::unique_ptr<ASTTypeNode> type)
-            : value(value), type(std::move(type)) {}
+        ASTLiteralExpressionNode(const std::string &value, std::unique_ptr<ASTTypeNode> type, const LexerToken& token)
+            : ASTExpressionNode(token), value(value), type(std::move(type)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -113,7 +120,9 @@ namespace compiler
     class ASTIdentifierExpressionNode final : public ASTExpressionNode
     {
     public:
-        ASTIdentifierExpressionNode(const std::string &name) : name(name) {}
+        ASTIdentifierExpressionNode(const std::string &name, const LexerToken &token)
+            : ASTExpressionNode(token), name(name) {}
+
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
         std::string name;
@@ -125,8 +134,9 @@ namespace compiler
     public:
         ASTCallExpressionNode(
             std::unique_ptr<ASTIdentifierExpressionNode> callee,
-            std::vector<std::unique_ptr<ASTExpressionNode>> args
-        ) : callee(std::move(callee)), args(std::move(args)) {}
+            std::vector<std::unique_ptr<ASTExpressionNode>> args,
+            const LexerToken& token
+        ) : ASTExpressionNode(token), callee(std::move(callee)), args(std::move(args)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -141,8 +151,9 @@ namespace compiler
     public:
         ASTIndexExpressionNode(
             std::unique_ptr<ASTIdentifierExpressionNode> array,
-            std::unique_ptr<ASTExpressionNode> index
-        ) : array(std::move(array)), index(std::move(index)) {}
+            std::unique_ptr<ASTExpressionNode> index,
+            const LexerToken& token
+        ) : ASTExpressionNode(token), array(std::move(array)), index(std::move(index)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -165,8 +176,9 @@ namespace compiler
         ASTAssignExpressionStatement(
             std::unique_ptr<ASTExpressionNode> target,
             const assignmentType op,
-            std::unique_ptr<ASTExpressionNode> value
-        ) : target(std::move(target)), op(op), value(std::move(value)) {}
+            std::unique_ptr<ASTExpressionNode> value,
+            const LexerToken& token
+        ) : ASTExpressionNode(token), target(std::move(target)), op(op), value(std::move(value)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -179,8 +191,8 @@ namespace compiler
     class ASTAddressOfExpressionNode final : public ASTExpressionNode
     {
     public:
-        ASTAddressOfExpressionNode(std::unique_ptr<ASTExpressionNode> expr)
-            : expression(std::move(expr)) {}
+        ASTAddressOfExpressionNode(std::unique_ptr<ASTExpressionNode> expr, const LexerToken &token)
+            : ASTExpressionNode(token), expression(std::move(expr)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
@@ -191,8 +203,8 @@ namespace compiler
     class ASTDereferenceExpressionNode final : public ASTExpressionNode
     {
     public:
-        ASTDereferenceExpressionNode(std::unique_ptr<ASTExpressionNode> expr)
-            : expression(std::move(expr)) {}
+        ASTDereferenceExpressionNode(std::unique_ptr<ASTExpressionNode> expr, const LexerToken &token)
+            : ASTExpressionNode(token), expression(std::move(expr)) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;

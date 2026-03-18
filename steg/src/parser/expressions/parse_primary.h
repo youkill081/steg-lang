@@ -27,7 +27,8 @@ namespace compiler
         as_expression(map(parseToken<TOKEN_INTEGER>, [](LexerToken token) {
             return std::make_unique<ASTLiteralExpressionNode>(
                 token.value,
-                std::make_unique<ASTTypeNode>(ASTTypeNode::INT32)
+                std::make_unique<ASTTypeNode>(ASTTypeNode::INT32, token),
+                token
             );
         }));
 
@@ -36,12 +37,14 @@ namespace compiler
         as_expression(map(parseToken<TOKEN_BOOL_TRUE>, [](LexerToken token) {
             return std::make_unique<ASTLiteralExpressionNode>(
                 "true",
-                std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL)
+                std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL, token),
+                token
             );
     })) | as_expression(map(parseToken<TOKEN_BOOL_FALSE>, [](LexerToken token) {
         return std::make_unique<ASTLiteralExpressionNode>(
             "false",
-            std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL)
+            std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL, token),
+            token
         );
     }));
 
@@ -50,7 +53,8 @@ namespace compiler
        as_expression(map(parseToken<TOKEN_STRING>, [](LexerToken token) {
            return std::make_unique<ASTLiteralExpressionNode>(
                token.value,
-               std::make_unique<ASTTypeNode>(ASTTypeNode::STRING)
+               std::make_unique<ASTTypeNode>(ASTTypeNode::STRING, token),
+               token
            );
     }));
 
@@ -63,10 +67,11 @@ namespace compiler
             {
                 auto [identifier, index] = std::move(data);
                 std::unique_ptr<ASTIdentifierExpressionNode> expressionIdentifier =
-                    std::make_unique<ASTIdentifierExpressionNode>(std::move(identifier.value));
+                    std::make_unique<ASTIdentifierExpressionNode>(std::move(identifier.value), identifier);
                 return std::make_unique<ASTIndexExpressionNode>(
                     std::move(expressionIdentifier),
-                    std::move(index)
+                    std::move(index),
+                    identifier
                 );
             })
         );
@@ -97,10 +102,11 @@ namespace compiler
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseFunctionCall =
         as_expression(map(seq(parseToken<TOKEN_IDENTIFIER>, parseFunctionCallParameters), [](auto data) {
             std::unique_ptr<ASTIdentifierExpressionNode> identifier =
-                std::make_unique<ASTIdentifierExpressionNode>(std::move(std::get<0>(data).value));
+                std::make_unique<ASTIdentifierExpressionNode>(std::move(std::get<0>(data).value), std::get<0>(data));
             return std::make_unique<ASTCallExpressionNode>(
                 std::move(identifier),
-                std::move(std::get<1>(data))
+                std::move(std::get<1>(data)),
+                std::get<0>(data)
             );
         }));
 
@@ -108,7 +114,7 @@ namespace compiler
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseIdentifier =
         as_expression(map(parseToken<TOKEN_IDENTIFIER>, [](LexerToken token) {
             return std::unique_ptr<ASTIdentifierExpressionNode>(
-                new ASTIdentifierExpressionNode(token.value)
+                new ASTIdentifierExpressionNode(token.value, token)
             );
         }));
 }

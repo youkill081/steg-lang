@@ -18,18 +18,20 @@ namespace compiler
 
     inline Parser<std::unique_ptr<ASTIfStatementNode>, TokenSpan> parseIfStatement =
         map(seq(
-                parseToken<TOKEN_KEYWORD_IF> >> parseCondition,
+                parseToken<TOKEN_KEYWORD_IF>,
+                parseCondition,
                 compiler::ref(parseBlock),
                 optional(parseToken<TOKEN_KEYWORD_ELSE> >> compiler::ref(parseBlock))
             ),
             [](auto data)
             {
-                auto [condition, then_block, else_opt] = std::move(data);
+                auto [if_token, condition, then_block, else_opt] = std::move(data);
 
                 return std::make_unique<ASTIfStatementNode>(
                     std::move(condition),
                     std::move(then_block),
-                    else_opt.has_value() ? std::move(*else_opt) : nullptr
+                    else_opt.has_value() ? std::move(*else_opt) : nullptr,
+                    if_token
                 );
             });
 }

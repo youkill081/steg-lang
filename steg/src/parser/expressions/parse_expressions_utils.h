@@ -16,6 +16,7 @@ namespace compiler
     struct InfixPart {
         ASTBinaryExpressionNode::binaryOperationType type;
         std::unique_ptr<ASTExpressionNode> right;
+        LexerToken op_token;
     };
 
     extern Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseExpression;
@@ -39,7 +40,8 @@ namespace compiler
             left = std::make_unique<ASTBinaryExpressionNode>(
                 std::move(left),
                 std::move(part.right),
-                part.type
+                part.type,
+                part.op_token
             );
         }
         return std::move(left);
@@ -55,7 +57,8 @@ namespace compiler
         return std::make_unique<ASTAssignExpressionStatement>(
             std::move(leftSide),
             optAssign->op,
-            std::move(optAssign->value)
+            std::move(optAssign->value),
+            optAssign->op_token
         );
     };
 }

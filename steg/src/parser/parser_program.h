@@ -24,7 +24,8 @@ namespace compiler
             {
                 return std::make_unique<ASTParameterProgramNode>(
                     std::get<1>(data).value,
-                    std::move(std::get<0>(data))
+                    std::move(std::get<0>(data)),
+                    std::get<1>(data)
                 );
             }
         );
@@ -80,7 +81,8 @@ parseFunctionParameters =
                     std::move(std::get<2>(data)),
                     std::move(std::get<3>(data)),
                     std::move(std::get<4>(data)),
-                    std::get<0>(data).has_value()
+                    std::get<0>(data).has_value(),
+                    std::move(std::get<1>(data))
                 );
             });
 
@@ -93,7 +95,7 @@ parseFunctionParameters =
                 [](auto data)
                 {
                     auto [name, path] = std::move(data);
-                    return std::make_unique<ASTFileProgramNode>(name.value, path.value);
+                    return std::make_unique<ASTFileProgramNode>(name.value, path.value, name, path);
                 });
 
 
@@ -102,7 +104,8 @@ parseFunctionParameters =
             [](auto data)
             {
                 return std::make_unique<ASTFilesProgramNode>(
-                    std::move(data)
+                    std::move(data),
+                    LexerToken::dummy()
                 );
             });
 
@@ -116,15 +119,16 @@ parseFunctionParameters =
                 lintedParseToken<TOKEN_STRING> << optional(parseToken<TOKEN_PUNCTUATION_SEMICOLON>)
             ), [](auto data)
             {
-                auto [function_variables, aze] = std::move(data);
+                auto [function_variables, token] = std::move(data);
 
                 std::vector<std::string> function_variables_vec;
-                for (const auto& token : function_variables)
-                    function_variables_vec.push_back(token.value);
+                for (const auto& t : function_variables)
+                    function_variables_vec.push_back(t.value);
 
                 return std::make_unique<ASTImportProgramNode>(
                     function_variables_vec,
-                    aze.value
+                    token.value,
+                    token
                 );
             });
 
@@ -206,7 +210,8 @@ parseFunctionParameters =
                     std::move(functions),
                     std::move(global_variables),
                     std::move(imports),
-                    std::move(files)
+                    std::move(files),
+                    LexerToken::dummy()
                 );
             });
 }

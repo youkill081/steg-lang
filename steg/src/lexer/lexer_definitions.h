@@ -87,7 +87,9 @@ namespace compiler
         TOKEN_IDENTIFIER, // Variable identifier, for example
         TOKEN_STRING,
         TOKEN_BOF, // Automatically added by lexer at the beginning of the file
-        TOKEN_EOF // Automatically added by lexer at the end of the file
+        TOKEN_EOF, // Automatically added by lexer at the end of the file
+
+        TOKEN_NO_TYPE // Automatically added by lexer at the end of the file
     };
 
     struct TokenEntry {
@@ -222,7 +224,8 @@ namespace compiler
         {TOKEN_IDENTIFIER, "TOKEN_IDENTIFIER"},
         {TOKEN_STRING, "TOKEN_STRING"},
         {TOKEN_BOF, "TOKEN_BOF"},
-        {TOKEN_EOF, "TOKEN_EOF"}
+        {TOKEN_EOF, "TOKEN_EOF"},
+        {TOKEN_NO_TYPE, "TOKEN_NO_TYPE"}
     };
 
     inline std::map<LexerTokenType, LexerTokenCategory> token_type_to_category = {

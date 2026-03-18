@@ -12,12 +12,12 @@ namespace compiler
     inline Parser<std::unique_ptr<ASTBreakStatement>, TokenSpan> parseBreak =
         map (parseToken<TOKEN_KEYWORD_BREAK>, [](auto data)
         {
-            return std::make_unique<ASTBreakStatement>();
+            return std::make_unique<ASTBreakStatement>(data);
         });
 
     inline Parser<std::unique_ptr<ASTContinueStatement>, TokenSpan> parseContinue =
         map (parseToken<TOKEN_KEYWORD_CONTINUE>, [](auto data)
         {
-            return std::make_unique<ASTContinueStatement>();
+            return std::make_unique<ASTContinueStatement>(data);
         });
 }
