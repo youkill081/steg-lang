@@ -49,6 +49,8 @@ namespace compiler
         TOKEN_TYPE_INT32,
         TOKEN_TYPE_BOOL,
         TOKEN_TYPE_VOID,
+        TOKEN_TYPE_FILE,
+        TOKEN_TYPE_CLOCK,
 
         TOKEN_BOOL_TRUE,
         TOKEN_BOOL_FALSE,
@@ -127,6 +129,8 @@ namespace compiler
         TokenEntry{"int32", TOKEN_TYPE_INT32},
         TokenEntry{"bool", TOKEN_TYPE_BOOL},
         TokenEntry{"void", TOKEN_TYPE_VOID},
+        TokenEntry{"file", TOKEN_TYPE_FILE},
+        TokenEntry{"clock", TOKEN_TYPE_CLOCK},
 
         // Literals
         TokenEntry{"true", TOKEN_BOOL_TRUE},
@@ -230,7 +234,9 @@ namespace compiler
         {TOKEN_STRING, "TOKEN_STRING"},
         {TOKEN_BOF, "TOKEN_BOF"},
         {TOKEN_EOF, "TOKEN_EOF"},
-        {TOKEN_NO_TYPE, "TOKEN_NO_TYPE"}
+        {TOKEN_NO_TYPE, "TOKEN_NO_TYPE"},
+        {TOKEN_TYPE_FILE, "TOKEN_TYPE_FILE"},
+        {TOKEN_TYPE_CLOCK, "TOKEN_TYPE_CLOCK"}
     };
 
     inline std::map<LexerTokenType, LexerTokenCategory> token_type_to_category = {
@@ -255,6 +261,8 @@ namespace compiler
     {TOKEN_TYPE_INT32, TOKEN_CATH_TYPE},
     {TOKEN_TYPE_BOOL, TOKEN_CATH_TYPE},
     {TOKEN_TYPE_VOID, TOKEN_CATH_TYPE},
+    {TOKEN_TYPE_FILE, TOKEN_CATH_TYPE},
+    {TOKEN_TYPE_CLOCK, TOKEN_CATH_TYPE},
 
     {TOKEN_OPERATOR_PLUS, TOKEN_CATH_OPERATOR},
     {TOKEN_OPERATOR_MINUS, TOKEN_CATH_OPERATOR},

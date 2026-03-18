@@ -15,10 +15,38 @@
 
 namespace compiler
 {
+    struct SymbolInfo;
+
+    class ASTTypeNode final : public ASTNode
+    {
+    public:
+        enum Types
+        {
+            UINT8,
+            INT8,
+            UINT16,
+            INT16,
+            UINT32,
+            INT32,
+            BOOL,
+            STRING,
+            VOID,
+            FILE,
+            CLOCK
+        };
+
+        ASTTypeNode(const Types type, const LexerToken &token) : type(type) { this->token = token; }
+        void display(std::size_t left_padding) override;
+        void accept(ASTVisitor* visitor) override;
+        Types type;
+    };
+
     class ASTExpressionNode : public ASTNode
     {
     public:
         ASTExpressionNode(const LexerToken& token) { this->token = token; }
+
+        ASTTypeNode::Types resolved_type = ASTTypeNode::VOID;
     };
 
 
@@ -79,30 +107,6 @@ namespace compiler
         unaryOperationType op_type;
     };
 
-
-    class ASTTypeNode final : public ASTNode
-    {
-    public:
-        enum Types
-        {
-            UINT8,
-            INT8,
-            UINT16,
-            INT16,
-            UINT32,
-            INT32,
-            BOOL,
-            STRING,
-            VOID
-        };
-
-        ASTTypeNode(const Types type, const LexerToken &token) : type(type) { this->token = token; }
-        void display(std::size_t left_padding) override;
-        void accept(ASTVisitor* visitor) override;
-        Types type;
-    };
-
-
     class ASTLiteralExpressionNode final : public ASTExpressionNode
     {
     public:
@@ -126,6 +130,7 @@ namespace compiler
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
         std::string name;
+        std::shared_ptr<SymbolInfo> resolved_symbol = nullptr;
     };
 
 
@@ -143,6 +148,7 @@ namespace compiler
 
         std::unique_ptr<ASTIdentifierExpressionNode> callee;
         std::vector<std::unique_ptr<ASTExpressionNode>> args;
+        std::shared_ptr<SymbolInfo> resolved_symbol = nullptr;
     };
 
 
@@ -223,7 +229,9 @@ namespace compiler
         {ASTTypeNode::Types::INT32, "INT32"},
         {ASTTypeNode::Types::BOOL, "BOOL"},
         {ASTTypeNode::Types::STRING, "STRING"},
-        {ASTTypeNode::Types::VOID, "VOID"}
+        {ASTTypeNode::Types::VOID, "VOID"},
+        {ASTTypeNode::Types::FILE, "FILE"},
+        {ASTTypeNode::Types::CLOCK, "CLOCK"}
     };
 
     static inline std::map<ASTUnaryExpressionNode::unaryOperationType, std::string_view> ASTUnaryExpressionNode_type_to_string = {

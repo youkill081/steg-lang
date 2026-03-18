@@ -46,7 +46,6 @@ namespace compiler
             node->statement->accept(this);
         }
 
-        // Le reste on descend juste dans l'arbre
         void visit(ASTMainProgramNode* node) override {
             for (auto& func : node->functions) func->accept(this);
             for (auto& var : node->global_variables) var->accept(this);

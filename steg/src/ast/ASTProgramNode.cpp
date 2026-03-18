@@ -37,7 +37,7 @@ void ASTImportProgramNode::display(std::size_t left_padding)
     std::cout << "Importing: " ;
     for (const auto &imported_name : functions_variables)
     {
-        std::cout << imported_name << " ";
+        std::cout << imported_name.value << " ";
     }
     std::cout << std::endl;
 }

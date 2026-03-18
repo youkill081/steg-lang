@@ -49,6 +49,10 @@ set(STEG_LIB_SOURCES
         src/lexer/TokenMap.cpp
         src/lexer/TokenMap.h
         src/semantic_analysis/step2/SemanticTokensVisitor.h
+        src/semantic_analysis/exports/ExportCollector.h
+        src/semantic_analysis/helpers.h
+        src/semantic_analysis/ModuleManager.h
+        src/semantic_analysis/analyzeExports.h
 )
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})

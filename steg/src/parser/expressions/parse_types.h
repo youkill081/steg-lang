@@ -17,7 +17,9 @@ namespace compiler
     inline auto parseINT32 = map(parseToken<TOKEN_TYPE_INT32>, [](auto token) { return std::make_unique<ASTTypeNode>(ASTTypeNode::INT32, token); });
     inline auto parseBOOL = map(parseToken<TOKEN_TYPE_BOOL>, [](auto token) { return std::make_unique<ASTTypeNode>(ASTTypeNode::BOOL, token); });
     inline auto parseVOID = map(parseToken<TOKEN_TYPE_VOID>, [](auto token) { return std::make_unique<ASTTypeNode>(ASTTypeNode::VOID, token); });
+    inline auto parseFILE = map(parseToken<TOKEN_TYPE_FILE>, [](auto token) { return std::make_unique<ASTTypeNode>(ASTTypeNode::FILE, token); });
+    inline auto parseCLOCK = map(parseToken<TOKEN_TYPE_CLOCK>, [](auto token) { return std::make_unique<ASTTypeNode>(ASTTypeNode::CLOCK, token); });
 
-    inline auto parseType = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL | parseVOID;
-    inline auto parseTypeNoVoid = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL;
+    inline auto parseType = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL | parseFILE | parseCLOCK | parseVOID;
+    inline auto parseTypeNoVoid = parseUINT8 | parseINT8 | parseUINT16 | parseINT16 | parseUINT32 | parseINT32 | parseBOOL | parseFILE | parseCLOCK;
 }

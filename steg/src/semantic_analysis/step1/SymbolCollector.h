@@ -7,6 +7,9 @@
 #include "ast/ASTVisitor.h"
 #include "semantic_analysis/SymbolTable.h"
 #include "linter/Linter.h"
+#include "semantic_analysis/analyzeExports.h"
+#include "semantic_analysis/helpers.h"
+#include "semantic_analysis/ModuleManager.h"
 
 namespace compiler
 {
@@ -16,6 +19,8 @@ namespace compiler
         SymbolTable table;
 
         void visit(ASTMainProgramNode* node) override {
+            for (const auto &import : node->imports)
+                import->accept(this);
             for (const auto &file : node->files)
                 file->accept(this);
             for (const auto &var : node->global_variables)
@@ -59,6 +64,9 @@ namespace compiler
             if (table.contains(node->name))
                 Linter::instance().report("Variable already declared: " + node->name, node->token);
 
+            if (node->expression)
+                node->expression->accept(this);
+
             table.declare(node->name, SymbolInfo{
                 .kind  = SymbolKind::VARIABLE,
                 .type  = node->type->type,
@@ -74,12 +82,14 @@ namespace compiler
         }
 
         void visit(ASTIfStatementNode* node) override {
+            node->condition->accept(this);
             node->then_statement->accept(this);
             if (node->false_statement)
                 node->false_statement->accept(this);
         }
 
         void visit(ASTWhileStatementNode* node) override {
+            node->condition->accept(this);
             node->body_statement->accept(this);
         }
 
@@ -87,6 +97,8 @@ namespace compiler
             table.enter_scope();
             if (node->init_expression)
                 node->init_expression->accept(this);
+            if (node->condition_expression)
+                node->condition_expression->accept(this);
             if (node->post_expression)
                 node->post_expression->accept(this);
             node->body_statement->accept(this);
@@ -133,25 +145,106 @@ namespace compiler
 
             table.declare(node->name, SymbolInfo{
                 .kind = SymbolKind::VARIABLE,
-                .type = ASTTypeNode::Types::UINT32,
+                .type = ASTTypeNode::Types::FILE,
                 .is_exported = true,
                 .token = node->token
             });
         }
 
         void visit(ASTFilesProgramNode*) override {}
-        void visit(ASTImportProgramNode*) override {}
+
+        void visit(ASTImportProgramNode* node) override {
+            auto path = utils::resolve_path(node->token.path, node->path);
+            if (!path) {
+                Linter::instance().report("Module not found: " + node->path, node->token);
+                return;
+            }
+
+            std::string absolute_path = std::filesystem::absolute(*path).string();
+            auto &manager = ModuleManager::instance();
+
+            if (manager.currently_parsing.contains(absolute_path))
+                return;
+
+            if (!manager.module_cache.contains(absolute_path)) {
+                manager.currently_parsing.insert(absolute_path);
+
+                auto exports = analyzeExports(absolute_path);
+
+                if (exports) {
+                    manager.module_cache[absolute_path] = std::move(*exports);
+                } else {
+                    Linter::instance().report("Failed to parse imported file: " + node->path, node->token);
+                }
+
+                manager.currently_parsing.erase(absolute_path);
+            }
+
+            auto &cache = manager.module_cache[absolute_path];
+            for (const auto& name : node->functions_variables) {
+                if (cache.contains(name.value)) {
+                    if (table.contains(name.value)) {
+                        Linter::instance().report("Import conflict: '" + name.value + "' is already defined.", name);
+                    } else {
+                        table.declare(name.value, *cache[name.value]);
+                    }
+                } else {
+                    Linter::instance().report("Symbol '" + name.value + "' is not exported by " + node->path, name);
+                }
+            }
+        }
+
         void visit(ASTBreakStatement*) override {}
         void visit(ASTContinueStatement*) override {}
-        void visit(ASTBinaryExpressionNode*) override {}
-        void visit(ASTUnaryExpressionNode*) override {}
+
+        void visit(ASTBinaryExpressionNode* node) override {
+            node->left->accept(this);
+            node->right->accept(this);
+        }
+
+        void visit(ASTUnaryExpressionNode* node) override
+        {
+            node->expression->accept(this);
+        }
+
         void visit(ASTLiteralExpressionNode*) override {}
-        void visit(ASTIdentifierExpressionNode*) override {}
-        void visit(ASTCallExpressionNode*) override {}
-        void visit(ASTIndexExpressionNode*) override {}
-        void visit(ASTAssignExpressionStatement*) override {}
-        void visit(ASTAddressOfExpressionNode*) override {}
-        void visit(ASTDereferenceExpressionNode*) override {}
+
+        void visit(ASTIdentifierExpressionNode* node) override {
+            const auto symbol = table.get(node->name);
+
+            if (symbol) {
+                node->resolved_symbol = symbol;
+            } else {
+                Linter::instance().report("Undeclared identifier: " + node->name, node->token);
+                Linter::instance().report("Undeclared identifier: " + node->name, node->token);
+            }
+        }
+
+        void visit(ASTCallExpressionNode* node) override {
+            node->callee->accept(this);
+            node->resolved_symbol = node->callee->resolved_symbol;
+
+            for (auto& arg : node->args) {
+                arg->accept(this);
+            }
+        }
+
+        void visit(ASTIndexExpressionNode* node) override {
+            node->array->accept(this);
+            node->index->accept(this);
+        }
+
+        void visit(ASTAssignExpressionStatement* node) override {
+            node->target->accept(this);
+            node->value->accept(this);
+        }
+
+        void visit(ASTAddressOfExpressionNode* node) override {
+            node->expression->accept(this);
+        }
+        void visit(ASTDereferenceExpressionNode* node) override {
+            node->expression->accept(this);
+        }
         void visit(ASTTypeNode*) override {}
         void visit(ASTErrorNode*) override {}
         void visit(ASTStatementError*) override {}

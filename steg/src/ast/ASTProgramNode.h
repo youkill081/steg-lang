@@ -52,13 +52,13 @@ namespace compiler
     class ASTImportProgramNode final : public ASTProgramNode
     {
     public:
-        ASTImportProgramNode(std::vector<std::string> functions, const std::string& path, const LexerToken& token)
+        ASTImportProgramNode(std::vector<LexerToken> functions, const std::string& path, const LexerToken& token)
             : ASTProgramNode(token), functions_variables(std::move(functions)), path(path) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
 
-        std::vector<std::string> functions_variables;
+        std::vector<LexerToken> functions_variables;
         std::string path;
     };
 

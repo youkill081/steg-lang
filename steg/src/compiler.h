@@ -22,6 +22,8 @@ namespace compiler
 
     inline std::optional<AnalysisResult> analyze(TextParser& parser)
     {
+        ModuleManager::instance().clear();
+
         Lexer lexer(parser);
         lexer.compute();
         auto tokens = lexer.tokens();

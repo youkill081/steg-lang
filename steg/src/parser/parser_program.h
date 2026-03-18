@@ -121,12 +121,8 @@ parseFunctionParameters =
             {
                 auto [function_variables, token] = std::move(data);
 
-                std::vector<std::string> function_variables_vec;
-                for (const auto& t : function_variables)
-                    function_variables_vec.push_back(t.value);
-
                 return std::make_unique<ASTImportProgramNode>(
-                    function_variables_vec,
+                    std::move(function_variables),
                     token.value,
                     token
                 );
