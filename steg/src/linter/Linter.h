@@ -28,6 +28,7 @@ namespace compiler
     {
     private:
         std::vector<LintData> _lints;
+        bool _disabled = false;
     public:
         static Linter& instance() // One linter for all compiler process
         {
@@ -43,6 +44,8 @@ namespace compiler
             uint32_t length = 1,
             LintData::Severity severity = LintData::Severity::ERR
         ) {
+            if (_disabled)
+                return;
             _lints.push_back({ message, file, line, column, length, severity });
         }
 
@@ -51,6 +54,8 @@ namespace compiler
             const LexerToken &token,
             const LintData::Severity severity = LintData::Severity::ERR
         ) {
+            if (_disabled)
+                return;
             report(message, token.path, token.line_number, token.column_number, token.value.size(), severity);
         }
 
@@ -66,5 +71,8 @@ namespace compiler
         void display_diagnostics() const;
 
         void clear() { _lints.clear(); };
+
+        void disable() { _disabled = true; }
+        void enable()  { _disabled = false; }
     };
 }
