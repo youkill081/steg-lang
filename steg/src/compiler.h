@@ -10,6 +10,7 @@
 #include "semantic_analysis/utils/SymbolTable.h"
 #include "semantic_analysis/step1/SymbolCollector.h"
 #include "semantic_analysis/step2/TypeInferenceVisitor.h"
+#include "semantic_analysis/step3/ControlFlowVisitor.h"
 #include "semantic_analysis/step4/SemanticTokensVisitor.h"
 
 
@@ -43,6 +44,9 @@ namespace compiler
         // Check all types inferences
         TypeInferenceVisitor types_inference;
         result->value->accept(&types_inference);
+
+        ControlFlowVisitor flow;
+        result->value->accept(&flow);
 
         // Tag all identifiers (function, function call and variable definition)
         SemanticTokensVisitor tokens_visitor(token_map, symbols);
