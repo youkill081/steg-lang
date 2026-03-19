@@ -1,0 +1,188 @@
+//
+// Created by Roumite on 19/03/2026.
+//
+
+#include "IRPrinter.h"
+
+#include <sstream>
+
+using namespace compiler;
+
+std::string IRPrinter::format_value_type(const IrValueType t)
+{
+    switch (t)
+    {
+    case IrValueType::BOOL: return "bool";
+    case IrValueType::UINT8: return "u8";
+    case IrValueType::UINT16: return "u16";
+    case IrValueType::UINT32: return "u32";
+    case IrValueType::INT8: return "i8";
+    case IrValueType::INT16: return "i16";
+    case IrValueType::INT32: return "i32";
+    case IrValueType::PTR: return "ptr";
+    case IrValueType::FILE: return "file";
+    case IrValueType::CLOCK: return "clock";
+    case IrValueType::UNKNOWN: return "?";
+    }
+    return "?";
+}
+
+std::string IRPrinter::format_operand(const IrOperand& op)
+{
+    const std::string type_suffix = (op.value_type != IrValueType::UNKNOWN)
+                                        ? (":" + format_value_type(op.value_type))
+                                        : "";
+
+    switch (op.type)
+    {
+    case IrOperandType::Constant: return op.value + type_suffix;
+    case IrOperandType::Label: return "@" + op.value;
+    case IrOperandType::Temporary: return op.value + type_suffix;
+    }
+    return "?";
+}
+
+std::string IRPrinter::format_instruction(const IrInstruction& i)
+{
+    std::ostringstream out;
+    const auto res = format_operand(i.result);
+    const auto a1 = format_operand(i.arg1);
+    const auto a2 = format_operand(i.arg2);
+
+    switch (i.op)
+    {
+    case IrOpCode::ADD: out << res << " = " << a1 << " + " << a2;
+        break;
+    case IrOpCode::SUB: out << res << " = " << a1 << " - " << a2;
+        break;
+    case IrOpCode::MUL: out << res << " = " << a1 << " * " << a2;
+        break;
+    case IrOpCode::DIV: out << res << " = " << a1 << " / " << a2;
+        break;
+    case IrOpCode::MOD: out << res << " = " << a1 << " % " << a2;
+        break;
+
+    case IrOpCode::EQ: out << res << " = " << a1 << " == " << a2;
+        break;
+    case IrOpCode::NEQ: out << res << " = " << a1 << " != " << a2;
+        break;
+
+    case IrOpCode::LT: out << res << " = " << a1 << " <u " << a2;
+        break;
+    case IrOpCode::GT: out << res << " = " << a1 << " >u " << a2;
+        break;
+    case IrOpCode::LEQ: out << res << " = " << a1 << " <=u " << a2;
+        break;
+    case IrOpCode::GEQ: out << res << " = " << a1 << " >=u " << a2;
+        break;
+
+    case IrOpCode::SLT: out << res << " = " << a1 << " <s " << a2;
+        break;
+    case IrOpCode::SGT: out << res << " = " << a1 << " >s " << a2;
+        break;
+    case IrOpCode::SLEQ: out << res << " = " << a1 << " <=s " << a2;
+        break;
+    case IrOpCode::SGEQ: out << res << " = " << a1 << " >=s " << a2;
+        break;
+
+    case IrOpCode::AND: out << res << " = " << a1 << " && " << a2;
+        break;
+    case IrOpCode::OR: out << res << " = " << a1 << " || " << a2;
+        break;
+
+    case IrOpCode::NEG: out << res << " = -" << a1;
+        break;
+    case IrOpCode::NOT: out << res << " = ! " << a1;
+        break;
+
+    case IrOpCode::COPY: out << res << " = " << a1;
+        break;
+
+    case IrOpCode::SEXT: out << res << " = sext " << a1;
+        break;
+    case IrOpCode::ZEXT: out << res << " = zext " << a1;
+        break;
+
+    case IrOpCode::LOAD_ARR: out << res << " = " << a1 << "[" << a2 << "]";
+        break;
+    case IrOpCode::STORE_ARR: out << res << "[" << a1 << "] = " << a2;
+        break;
+    case IrOpCode::ADDR_OF: out << res << " = &" << a1;
+        break;
+    case IrOpCode::DEREF: out << res << " = *" << a1;
+        break;
+    case IrOpCode::DEREF_STORE: out << "*" << res << " = " << a1;
+        break;
+
+    case IrOpCode::CALL:
+        {
+            out << res << " = call " << a1 << "(";
+            for (std::size_t k = 0; k < i.call_args.size(); ++k)
+            {
+                if (k > 0) out << ", ";
+                out << format_operand(i.call_args[k]);
+            }
+            out << ")";
+            break;
+        }
+    }
+
+    return out.str();
+}
+
+std::string IRPrinter::format_terminator(const IrBasicBlock& block)
+{
+    switch (block.terminator)
+    {
+    case IrBlockTerminator::JUMP:
+        {
+            const auto target = block.successor.lock();
+            return "jump -> " + (target ? target->label : "???");
+        }
+    case IrBlockTerminator::BRANCH:
+        {
+            const auto t = block.successor.lock();
+            const auto f = block.false_successor.lock();
+            return "branch " + format_operand(block.condition_operand)
+                + " -> " + (t ? t->label : "???")
+                + " | " + (f ? f->label : "???");
+        }
+    case IrBlockTerminator::RETURN:
+        return "return " + format_operand(block.return_operand);
+    case IrBlockTerminator::RETURN_VOID:
+        return "return";
+    case IrBlockTerminator::NONE:
+        return "<unterminated>";
+    }
+    return "?";
+}
+
+std::string IRPrinter::print() const
+{
+    std::ostringstream out;
+
+    if (!_globals.empty())
+    {
+        out << "Globals\n";
+        for (const auto& [name, initial_value] : _globals)
+        {
+            out << "  " << name;
+            if (!initial_value.value.empty())
+                out << " = " << format_operand(initial_value);
+            out << "\n";
+        }
+        out << "\n";
+    }
+
+    for (const auto& block : _blocks)
+    {
+        out << block->label << ":\n";
+
+        for (const auto& instr : block->instructions)
+            out << "  " << format_instruction(instr) << "\n";
+
+        out << "  " << format_terminator(*block) << "\n\n";
+    }
+
+    return out.str();
+}

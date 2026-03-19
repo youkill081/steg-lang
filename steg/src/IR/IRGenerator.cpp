@@ -98,6 +98,23 @@ IrOpCode IRGenerator::binary_opcode(const ASTBinaryExpressionNode::binaryOperati
     return IrOpCode::ADD;
 }
 
+IrOpCode IRGenerator::binary_opcode(const ASTBinaryExpressionNode::binaryOperationType op, bool is_signed)
+{
+    switch (op)
+    {
+    case ASTBinaryExpressionNode::COMPARISON_LESS:
+        return is_signed ? IrOpCode::SLT : IrOpCode::LT;
+    case ASTBinaryExpressionNode::COMPARISON_GREATER:
+        return is_signed ? IrOpCode::SGT : IrOpCode::GT;
+    case ASTBinaryExpressionNode::COMPARISON_LESS_OR_EQUAL:
+        return is_signed ? IrOpCode::SLEQ : IrOpCode::LEQ;
+    case ASTBinaryExpressionNode::COMPARISON_GREATER_OR_EQUAL:
+        return is_signed ? IrOpCode::SGEQ : IrOpCode::GEQ;
+    default:
+        return binary_opcode(op);
+    }
+}
+
 IrOpCode IRGenerator::unary_opcode(const ASTUnaryExpressionNode::unaryOperationType op)
 {
     switch (op)
@@ -125,25 +142,116 @@ IrOpCode IRGenerator::composed_opcode(const ASTAssignExpressionStatement::assign
     }
 }
 
+IrValueType IRGenerator::resolved_to_ir_type(const ResolvedType& t)
+{
+    if (t.pointer_depth > 0) return IrValueType::PTR;
+    switch (t.base)
+    {
+    case ASTTypeNode::Types::BOOL: return IrValueType::BOOL;
+    case ASTTypeNode::Types::UINT8: return IrValueType::UINT8;
+    case ASTTypeNode::Types::UINT16: return IrValueType::UINT16;
+    case ASTTypeNode::Types::UINT32: return IrValueType::UINT32;
+    case ASTTypeNode::Types::INT8: return IrValueType::INT8;
+    case ASTTypeNode::Types::INT16: return IrValueType::INT16;
+    case ASTTypeNode::Types::INT32: return IrValueType::INT32;
+    default: return IrValueType::UNKNOWN;
+    }
+}
+
 void IRGenerator::visit(ASTLiteralExpressionNode* node)
 {
     const auto t = new_temp();
-    add_instruction({IrOpCode::COPY, temp_op(t), const_op(node->value)});
-    _current_operand = temp_op(t);
+    const auto ir_type = resolved_to_ir_type(node->resolved_type);
+    IrOperand dest = temp_op(t);
+    dest.value_type = ir_type;
+
+    IrOperand src = const_op(node->value);
+    src.value_type = ir_type;
+
+    add_instruction({IrOpCode::COPY, dest, src});
+    _current_operand = dest;
 }
 
 void IRGenerator::visit(ASTIdentifierExpressionNode* node)
 {
-    _current_operand = temp_op(node->name);
+    IrOperand op = temp_op(node->name);
+    op.value_type = resolved_to_ir_type(node->resolved_type);
+    _current_operand = op;
+}
+
+IrValueType wider_type(IrValueType a, IrValueType b)
+{
+    auto rank = [](IrValueType t) -> int
+    {
+        switch (t)
+        {
+        case IrValueType::BOOL:
+        case IrValueType::UINT8:
+        case IrValueType::INT8: return 8;
+        case IrValueType::UINT16:
+        case IrValueType::INT16: return 16;
+        case IrValueType::UINT32:
+        case IrValueType::INT32: return 32;
+        default: return 0;
+        }
+    };
+    return rank(a) >= rank(b) ? a : b;
+}
+
+bool is_value_type_signed(IrValueType t)
+{
+    return t == IrValueType::INT8
+        || t == IrValueType::INT16
+        || t == IrValueType::INT32;
 }
 
 void IRGenerator::visit(ASTBinaryExpressionNode* node)
 {
-    const auto left  = eval(node->left.get());
-    const auto right = eval(node->right.get());
-    const auto t= new_temp();
-    add_instruction({binary_opcode(node->op_type), temp_op(t), left, right});
-    _current_operand = temp_op(t);
+    auto left  = eval(node->left.get());
+    auto right = eval(node->right.get());
+
+    const IrValueType result_type   = resolved_to_ir_type(node->resolved_type);
+    const IrValueType left_type     = left.value_type;
+    const IrValueType right_type    = right.value_type;
+
+    const bool is_comparison = [&] {
+        using T = ASTBinaryExpressionNode::binaryOperationType;
+        switch (node->op_type) {
+            case T::COMPARISON_EQUAL:
+            case T::COMPARISON_NOT_EQUAL:
+            case T::COMPARISON_LESS:
+            case T::COMPARISON_GREATER:
+            case T::COMPARISON_LESS_OR_EQUAL:
+            case T::COMPARISON_GREATER_OR_EQUAL:
+                return true;
+            default: return false;
+        }
+    }();
+
+    const IrValueType operand_target = is_comparison
+        ? wider_type(left_type, right_type)
+        : result_type;
+
+    auto sext_if_needed = [&](IrOperand& op, IrValueType target) {
+        if (op.value_type == target || op.value_type == IrValueType::UNKNOWN)
+            return;
+        const auto t = new_temp();
+        IrOperand dest = temp_op(t);
+        dest.value_type = target;
+        add_instruction({op.is_signed() ? IrOpCode::SEXT : IrOpCode::ZEXT, dest, op});
+        op = dest;
+    };
+
+    sext_if_needed(left, operand_target);
+    sext_if_needed(right, operand_target);
+
+    const auto t = new_temp();
+    IrOperand dest = temp_op(t);
+    dest.value_type = result_type;
+
+    const bool signed_op = is_value_type_signed(left_type) || is_value_type_signed(right_type);
+    add_instruction({binary_opcode(node->op_type, signed_op), dest, left, right});
+    _current_operand = dest;
 }
 
 void IRGenerator::visit(ASTUnaryExpressionNode* node)
@@ -168,31 +276,31 @@ void IRGenerator::visit(ASTCallExpressionNode* node)
     for (auto& arg : node->args)
         args.push_back(eval(arg.get()));
 
-    IrInstruction i;
-    i.op = IrOpCode::CALL;
+    IrInstruction instruction;
+    instruction.op = IrOpCode::CALL;
     const std::string call_label = (node->resolved_symbol && !node->resolved_symbol->source_file.empty())
                                        ? gen_function_label(node->resolved_symbol->source_file, node->callee->name)
                                        : node->callee->name;
-    i.arg1 = label_op(call_label);
+    instruction.arg1 = label_op(call_label);
 
-    i.call_args = std::move(args);
+    instruction.call_args = std::move(args);
 
     const bool is_void = node->resolved_type.base == ASTTypeNode::Types::VOID
         && node->resolved_type.pointer_depth == 0;
 
     if (is_void)
     {
-        i.result = {};
+        instruction.result = {};
         _current_operand = {};
     }
     else
     {
         const auto t = new_temp();
-        i.result = temp_op(t);
+        instruction.result = temp_op(t);
         _current_operand = temp_op(t);
     }
 
-    add_instruction(std::move(i));
+    add_instruction(std::move(instruction));
 }
 
 void IRGenerator::visit(ASTAssignExpressionStatement* node)

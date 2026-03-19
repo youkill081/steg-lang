@@ -17,17 +17,41 @@ namespace compiler
         Label // A function label, for example
     };
 
+    enum class IrValueType
+    {
+        UNKNOWN,
+        BOOL,
+        UINT8, UINT16, UINT32,
+        INT8, INT16, INT32,
+        PTR,
+        FILE,
+        CLOCK
+    };
+
     struct IrOperand {
         IrOperandType type;
         std::string value = "";
+        IrValueType value_type = IrValueType::UNKNOWN;
 
         [[nodiscard]] int32_t as_int() const { return std::stoi(value); }
+        [[nodiscard]] bool is_signed() const {
+            return value_type == IrValueType::INT8
+                || value_type == IrValueType::INT16
+                || value_type == IrValueType::INT32;
+        }
     };
 
     enum class IrOpCode {
         ADD, SUB, MUL, DIV, MOD,
         NEG, NOT,
-        EQ, NEQ, LT, GT, LEQ, GEQ,
+
+        EQ, NEQ,
+        LT, GT, LEQ, GEQ,
+        SLT, SGT, SLEQ, SGEQ, // Signed version
+
+        SEXT, // Sign extention
+        ZEXT, // Sign packing
+
         AND, OR,
         COPY,
         LOAD_ARR,
