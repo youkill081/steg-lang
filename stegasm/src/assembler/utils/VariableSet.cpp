@@ -58,6 +58,8 @@ VariableType get_end_of_variable(VariableTypeFlag type)
         return static_cast<uint16_t>(0);
     case VARIABLE_UINT32:
         return static_cast<uint32_t>(0);
+    default:
+        return static_cast<uint32_t>(0);
     }
 }
 

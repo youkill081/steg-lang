@@ -170,6 +170,27 @@ void instr_STORER_8(Runtime &runtime, InstructionView view)
     );
 }
 
+void instr_EXTEND_8(Runtime& runtime, InstructionView view)
+{
+    const auto val8 = static_cast<int8_t>(view.get_r2(runtime));
+    runtime.registries.write(view.r1(), static_cast<uint32_t>(val8));
+}
+
+void instr_EXTEND_16(Runtime& runtime, InstructionView view)
+{
+    const auto val16 = static_cast<int16_t>(view.get_r2(runtime));
+    runtime.registries.write(view.r1(), static_cast<uint32_t>(val16));
+}
+
+void instr_TRUNC_8(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(view.r1(), view.get_r2(runtime) & 0xFF);
+}
+
+void instr_TRUNC_16(Runtime &runtime, InstructionView view)
+{
+    runtime.registries.write(view.r1(), view.get_r2(runtime) & 0xFFFF);
+}
 void instr_ADDR(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -384,7 +405,7 @@ void instr_DISPLAY_C(Runtime &runtime, InstructionView view)
 
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view)
 {
-    Logger::log_uint16_as_bit(view.get_r1(runtime));
+    Logger::log_uint32_as_bit(view.get_r1(runtime));
 }
 
 void instr_HALT(Runtime &runtime, InstructionView view)

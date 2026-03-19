@@ -112,6 +112,10 @@ void instr_STORED_16(Runtime &runtime, InstructionView view);
 void instr_STORER_16(Runtime &runtime, InstructionView view);
 void instr_STORED_8(Runtime &runtime, InstructionView view);
 void instr_STORER_8(Runtime &runtime, InstructionView view);
+void instr_EXTEND_8(Runtime &runtime, InstructionView view);
+void instr_EXTEND_16(Runtime &runtime, InstructionView view);
+void instr_TRUNC_8(Runtime &runtime, InstructionView view);
+void instr_TRUNC_16(Runtime &runtime, InstructionView view);
 void instr_ADDR(Runtime &runtime, InstructionView view);
 void instr_ADDD(Runtime &runtime, InstructionView view);
 void instr_SUBR(Runtime &runtime, InstructionView view);
@@ -261,6 +265,10 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"STORE_8", true,
         InstructionHandler(&instr_STORED_8, REG_BOTH, ONE_DATA),
         InstructionHandler(&instr_STORER_8, REG_BOTH, REG)},
+    RawInstruction{"EXTEND_8", true, InstructionHandler(&instr_EXTEND_8, REG, REG_BOTH)},
+    RawInstruction{"EXTEND_16", true, InstructionHandler(&instr_EXTEND_16, REG, REG_BOTH)},
+    RawInstruction{"TRUNC_8", true, InstructionHandler(&instr_TRUNC_8, REG, REG_BOTH)},
+    RawInstruction{"TRUNC_16", true, InstructionHandler(&instr_TRUNC_16, REG, REG_BOTH)},
     RawInstruction{"ADD", true,
         InstructionHandler(&instr_ADDD, REG, ONE_DATA),
         InstructionHandler(&instr_ADDR, REG, REG_BOTH)},

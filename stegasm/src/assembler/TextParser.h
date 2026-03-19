@@ -19,7 +19,7 @@ namespace assembler
 
     struct ParsedLine
     {
-        std::size_t line_number = 0;
+        uint32_t line_number = 0;
         std::string original_line = "";
         std::vector<std::string> tokens = {};
         uint32_t column_offset = 0; // Number of space before beg of line

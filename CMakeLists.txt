@@ -13,6 +13,7 @@ add_subdirectory(libs/json)
 add_subdirectory(libs/raylib)
 
 add_subdirectory(steg)
+add_subdirectory(stegasm)
 add_subdirectory(steg/lsp)
 
 add_subdirectory(test)
