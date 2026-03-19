@@ -5,6 +5,9 @@
 #pragma once
 
 #include "ast/ASTProgramNode.h"
+#include "IR/IRGenerator.h"
+#include "IR/IRPrinter.h"
+#include "IR/ir_structure.h"
 #include "lexer/TokenMap.h"
 #include "parser/parser_program.h"
 #include "semantic_analysis/utils/SymbolTable.h"
@@ -65,17 +68,19 @@ namespace compiler
 
     /* Full Compiler */
 
-
+    /* One compiled file */
     struct CompilationUnit {
         std::filesystem::path path;
-        std::unique_ptr<ASTMainProgramNode> ast;
-        SymbolTable symbols;
+        std::vector<std::shared_ptr<IrBasicBlock>> ir_blocks;
+        std::vector<IrGlobal> globals;
+        std::vector<std::filesystem::path> imported_paths;
     };
 
+    /* Full program compiled */
     struct CompilationResult {
-        std::vector<CompilationUnit> units;
+        std::vector<std::shared_ptr<IrBasicBlock>> ir_blocks;
+        std::vector<IrGlobal> globals;
     };
-
 
     inline std::optional<CompilationUnit> compile_single(const std::filesystem::path& path)
     {
@@ -98,20 +103,26 @@ namespace compiler
         ControlFlowVisitor flow;
         result->value->accept(&flow);
 
+        IRGenerator ir_gen;
+        result->value->accept(&ir_gen);
+
         return CompilationUnit {
             .path = path,
-            .ast = std::move(result->value),
-            .symbols = std::move(collector.table),
+            .ir_blocks = std::move(ir_gen.all_blocks),
+            .globals = std::move(ir_gen.globals),
+            .imported_paths = std::move(collector.imported_paths)
         };
     }
 
-    inline std::optional<CompilationResult> compile(const std::filesystem::path &path)
+    inline std::optional<CompilationResult> compile(const std::filesystem::path& path)
     {
         Linter::instance().set_compile_mode(true);
         ModuleManager::instance().clear();
 
         CompilationResult out;
-        std::set<std::filesystem::path> visited;
+
+        std::set<std::filesystem::path> visited; // Follow the already compiled file
+        std::set<std::string> seen_globals; // Follow already defined global variables
 
         std::function<bool(const std::filesystem::path&)> compile_recursive =
             [&](const std::filesystem::path& file) -> bool
@@ -121,32 +132,39 @@ namespace compiler
                     return true;
                 visited.insert(absolute);
 
-                auto unit = compile_single(file);
+                auto unit = compile_single(absolute);
                 if (!unit)
                     return false;
 
-                TextParser sub_parser = TextParser::from_file(file.string());
-                Lexer sub_lexer(sub_parser);
-                sub_lexer.compute();
-                auto sub_tokens = sub_lexer.tokens();
-                auto sub_result = parseMainProgram(sub_tokens);
-                if (sub_result) {
-                    SymbolCollector sub_collector;
-                    Linter::instance().disable();
-                    sub_result->value->accept(&sub_collector);
-                    Linter::instance().enable();
+                for (const auto& dep : unit->imported_paths)
+                    if (!compile_recursive(dep))
+                        return false;
 
-                    for (const auto& import_path : sub_collector.imported_paths)
-                        if (!compile_recursive(import_path))
-                            return false;
+                for (auto& block : unit->ir_blocks)
+                    out.ir_blocks.push_back(std::move(block));
+
+                for (auto& global : unit->globals)
+                {
+                    if (!seen_globals.contains(global.name))
+                    {
+                        seen_globals.insert(global.name);
+                        out.globals.push_back(std::move(global));
+                    }
                 }
 
-                out.units.push_back(std::move(*unit));
                 return true;
             };
 
         if (!compile_recursive(path))
             return std::nullopt;
+
+        if (Linter::instance().has_errors())
+            return std::nullopt;
+
+        if (!out.ir_blocks.empty()) {
+            const IRPrinter printer{out.ir_blocks, out.globals};
+            std::cout << printer.print() << std::endl;
+        }
 
         return out;
     }

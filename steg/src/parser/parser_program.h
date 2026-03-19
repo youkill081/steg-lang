@@ -82,7 +82,8 @@ parseFunctionParameters =
                     std::move(std::get<3>(data)),
                     std::move(std::get<4>(data)),
                     std::get<0>(data).has_value(),
-                    std::move(std::get<1>(data))
+                    std::move(std::get<1>(data)),
+                    std::get<1>(data).path
                 );
             });
 

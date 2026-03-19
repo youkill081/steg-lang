@@ -59,6 +59,11 @@ set(STEG_LIB_SOURCES
         src/semantic_analysis/step2/TypeInferenceVisitor.cpp
         src/semantic_analysis/step3/ControlFlowVisitor.cpp
         src/semantic_analysis/step3/ControlFlowVisitor.h
+        src/IR/ir_structure.h
+        src/IR/IRGenerator.cpp
+        src/IR/IRGenerator.h
+        src/IR/IRprinter.cpp
+        src/IR/IRprinter.h
 )
 
 add_library(steg_lib STATIC ${STEG_LIB_SOURCES})

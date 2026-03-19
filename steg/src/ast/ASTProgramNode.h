@@ -84,18 +84,21 @@ namespace compiler
             std::unique_ptr<ASTTypeNode> return_type,
             std::unique_ptr<ASTBlockStatementNode> statement,
             bool is_exported,
-            const LexerToken& token
+            const LexerToken& token,
+            const std::filesystem::path &path
         ) : ASTProgramNode(token),
             name(name),
             parameters(std::move(parameters)),
             return_type(std::move(return_type)),
             statement(std::move(statement)),
-            is_exported(is_exported) {}
+            is_exported(is_exported),
+            path(path) {}
 
         void display(std::size_t left_padding) override;
         void accept(ASTVisitor* visitor) override;
 
         std::string name;
+        std::filesystem::path path;
         std::vector<std::unique_ptr<ASTParameterProgramNode>> parameters;
         std::unique_ptr<ASTTypeNode> return_type;
         std::unique_ptr<ASTBlockStatementNode> statement;

@@ -43,6 +43,7 @@ namespace compiler
                 .type = ResolvedType::from(node->return_type),
                 .param_types = param_types,
                 .is_exported = node->is_exported,
+                .source_file = node->token.path,
                 .token = node->token
             });
 
@@ -189,7 +190,9 @@ namespace compiler
                     if (table.contains(name.value)) {
                         Linter::instance().report("Import conflict: '" + name.value + "' is already defined.", name);
                     } else {
-                        table.declare(name.value, *cache[name.value]);
+                        auto symbol = std::make_shared<SymbolInfo>(*cache[name.value]);
+                        symbol->source_file = name.path;
+                        table.declare(name.value, *symbol);
                     }
                 } else {
                     Linter::instance().report("Symbol '" + name.value + "' is not exported by " + node->path, name);

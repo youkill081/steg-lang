@@ -24,6 +24,7 @@ namespace compiler
         ResolvedType type; // For variables and functions
         std::vector<ResolvedType> param_types; // For functions
         bool is_exported = false;
+        std::filesystem::path source_file;
         LexerToken token; // For errors
     };
 
@@ -112,7 +113,7 @@ namespace compiler
 
             this->declare("window_clear", SymbolInfo{
                 .kind = SymbolKind::BUILT_IN_FUNCTION,
-                .type = ResolvedType::from(ASTTypeNode::Types::BOOL, 0),
+                .type = ResolvedType::from(ASTTypeNode::Types::VOID, 0),
                 .param_types = {
                     ResolvedType::from(ASTTypeNode::Types::UINT8, 0),
                     ResolvedType::from(ASTTypeNode::Types::UINT8, 0),

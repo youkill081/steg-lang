@@ -34,8 +34,10 @@ ResolvedType TypeInferenceVisitor::check_assignable(
 
 void TypeInferenceVisitor::visit(ASTMainProgramNode* node)
 {
+    _checking_globals = true;
     for (const auto &variable  : node->global_variables)
         variable->accept(this);
+    _checking_globals = false;
     for (const auto &function : node->functions)
         function->accept(this);
 }
@@ -90,8 +92,18 @@ void TypeInferenceVisitor::visit(ASTVariableStatement* node)
     if (!node->expression)
         return;
 
-    node->expression->accept(this);
-    check_assignable(node->expression->resolved_type, declared, node->expression->token);
+    if (_checking_globals)
+    {
+        if (not dynamic_cast<ASTLiteralExpressionNode *>(node->expression.get()))
+        {
+            type_error("Global variable must be initialized with literal", node->token);
+        }
+    }
+    else
+    {
+        node->expression->accept(this);
+        check_assignable(node->expression->resolved_type, declared, node->expression->token);
+    }
 }
 
 void TypeInferenceVisitor::visit(ASTIfStatementNode* node)

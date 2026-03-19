@@ -13,6 +13,7 @@ namespace compiler
     class TypeInferenceVisitor final : public ASTVisitor
     {
     private:
+        bool _checking_globals = false;
         ResolvedType _current_return_type = ResolvedType::from(ASTTypeNode::VOID);
 
         static void type_error(const std::string& message, const LexerToken& token) {
