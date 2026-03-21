@@ -324,6 +324,128 @@ void instr_MODD(Runtime& runtime, InstructionView view)
     );
 }
 
+/* Three operand opérations */
+
+void instr_ADDR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) + view.get_r3(runtime)
+    );
+}
+
+void instr_ADDD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) + view.get_data(runtime)
+    );
+}
+
+void instr_SUBR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) - view.get_r3(runtime)
+    );
+}
+
+void instr_SUBD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) - view.get_data(runtime)
+    );
+}
+
+void instr_MULR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) * view.get_r3(runtime)
+    );
+}
+
+void instr_MULD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) * view.get_data(runtime)
+    );
+}
+
+void instr_DIVR3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_r3(runtime) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) / view.get_r3(runtime)
+    );
+}
+
+void instr_DIVD3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_data(runtime) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) / view.get_data(runtime)
+    );
+}
+
+void instr_MINR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::min(view.get_r2(runtime), view.get_r3(runtime))
+    );
+}
+
+void instr_MIND3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::min(view.get_r2(runtime), view.get_data(runtime))
+    );
+}
+
+void instr_MAXR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::max(view.get_r2(runtime), view.get_r3(runtime))
+    );
+}
+
+void instr_MAXD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::max(view.get_r2(runtime), view.get_data(runtime))
+    );
+}
+
+void instr_MODR3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_r3(runtime) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) % view.get_r3(runtime)
+    );
+}
+
+void instr_MODD3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_data(runtime) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        view.get_r2(runtime) % view.get_data(runtime)
+    );
+}
+
 void instr_JMP(Runtime &runtime, InstructionView view)
 {
     runtime.instruction_pointer = view.get_data(runtime);

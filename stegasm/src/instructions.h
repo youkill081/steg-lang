@@ -130,6 +130,20 @@ void instr_MAXR(Runtime &runtime, InstructionView view);
 void instr_MAXD(Runtime &runtime, InstructionView view);
 void instr_MODR(Runtime &runtime, InstructionView view);
 void instr_MODD(Runtime &runtime, InstructionView view);
+void instr_ADDR3(Runtime &runtime, InstructionView view);
+void instr_ADDD3(Runtime &runtime, InstructionView view);
+void instr_SUBR3(Runtime &runtime, InstructionView view);
+void instr_SUBD3(Runtime &runtime, InstructionView view);
+void instr_MULR3(Runtime &runtime, InstructionView view);
+void instr_MULD3(Runtime &runtime, InstructionView view);
+void instr_DIVR3(Runtime &runtime, InstructionView view);
+void instr_DIVD3(Runtime &runtime, InstructionView view);
+void instr_MINR3(Runtime &runtime, InstructionView view);
+void instr_MIND3(Runtime &runtime, InstructionView view);
+void instr_MAXR3(Runtime &runtime, InstructionView view);
+void instr_MAXD3(Runtime &runtime, InstructionView view);
+void instr_MODR3(Runtime &runtime, InstructionView view);
+void instr_MODD3(Runtime &runtime, InstructionView view);
 void instr_JMP(Runtime &runtime, InstructionView view);
 void instr_CMPR(Runtime &runtime, InstructionView view);
 void instr_CMPD(Runtime &runtime, InstructionView view);
@@ -249,7 +263,8 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"EOF", false, InstructionHandler(&instr_EOF)},
     RawInstruction{"LOAD_32", true,
         InstructionHandler(&instr_LOADD_32, REG, ONE_DATA),
-        InstructionHandler(&instr_LOADR_32, REG, REG_BOTH)},
+        InstructionHandler(&instr_LOADR_32, REG, REG_BOTH)
+        },
     RawInstruction{"LOAD_16", true,
         InstructionHandler(&instr_LOADD_16, REG, ONE_DATA),
         InstructionHandler(&instr_LOADR_16, REG, REG_BOTH)},
@@ -271,25 +286,45 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"TRUNC_16", true, InstructionHandler(&instr_TRUNC_16, REG, REG_BOTH)},
     RawInstruction{"ADD", true,
         InstructionHandler(&instr_ADDD, REG, ONE_DATA),
-        InstructionHandler(&instr_ADDR, REG, REG_BOTH)},
+        InstructionHandler(&instr_ADDR, REG, REG_BOTH),
+        InstructionHandler(&instr_ADDR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_ADDD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"SUB", true,
         InstructionHandler(&instr_SUBR, REG, REG_BOTH),
-        InstructionHandler(&instr_SUBD, REG, ONE_DATA)},
+        InstructionHandler(&instr_SUBD, REG, ONE_DATA),
+        InstructionHandler(&instr_SUBR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_SUBD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"MUL", true,
         InstructionHandler(&instr_MULR, REG, REG_BOTH),
-        InstructionHandler(&instr_MULD, REG, ONE_DATA)},
+        InstructionHandler(&instr_MULD, REG, ONE_DATA),
+        InstructionHandler(&instr_MULR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_MULD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"DIV", true,
         InstructionHandler(&instr_DIVR, REG, REG_BOTH),
-        InstructionHandler(&instr_DIVD, REG, ONE_DATA)},
+        InstructionHandler(&instr_DIVD, REG, ONE_DATA),
+        InstructionHandler(&instr_DIVR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_DIVD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"MIN", true,
         InstructionHandler(&instr_MINR, REG, REG_BOTH),
-        InstructionHandler(&instr_MIND, REG, ONE_DATA)},
+        InstructionHandler(&instr_MIND, REG, ONE_DATA),
+        InstructionHandler(&instr_MINR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_MIND3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"MAX", true,
         InstructionHandler(&instr_MAXR, REG, REG_BOTH),
-        InstructionHandler(&instr_MAXD, REG, ONE_DATA)},
+        InstructionHandler(&instr_MAXD, REG, ONE_DATA),
+        InstructionHandler(&instr_MAXR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_MAXD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"MOD", true,
         InstructionHandler(&instr_MODR, REG, REG_BOTH),
-        InstructionHandler(&instr_MODD, REG, ONE_DATA)},
+        InstructionHandler(&instr_MODD, REG, ONE_DATA),
+        InstructionHandler(&instr_MODR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_MODD3, REG, REG_BOTH, ONE_DATA)},
     RawInstruction{"JMP", true, InstructionHandler(&instr_JMP, ONE_DATA)},
     RawInstruction{"CMP", true,
         InstructionHandler(&instr_CMPR, REG_BOTH, REG_BOTH),
