@@ -70,6 +70,7 @@ namespace compiler
         DEREF_STORE, // *result = arg1 (result is a pointer)
 
         CALL,
+        BUILTIN_CALL,
     };
 
     struct IrInstruction {

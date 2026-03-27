@@ -5,13 +5,10 @@
 #include <iostream>
 
 #include "compiler.h"
-#include "ast/ASTProgramNode.h"
-#include "lexer/Lexer.h"
-#include "lexer/TextParser.h"
+#include "assembler/Assembler.h"
+#include "interpreter/Vm.h"
 #include "linter/Linter.h"
 #include "parser/parser_program.h"
-#include "parser/monadic/monadic.hpp"
-#include "semantic_analysis/step1/SymbolCollector.h"
 
 
 int main()
@@ -20,6 +17,31 @@ int main()
     if (!compiler::Linter::instance().has_errors())
     {
         std::cout << "Compilation successful" << std::endl;
+
+        assembler::Linter linter;
+        auto buffer = assembler::Assembler::assemble_from_text(result->asm_output, linter, false);
+
+        if (linter.has_errors())
+        {
+            std::cerr << "Errors during assembly" << std::endl;
+            for (const auto &error : linter.get_errors())
+            {
+                std::cerr << error.message << std::endl;
+            }
+
+            std::cerr << "Generated assembly :" << std::endl;
+            std::cout << result->asm_output << std::endl;
+        } else
+        {
+            try
+            {
+                Vm::run(buffer);
+            } catch (const std::exception &e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
+        }
+
         return 0;
     }
     std::cerr << "Errors during compilation" << std::endl;

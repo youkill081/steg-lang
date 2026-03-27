@@ -5,7 +5,6 @@ project(steg)
 set(CMAKE_CXX_STANDARD 23)
 
 set(STEG_LIB_SOURCES
-        src/main.cpp
         src/lexer/lexer_definitions.h
         src/lexer/Lexer.cpp
         src/lexer/Lexer.h
@@ -79,4 +78,4 @@ target_link_libraries(steg_lib PUBLIC stegcommon)
 
 add_executable(steg src/main.cpp)
 
-target_link_libraries(steg PRIVATE steg_lib)
+target_link_libraries(steg PRIVATE steg_lib stegasm_lib)

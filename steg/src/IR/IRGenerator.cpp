@@ -149,7 +149,17 @@ void IRGenerator::visit(ASTLiteralExpressionNode* node)
     IrOperand dest = temp_op(new_temp());
     dest.value_type = ir_type;
 
-    IrOperand src = const_op(node->value);
+    std::string val = node->value;
+    if (ir_type == IrValueType::BOOL)
+    {
+        if (val == "true")
+            val = "1";
+        if (val == "false")
+            val = "0";
+    }
+
+
+    IrOperand src = const_op(val);
     src.value_type = ir_type;
 
     add_instruction({IrOpCode::COPY, dest, src});
@@ -262,32 +272,43 @@ void IRGenerator::visit(ASTCallExpressionNode* node)
         args.push_back(eval(arg.get()));
 
     IrInstruction instruction;
-    instruction.op = IrOpCode::CALL;
-
-    const std::string call_label =
-        (node->resolved_symbol && !node->resolved_symbol->source_file.empty())
-            ? gen_function_label(node->resolved_symbol->source_file, node->callee->name)
-            : node->callee->name;
-
-    instruction.arg1 = label_op(call_label);
     instruction.call_args = std::move(args);
 
     const bool is_void = node->resolved_type.base == ASTTypeNode::Types::VOID
         && node->resolved_type.pointer_depth == 0;
 
-    if (is_void)
-    {
-        instruction.result = {};
-        _current_operand = {};
-    }
-    else
+    if (!is_void)
     {
         const auto t = new_temp();
         instruction.result = temp_op(t);
         _current_operand = temp_op(t);
     }
+    else
+    {
+        instruction.result = {};
+        _current_operand = {};
+    }
 
-    add_instruction(std::move(instruction));
+    if (node->resolved_symbol && node->resolved_symbol->is_builtin)
+    {
+        if (!node->resolved_symbol->builtin_instruction.has_value())
+            throw std::runtime_error(
+                "built_in_not_implemented: '" + node->callee->name + "'");
+
+        instruction.op = IrOpCode::BUILTIN_CALL;
+        instruction.arg1 = label_op(*node->resolved_symbol->builtin_instruction);
+        add_instruction(std::move(instruction));
+    }
+    else
+    {
+        instruction.op = IrOpCode::CALL;
+        instruction.arg1 = label_op(
+            (node->resolved_symbol && !node->resolved_symbol->source_file.empty())
+                ? gen_function_label(node->resolved_symbol->source_file, node->callee->name)
+                : node->callee->name);
+
+        add_instruction(std::move(instruction));
+    }
 }
 
 void IRGenerator::visit(ASTAssignExpressionStatement* node)

@@ -582,6 +582,36 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
             }
             break;
         }
+    case IrOpCode::BUILTIN_CALL:
+        {
+            std::vector<std::string> used_params;
+
+            for (std::size_t i = 0; i < instr.call_args.size() && i < 6; ++i)
+            {
+                bool imm;
+                const std::string arg   = resolve_src(instr.call_args[i], k_ssrc1, imm);
+                const std::string param = "R" + std::to_string(static_cast<int>(i) + 1);
+
+                if (arg != param)
+                    c("    LOAD_32 " + param + ", " + arg);
+
+                used_params.push_back(param);
+            }
+
+            std::string line = "    " + instr.arg1.value;
+            for (const auto& p : used_params)
+                line += " " + p;
+            c(line);
+
+            if (!instr.result.empty())
+            {
+                const std::string dst = resolve_dst(instr.result);
+                if (dst != "R0")
+                    c("    LOAD_32 " + dst + ", R0");
+                finalize_dst(instr.result, dst);
+            }
+            break;
+        }
     }
 }
 

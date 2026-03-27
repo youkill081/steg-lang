@@ -247,7 +247,7 @@ void IRLowering::lower_instruction(
     if (!instr.arg2.empty())
         lowered.arg2 = lower_src(instr.arg2, out);
 
-    if (instr.op == IrOpCode::CALL)
+    if (instr.op == IrOpCode::CALL || instr.op == IrOpCode::BUILTIN_CALL)
     {
         lowered.call_args.clear();
         for (const auto& arg : instr.call_args)

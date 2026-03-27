@@ -90,6 +90,7 @@ namespace compiler
         std::vector<std::shared_ptr<IrBasicBlock>> ir_blocks;
         std::vector<IrGlobal> globals;
         RegisterAllocation registers;
+        std::string asm_output;
     };
 
     /* Compile single file IR */
@@ -195,14 +196,9 @@ namespace compiler
             }
         }
 
-        IRPrinter printer(out.ir_blocks, out.globals);
-        std::cout << printer.print() << std::endl;
-
         /* ASM Generation */
         AsmGenerator asm_gen(out.ir_blocks, out.globals, out.registers);
-        const std::string asm_output = asm_gen.generate();
-
-        std::cout << asm_output << std::endl;
+        out.asm_output = asm_gen.generate();
 
         return out;
     }
