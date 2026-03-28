@@ -91,6 +91,7 @@ namespace compiler
             auto v = [](const T t, int d = 0) { return ResolvedType::from(t, d); };
 
             builtin("print_n", v(T::VOID), {v(T::UINT32, 0)}, "DISPLAY_N");
+            builtin("print_c", v(T::VOID), {v(T::UINT8, 0)}, "DISPLAY_C");
 
             builtin("window_create", v(T::VOID), {v(T::UINT32), v(T::UINT32), v(T::UINT8, 1)});
             builtin("window_close", v(T::VOID), {}, "WINDOW_CLOSE");
