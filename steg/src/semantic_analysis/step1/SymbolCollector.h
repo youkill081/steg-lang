@@ -191,7 +191,7 @@ namespace compiler
                         Linter::instance().report("Import conflict: '" + name.value + "' is already defined.", name);
                     } else {
                         auto symbol = std::make_shared<SymbolInfo>(*cache[name.value]);
-                        symbol->source_file = name.path;
+                        symbol->source_file = absolute_path;
                         table.declare(name.value, *symbol);
                     }
                 } else {

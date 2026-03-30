@@ -302,11 +302,15 @@ void IRGenerator::visit(ASTCallExpressionNode* node)
     else
     {
         instruction.op = IrOpCode::CALL;
-        instruction.arg1 = label_op(
-            (node->resolved_symbol && !node->resolved_symbol->source_file.empty())
-                ? gen_function_label(node->resolved_symbol->source_file, node->callee->name)
-                : node->callee->name);
 
+        std::string final_label;
+        if (node->resolved_symbol) {
+            final_label = gen_function_label(node->resolved_symbol->source_file, node->callee->name);
+        } else {
+            final_label = node->callee->name;
+        }
+
+        instruction.arg1 = label_op(final_label);
         add_instruction(std::move(instruction));
     }
 }
