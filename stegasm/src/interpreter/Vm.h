@@ -11,5 +11,5 @@ class Vm
 {
 private:
 public:
-    static void run(ByteBuffer &buffer);
+    static uint32_t run(ByteBuffer &buffer);
 };

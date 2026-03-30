@@ -123,20 +123,39 @@ IrOpCode IRGenerator::composed_opcode(const ASTAssignExpressionStatement::assign
     }
 }
 
+IrValueType IRGenerator::type_to_ptr_type(const ResolvedType& t)
+{
+    switch (t.base)
+    {
+    case ASTTypeNode::BOOL:
+    case ASTTypeNode::UINT8:
+    case ASTTypeNode::INT8: return IrValueType::PTR8;
+
+    case ASTTypeNode::UINT16:
+    case ASTTypeNode::INT16: return IrValueType::INT16;
+
+    case ASTTypeNode::FILE:
+    case ASTTypeNode::CLOCK:
+    case ASTTypeNode::UINT32:
+    case ASTTypeNode::INT32: return IrValueType::INT32;
+    default: return IrValueType::UNKNOWN;
+    }
+}
+
 IrValueType IRGenerator::resolved_to_ir_type(const ResolvedType& t)
 {
-    if (t.pointer_depth > 0) return IrValueType::PTR;
+    if (t.pointer_depth > 0) return type_to_ptr_type(t);
     switch (t.base)
     {
     case ASTTypeNode::BOOL: return IrValueType::BOOL;
     case ASTTypeNode::UINT8: return IrValueType::UINT8;
     case ASTTypeNode::UINT16: return IrValueType::UINT16;
+    case ASTTypeNode::FILE:
+    case ASTTypeNode::CLOCK:
     case ASTTypeNode::UINT32: return IrValueType::UINT32;
     case ASTTypeNode::INT8: return IrValueType::INT8;
     case ASTTypeNode::INT16: return IrValueType::INT16;
     case ASTTypeNode::INT32: return IrValueType::INT32;
-    case ASTTypeNode::FILE: return IrValueType::FILE;
-    case ASTTypeNode::CLOCK: return IrValueType::CLOCK;
     default: return IrValueType::UNKNOWN;
     }
 }
@@ -252,7 +271,8 @@ void IRGenerator::visit(ASTBinaryExpressionNode* node)
 void IRGenerator::visit(ASTUnaryExpressionNode* node)
 {
     const auto operand = eval(node->expression.get());
-    const IrOperand dest = temp_op(new_temp());
+    IrOperand dest = temp_op(new_temp());
+    dest.value_type = resolved_to_ir_type(node->resolved_type);
     add_instruction({unary_opcode(node->op_type), dest, operand});
     _current_operand = dest;
 }
@@ -260,7 +280,8 @@ void IRGenerator::visit(ASTUnaryExpressionNode* node)
 void IRGenerator::visit(ASTIndexExpressionNode* node)
 {
     const auto index = eval(node->index.get());
-    const IrOperand dest = temp_op(new_temp());
+    IrOperand dest = temp_op(new_temp());
+    dest.value_type = resolved_to_ir_type(node->resolved_type);
     add_instruction({IrOpCode::LOAD_ARR, dest, temp_op(node->array->name), index});
     _current_operand = dest;
 }
@@ -353,6 +374,7 @@ void IRGenerator::visit(ASTAddressOfExpressionNode* node)
 {
     const auto operand = eval(node->expression.get());
     IrOperand dest = temp_op(new_temp());
+    dest.value_type = resolved_to_ir_type(node->resolved_type);
     add_instruction({IrOpCode::ADDR_OF, dest, operand});
     _current_operand = dest;
 }
@@ -361,6 +383,7 @@ void IRGenerator::visit(ASTDereferenceExpressionNode* node)
 {
     const auto operand = eval(node->expression.get());
     IrOperand dest = temp_op(new_temp());
+    dest.value_type = resolved_to_ir_type(node->resolved_type);
     add_instruction({IrOpCode::DEREF, dest, operand});
     _current_operand = dest;
 }
@@ -368,7 +391,7 @@ void IRGenerator::visit(ASTDereferenceExpressionNode* node)
 /* Statements visitors */
 void IRGenerator::visit(ASTVariableStatement* node)
 {
-    if (!_current_block)
+    if (!_current_block) // It's a global variable
     {
         IrGlobal g;
         g.name = node->name;

@@ -11,7 +11,7 @@
 
 #include "Logger.h"
 
-void Vm::run(ByteBuffer& buffer)
+uint32_t Vm::run(ByteBuffer& buffer)
 {
     Runtime runtime = Loader::load(buffer);
 
@@ -27,4 +27,5 @@ void Vm::run(ByteBuffer& buffer)
         runtime.instruction_pointer++;
         current_instr.handler.fn(runtime, current_instr.view);
     }
+    return runtime.return_value;
 }

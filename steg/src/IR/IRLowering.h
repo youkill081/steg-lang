@@ -14,6 +14,8 @@
 
 namespace compiler
 {
+    static uint64_t _str_count = 0;
+
     class IRLowering
     {
     public:
@@ -31,17 +33,17 @@ namespace compiler
 
         std::unordered_set<std::string> _global_names;
         std::unordered_map<std::string, IrValueType> _global_types;
-        std::unordered_map<std::string, std::string> _ptr_local_to_global;
+        std::unordered_map<std::string, std::string> _string_constants;
 
         std::string _current_function_name;
         uint64_t _temp_count = 0;
 
         std::string new_temp();
-        static bool is_user_variable(const std::string& name);
         static IrOpCode load_opcode(IrValueType t);
         static IrOpCode store_opcode(IrValueType t);
 
         IrOperand lower_src(const IrOperand& op, std::vector<IrInstruction>& out);
+        IrValueType effective_type(IrValueType vt, const std::string& name) const;
 
         void lower_instruction(
             const IrInstruction& instr,

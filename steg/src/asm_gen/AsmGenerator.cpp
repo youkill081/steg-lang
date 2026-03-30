@@ -34,8 +34,10 @@ std::string AsmGenerator::data_directive(IrValueType t)
     {
     case IrValueType::BOOL:
     case IrValueType::UINT8:
+    case IrValueType::PTR8:
     case IrValueType::INT8: return "DB";
     case IrValueType::UINT16:
+    case IrValueType::PTR16:
     case IrValueType::INT16: return "DW";
     default: return "DD";
     }
@@ -67,7 +69,6 @@ void AsmGenerator::emit_text_section()
     c("section .text");
 
     // Find main function name
-    std::string main_fn;
     for (const auto& blk : _blocks)
     {
         if (!blk->is_function_entry) continue;
@@ -75,7 +76,7 @@ void AsmGenerator::emit_text_section()
         if (fn == "main" ||
             (fn.size() >= 6 && fn.rfind("__main") == fn.size() - 6))
         {
-            main_fn = fn;
+            _main_function_name = fn;
             break;
         }
     }
@@ -94,9 +95,9 @@ void AsmGenerator::emit_text_section()
     };
 
     // Write main and other after
-    if (!main_fn.empty())
-        emit_blocks_for(main_fn, true);
-    emit_blocks_for(main_fn, false);
+    if (!_main_function_name.empty())
+        emit_blocks_for(_main_function_name, true);
+    emit_blocks_for(_main_function_name, false);
 }
 
 void AsmGenerator::emit_block(const IrBasicBlock& block)
@@ -142,9 +143,12 @@ uint8_t AsmGenerator::bits_for(IrValueType t)
     }
 }
 
-std::string AsmGenerator::emit_mem_load(const std::string& name, const char* scratch)
+std::string AsmGenerator::emit_mem_load(const std::string& name, IrValueType type, const char* scratch)
 {
-    c("    LOAD_" + std::to_string(bits_for(type_of(name))) + " " + scratch + ", [" + name + "]");
+    if (ir_value_type_is_ptr(type))
+        c("    LOAD_" + std::to_string(bits_for(type_of(name))) + " " + scratch + ", " + name );
+    else
+        c("    LOAD_" + std::to_string(bits_for(type_of(name))) + " " + scratch + ", [" + name + "]");
     return scratch;
 }
 
@@ -167,7 +171,7 @@ std::string AsmGenerator::resolve_src(
 
     case IrOperandType::Temporary:
         if (is_mem(op))
-            return emit_mem_load(op.value, scratch); // Load from memory
+            return emit_mem_load(op.value, op.value_type, scratch); // Load from memory
 
         {
             const std::string r = phys_reg(op);
@@ -291,7 +295,10 @@ void AsmGenerator::emit_load_ir(const IrInstruction& instr, uint8_t bits)
 
     if (is_mem(a))
     {
-        c("    " + prefix + dst + ", [" + a.value + "]");
+        if (ir_value_type_is_ptr(type_of(a.value)))
+            c("    " + prefix + dst + ", " + a.value);
+        else
+            c("    " + prefix + dst + ", [" + a.value + "]");
     }
     else
     {
@@ -521,6 +528,7 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
 
     case IrOpCode::DEREF:
         {
+            const uint8_t bits = bits_for(instr.result.value_type);
             bool imm;
             const std::string ptr = resolve_src(instr.arg1, k_ssrc1, imm);
             const std::string dst = resolve_dst(instr.result);
@@ -532,7 +540,7 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
                 return k_ssrc1;
             }();
 
-            c("    LOAD_32 " + dst + ", [" + rp + "]");
+            c("    LOAD_" + std::to_string(bits) + " " + dst + ", [" + rp + "]");
             finalize_dst(instr.result, dst);
             break;
         }
@@ -541,6 +549,7 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
         {
             bool imm_v;
             const std::string val = resolve_src(instr.arg1, k_ssrc2, imm_v);
+            const uint8_t bits = bits_for(instr.arg1.value_type);
             const std::string rv = [&]() -> std::string
             {
                 if (!imm_v) return val;
@@ -551,12 +560,12 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
             const std::string addr = [&]() -> std::string
             {
                 if (is_mem(instr.result))
-                    return emit_mem_load(instr.result.value, k_ssrc1);
+                    return emit_mem_load(instr.result.value, instr.result.value_type, k_ssrc1);
                 const std::string r = phys_reg(instr.result);
                 return r.empty() ? k_ssrc1 : r;
             }();
 
-            c("    STORE_32 " + rv + ", " + addr);
+            c("    STORE_" + std::to_string(bits) + " " + rv + ", " + addr);
             break;
         }
 
@@ -648,14 +657,28 @@ void AsmGenerator::emit_terminator(const IrBasicBlock& block)
         {
             bool imm;
             const std::string val = resolve_src(block.return_operand, k_ssrc1, imm);
-            if (val != "R0")
-                c("    LOAD_32 R0, " + val);
-            c("    RET");
+            if (_current_function == _main_function_name)
+            {
+                if (val != "R0")
+                    c("    LOAD_32 R0, " + val);
+                c("    HALT");
+            }
+            else
+            {
+                if (val != "R0")
+                    c("    LOAD_32 R0, " + val);
+                c("    RET");
+            }
             break;
+
         }
     case IrBlockTerminator::RETURN_VOID:
-        c("    RET");
+        if (_current_function == _main_function_name)
+            c("    HALT");
+        else
+            c("    RET");
         break;
+
     case IrBlockTerminator::NONE:
         c("    ; <bloc non terminé>");
         break;

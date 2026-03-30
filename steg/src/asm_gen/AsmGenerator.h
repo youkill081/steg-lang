@@ -36,6 +36,7 @@ namespace compiler
         const std::vector<std::shared_ptr<IrBasicBlock>>& _blocks;
         const std::vector<IrGlobal>& _globals;
         const RegisterAllocation& _alloc;
+        std::string _main_function_name;
 
         std::unordered_map<std::string, IrValueType> _global_types;
 
@@ -62,7 +63,7 @@ namespace compiler
         [[nodiscard]] static uint8_t bits_for(IrValueType t);
 
         // Load variable in scratch
-        std::string emit_mem_load(const std::string& name, const char* scratch);
+        std::string emit_mem_load(const std::string& name, IrValueType type, const char* scratch);
         // Store reg in scratch
         void emit_mem_store(const std::string& reg, const std::string& name);
 

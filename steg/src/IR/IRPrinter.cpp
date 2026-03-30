@@ -19,7 +19,9 @@ std::string IRPrinter::format_value_type(const IrValueType t)
     case IrValueType::INT8: return "i8";
     case IrValueType::INT16: return "i16";
     case IrValueType::INT32: return "i32";
-    case IrValueType::PTR: return "ptr";
+    case IrValueType::PTR8: return "ptr8";
+    case IrValueType::PTR16: return "ptr16";
+    case IrValueType::PTR32: return "ptr32";
     case IrValueType::FILE: return "file";
     case IrValueType::CLOCK: return "clock";
     case IrValueType::UNKNOWN: return "?";

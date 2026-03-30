@@ -23,10 +23,15 @@ namespace compiler
         BOOL,
         UINT8, UINT16, UINT32,
         INT8, INT16, INT32,
-        PTR,
+        PTR8, PTR16, PTR32,
         FILE,
         CLOCK
     };
+
+    inline bool ir_value_type_is_ptr(IrValueType t)
+    {
+        return t == IrValueType::PTR8 || t == IrValueType::PTR16 || t == IrValueType::PTR32;
+    }
 
     struct IrOperand {
         IrOperandType type;

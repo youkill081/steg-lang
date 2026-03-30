@@ -61,6 +61,7 @@ namespace compiler
         static IrOpCode binary_opcode(const ASTBinaryExpressionNode::binaryOperationType op, bool is_signed);
         static IrOpCode unary_opcode(const ASTUnaryExpressionNode::unaryOperationType op);
         static IrOpCode composed_opcode(const ASTAssignExpressionStatement::assignmentType op);
+        static IrValueType type_to_ptr_type(const ResolvedType &t);
         static IrValueType resolved_to_ir_type(const ResolvedType &t);
     public:
         /* --Visitors-- */

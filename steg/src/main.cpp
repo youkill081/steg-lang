@@ -35,14 +35,14 @@ int main()
         {
             try
             {
-                Vm::run(buffer);
+                return Vm::run(buffer);
             } catch (const std::exception &e)
             {
                 std::cerr << e.what() << std::endl;
             }
         }
 
-        return 0;
+        return 1;
     }
     std::cerr << "Errors during compilation" << std::endl;
     return 1;

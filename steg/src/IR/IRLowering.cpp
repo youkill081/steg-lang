@@ -19,6 +19,7 @@ IRLowering::IRLowering(
         _global_names.insert(global.name);
         _global_types[global.name] = global.type;
     }
+    _str_count = 0;
 }
 
 void IRLowering::lower()
@@ -44,12 +45,6 @@ void IRLowering::lower()
     {
         const IrBasicBlock& src = *src_ptr;
         IrBasicBlock& dst = *remap.at(src_ptr.get());
-
-        if (src.is_function_entry)
-        {
-            _current_function_name = src.function_name;
-            _ptr_local_to_global.clear();
-        }
 
         for (const auto& instr : src.instructions)
             lower_instruction(instr, dst.instructions);
@@ -84,16 +79,6 @@ std::string IRLowering::new_temp()
     return "_lt" + std::to_string(_temp_count++);
 }
 
-bool IRLowering::is_user_variable(const std::string& name)
-{
-    if (name.empty() || name[0] != 't')
-        return true;
-    for (std::size_t i = 1; i < name.size(); ++i)
-        if (!std::isdigit(static_cast<unsigned char>(name[i])))
-            return true;
-    return false;
-}
-
 IrOpCode IRLowering::load_opcode(IrValueType t)
 {
     switch (t)
@@ -126,16 +111,6 @@ IrOperand IRLowering::lower_src(const IrOperand& op, std::vector<IrInstruction>&
     if (op.type != IrOperandType::Temporary || op.value.empty())
         return op;
 
-    if (const auto it = _ptr_local_to_global.find(op.value);
-        it != _ptr_local_to_global.end())
-    {
-        const std::string& mangled = it->second;
-        IrOperand dest = {IrOperandType::Temporary, new_temp(), IrValueType::PTR};
-        IrOperand addr = {IrOperandType::Temporary, mangled, IrValueType::PTR};
-        out.push_back({IrOpCode::LOAD_32, dest, addr});
-        return dest;
-    }
-
     if (_global_names.count(op.value))
     {
         const IrValueType vt = (op.value_type != IrValueType::UNKNOWN)
@@ -153,6 +128,13 @@ IrOperand IRLowering::lower_src(const IrOperand& op, std::vector<IrInstruction>&
     return op;
 }
 
+IrValueType IRLowering::effective_type(IrValueType vt, const std::string& name) const
+{
+    if (vt != IrValueType::UNKNOWN) return vt;
+    const auto it = _global_types.find(name);
+    return it != _global_types.end() ? it->second : IrValueType::UINT32;
+}
+
 /* Lowered instructions */
 void IRLowering::lower_instruction(
     const IrInstruction& instr, std::vector<IrInstruction>& out)
@@ -164,60 +146,42 @@ void IRLowering::lower_instruction(
         auto value = lower_src(instr.arg2, out);
 
         out.push_back({IrOpCode::STORE_ARR, base, index, value});
-        return;
     }
-    if (instr.op == IrOpCode::COPY)
+    else if (instr.op == IrOpCode::COPY)
     {
         const std::string& dest_name = instr.result.value;
 
-        if (_global_names.count(dest_name))
+        if (_global_names.count(dest_name)) // If dest is global -> store in memory
         {
-            const IrValueType vt = (instr.result.value_type != IrValueType::UNKNOWN)
-                                       ? instr.result.value_type
-                                       : _global_types.count(dest_name)
-                                       ? _global_types.at(dest_name)
-                                       : IrValueType::UINT32;
-
+            const IrValueType vt = effective_type(instr.result.value_type, dest_name);
             IrOperand addr = {IrOperandType::Temporary, dest_name, vt};
             auto val = lower_src(instr.arg1, out);
-
             out.push_back({store_opcode(vt), {}, addr, val});
-            return;
         }
-
-        if (instr.arg1.value_type == IrValueType::PTR
-            && is_user_variable(dest_name)
-            && !_ptr_local_to_global.count(dest_name))
+        else if (instr.arg1.type == IrOperandType::Constant // If the value is a table (like string)
+            && ir_value_type_is_ptr(instr.arg1.value_type))
         {
-            const std::string mangled = _current_function_name + "_" + dest_name;
+            const std::string& str_val = instr.arg1.value;
 
-            _ptr_local_to_global[dest_name] = mangled;
+            std::string mangled = "_str_" + std::to_string(_str_count++);
+            _string_constants[str_val] = mangled;
             _global_names.insert(mangled);
-            _global_types[mangled] = IrValueType::PTR;
-            lowered_globals.push_back({mangled, IrValueType::PTR, {}});
+            _global_types[mangled] = instr.arg1.value_type;
+            lowered_globals.push_back({
+                mangled, instr.arg1.value_type,
+                {IrOperandType::Constant, str_val, instr.arg1.value_type}
+            });
 
-            IrOperand addr = {IrOperandType::Temporary, mangled, IrValueType::PTR};
-            auto val = lower_src(instr.arg1, out);
-
-            out.push_back({IrOpCode::STORE_32, {}, addr, val});
-            return;
-        }
-
-        if (const auto it = _ptr_local_to_global.find(dest_name);
-            it != _ptr_local_to_global.end())
-        {
-            IrOperand addr = {IrOperandType::Temporary, it->second, IrValueType::PTR};
-            auto val = lower_src(instr.arg1, out);
-            out.push_back({IrOpCode::STORE_32, {}, addr, val});
-            return;
-        }
-
+            IrOperand mangled_op = {IrOperandType::Temporary, mangled, instr.arg1.value_type};
+            out.push_back({IrOpCode::COPY, instr.result, mangled_op});
+        } else // Just a simple copy
         {
             auto val = lower_src(instr.arg1, out);
             out.push_back({IrOpCode::COPY, instr.result, val});
-            return;
         }
+        return;
     }
+
 
     if (instr.op == IrOpCode::DEREF)
     {
