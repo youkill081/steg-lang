@@ -396,6 +396,7 @@ void IRGenerator::visit(ASTVariableStatement* node)
         IrGlobal g;
         g.name = node->name;
         g.type = resolved_to_ir_type(ResolvedType::from(node->type));
+        g.default_ast_type = node->type->type;
 
         if (node->expression)
         {

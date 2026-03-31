@@ -17,6 +17,7 @@ int main()
     if (!compiler::Linter::instance().has_errors())
     {
         std::cout << "Compilation successful" << std::endl;
+        std::cout << result->asm_output << std::endl;
 
         assembler::Linter linter;
         auto buffer = assembler::Assembler::assemble_from_text(result->asm_output, linter, false);

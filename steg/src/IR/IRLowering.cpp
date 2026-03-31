@@ -168,7 +168,7 @@ void IRLowering::lower_instruction(
             _global_names.insert(mangled);
             _global_types[mangled] = instr.arg1.value_type;
             lowered_globals.push_back({
-                mangled, instr.arg1.value_type,
+                mangled, instr.arg1.value_type, ASTTypeNode::STRING,
                 {IrOperandType::Constant, str_val, instr.arg1.value_type}
             });
 

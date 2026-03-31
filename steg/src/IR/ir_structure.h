@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "ast/ASTTypeNode.h"
+
 namespace compiler
 {
     enum class IrOperandType
@@ -104,6 +106,7 @@ namespace compiler
     struct IrGlobal {
         std::string name;
         IrValueType type = IrValueType::UNKNOWN;
+        ASTTypeNode::Types default_ast_type = ASTTypeNode::Types::VOID;
         IrOperand initial_value = {};
     };
 

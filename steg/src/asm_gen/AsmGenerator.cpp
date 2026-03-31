@@ -57,7 +57,12 @@ void AsmGenerator::emit_data_section()
 {
     d("section .data");
     for (const auto& g : _globals)
-        d("    " + g.name + " " + data_directive(g.type) + " " + format_init(g));
+    {
+        if (g.default_ast_type == ASTTypeNode::STRING)
+            d("    " + g.name + " " + data_directive(g.type) + " \"" + format_init(g) + "\"");
+        else
+            d("    " + g.name + " " + data_directive(g.type) + " " + format_init(g));
+    }
 }
 
 

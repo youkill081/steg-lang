@@ -186,15 +186,29 @@ namespace compiler
 
         RegisterAllocator allocator(out.ir_blocks, global_name_set);
         out.registers = allocator.allocate();
+        std::cout << "\n=== [DEBUG] Register Allocation Results ===\n";
 
-        for (auto& spill : out.registers.spill_globals)
-        {
-            if (!seen_globals.contains(spill.name))
-            {
-                seen_globals.insert(spill.name);
-                out.globals.push_back(spill);
+        std::cout << "--- Register Map ---\n";
+        if (out.registers.reg_map.empty()) {
+            std::cout << "  (Empty)\n";
+        } else {
+            for (const auto& [key, reg] : out.registers.reg_map) {
+                std::cout << "  " << key << " -> " << reg << "\n";
             }
         }
+
+        std::cout << "\n--- Spilled Globals (" << out.registers.spill_globals.size() << ") ---\n";
+        if (out.registers.spill_globals.empty()) {
+            std::cout << "  (None)\n";
+        } else {
+            for (const auto& spill : out.registers.spill_globals) {
+                std::cout << "  " << spill.name << "\n";
+            }
+        }
+        std::cout << "===========================================\n\n";
+
+        IRPrinter printer(out.ir_blocks, out.globals);
+        std::cout << printer.print() << std::endl;
 
         /* ASM Generation */
         AsmGenerator asm_gen(out.ir_blocks, out.globals, out.registers);

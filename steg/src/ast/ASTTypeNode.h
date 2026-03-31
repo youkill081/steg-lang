@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "ASTNode.h"
+
 namespace compiler
 {
     class ASTVisitor;

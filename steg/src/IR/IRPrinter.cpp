@@ -132,6 +132,7 @@ std::string IRPrinter::format_instruction(const IrInstruction& i)
         break;
 
     case IrOpCode::CALL:
+    case IrOpCode::BUILTIN_CALL:
         {
             if (!i.result.empty())
                 out << res << " = ";
@@ -183,7 +184,7 @@ std::string IRPrinter::print() const
     if (!_globals.empty())
     {
         out << "Globals\n";
-        for (const auto &[name, type, initial_value] : _globals)
+        for (const auto &[name, type, ast_type, initial_value] : _globals)
         {
             out << "  " << name;
             if (!initial_value.value.empty())
