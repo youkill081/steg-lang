@@ -168,6 +168,7 @@ void instr_PUSH(Runtime &runtime, InstructionView view);
 void instr_POP(Runtime &runtime, InstructionView view);
 void instr_RAND(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE(Runtime &runtime, InstructionView view);
+void instr_WINDOW_CREATE3(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CLOSE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_VIEWPORT_SIZE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_DISABLE_VIEWPORT(Runtime &runtime, InstructionView view);
@@ -176,16 +177,24 @@ void instr_WINDOW_SHOULD_CLOSE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CLEAR(Runtime &runtime, InstructionView view);
 void instr_WINDOW_PRESENT(Runtime &runtime, InstructionView view);
 void instr_WINDOW_KEY_PRESSED(Runtime &runtime, InstructionView view);
+void instr_WINDOW_KEY_PRESSED2(Runtime &runtime, InstructionView view);
 void instr_WINDOW_KEY_DOWN(Runtime &runtime, InstructionView view);
+void instr_WINDOW_KEY_DOWN2(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_TARGET_FPS(Runtime &runtime, InstructionView view);
+void instr_WINDOW_SET_TARGET_FPS1(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_TEXT_SIZE(Runtime &runtime, InstructionView view);
+void instr_WINDOW_SET_TEXT_SIZE1(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_TEXT_COLOR(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_FONT(Runtime &runtime, InstructionView view);
+void instr_WINDOW_SET_FONT1(Runtime &runtime, InstructionView view);
 void instr_WINDOW_DRAW_TEXT(Runtime &runtime, InstructionView view);
+void instr_WINDOW_DRAW_TEXT3(Runtime &runtime, InstructionView view);
 void instr_WINDOW_DRAW_TEXTURE(Runtime &runtime, InstructionView view);
+void instr_WINDOW_DRAW_TEXTURE3(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_TEXTURE_COLOR_MASK(Runtime &runtime, InstructionView view);
 void instr_WINDOW_RESET_TEXTURE_COLOR_MASK(Runtime &runtime, InstructionView view);
 void instr_WINDOW_SET_ICON(Runtime &runtime, InstructionView view);
+void instr_WINDOW_SET_ICON1(Runtime &runtime, InstructionView view);
 void instr_FILE_OPEN(Runtime &runtime, InstructionView view);
 void instr_FILE_CREATE(Runtime &runtime, InstructionView view);
 void instr_FILE_SAVE(Runtime &runtime, InstructionView view);
@@ -352,25 +361,43 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"PUSH", true, InstructionHandler(&instr_PUSH, REG)},
     RawInstruction{"POP", true, InstructionHandler(&instr_POP, REG)},
     RawInstruction{"RAND", true, InstructionHandler(&instr_RAND, REG)},
-    RawInstruction{"WINDOW_CREATE", true, InstructionHandler(&instr_WINDOW_CREATE, REG, REG, ONE_DATA)},
+    RawInstruction{"WINDOW_CREATE", true,
+        InstructionHandler(&instr_WINDOW_CREATE, REG_BOTH, REG_BOTH, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_CREATE3, REG_BOTH, REG_BOTH, REG_BOTH)},
     RawInstruction{"WINDOW_CLOSE", true, InstructionHandler(&instr_WINDOW_CLOSE)},
-    RawInstruction{"WINDOW_SET_VIEWPORT_SIZE", true, InstructionHandler(&instr_WINDOW_SET_VIEWPORT_SIZE, REG, REG)},
-    RawInstruction{"WINDOW_DISABLE_VIEWPORT", true, InstructionHandler(&instr_WINDOW_DISABLE_VIEWPORT, REG, REG)},
+    RawInstruction{"WINDOW_SET_VIEWPORT_SIZE", true, InstructionHandler(&instr_WINDOW_SET_VIEWPORT_SIZE, REG_BOTH, REG_BOTH)},
+    RawInstruction{"WINDOW_DISABLE_VIEWPORT", true, InstructionHandler(&instr_WINDOW_DISABLE_VIEWPORT, REG_BOTH, REG_BOTH)},
     RawInstruction{"WINDOW_POOL", true, InstructionHandler(&instr_WINDOW_POOL)},
     RawInstruction{"WINDOW_SHOULD_CLOSE", true, InstructionHandler(&instr_WINDOW_SHOULD_CLOSE, REG)},
-    RawInstruction{"WINDOW_CLEAR", true, InstructionHandler(&instr_WINDOW_CLEAR, REG, REG, REG)},
+    RawInstruction{"WINDOW_CLEAR", true, InstructionHandler(&instr_WINDOW_CLEAR, REG_BOTH, REG_BOTH, REG_BOTH)},
     RawInstruction{"WINDOW_PRESENT", true, InstructionHandler(&instr_WINDOW_PRESENT)},
-    RawInstruction{"WINDOW_KEY_PRESSED", true, InstructionHandler(&instr_WINDOW_KEY_PRESSED, REG, ONE_DATA)},
-    RawInstruction{"WINDOW_KEY_DOWN", true, InstructionHandler(&instr_WINDOW_KEY_DOWN, REG, ONE_DATA)},
-    RawInstruction{"WINDOW_SET_TARGET_FPS", true, InstructionHandler(&instr_WINDOW_SET_TARGET_FPS, ONE_DATA)},
-    RawInstruction{"WINDOW_SET_TEXT_SIZE", true, InstructionHandler(&instr_WINDOW_SET_TEXT_SIZE, ONE_DATA)},
-    RawInstruction{"WINDOW_SET_TEXT_COLOR", true, InstructionHandler(&instr_WINDOW_SET_TEXT_COLOR, REG, REG, REG)},
-    RawInstruction{"WINDOW_SET_FONT", true, InstructionHandler(&instr_WINDOW_SET_FONT, ONE_DATA)},
-    RawInstruction{"WINDOW_DRAW_TEXT", true, InstructionHandler(&instr_WINDOW_DRAW_TEXT, REG, REG, ONE_DATA)},
-    RawInstruction{"WINDOW_DRAW_TEXTURE", true, InstructionHandler(&instr_WINDOW_DRAW_TEXTURE, REG, REG, ONE_DATA)},
-    RawInstruction{"WINDOW_SET_TEXTURE_COLOR_MASK", true, InstructionHandler(&instr_WINDOW_SET_TEXTURE_COLOR_MASK, REG, REG, REG)},
+    RawInstruction{"WINDOW_KEY_PRESSED", true,
+        InstructionHandler(&instr_WINDOW_KEY_PRESSED, REG, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_KEY_PRESSED2, REG, REG_BOTH)},
+    RawInstruction{"WINDOW_KEY_DOWN", true,
+        InstructionHandler(&instr_WINDOW_KEY_DOWN, REG, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_KEY_DOWN, REG, REG_BOTH)},
+    RawInstruction{"WINDOW_SET_TARGET_FPS", true,
+        InstructionHandler(&instr_WINDOW_SET_TARGET_FPS, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_SET_TARGET_FPS1, REG_BOTH)},
+    RawInstruction{"WINDOW_SET_TEXT_SIZE", true,
+        InstructionHandler(&instr_WINDOW_SET_TEXT_SIZE, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_SET_TEXT_SIZE1, REG_BOTH)},
+    RawInstruction{"WINDOW_SET_TEXT_COLOR", true, InstructionHandler(&instr_WINDOW_SET_TEXT_COLOR, REG_BOTH, REG_BOTH, REG_BOTH)},
+    RawInstruction{"WINDOW_SET_FONT", true,
+        InstructionHandler(&instr_WINDOW_SET_FONT, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_SET_FONT1, REG_BOTH)},
+    RawInstruction{"WINDOW_DRAW_TEXT", true,
+        InstructionHandler(&instr_WINDOW_DRAW_TEXT, REG_BOTH, REG_BOTH, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_DRAW_TEXT3, REG_BOTH, REG_BOTH, REG_BOTH)},
+    RawInstruction{"WINDOW_DRAW_TEXTURE", true,
+        InstructionHandler(&instr_WINDOW_DRAW_TEXTURE, REG_BOTH, REG_BOTH, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_DRAW_TEXTURE3, REG_BOTH, REG_BOTH, REG_BOTH)},
+    RawInstruction{"WINDOW_SET_TEXTURE_COLOR_MASK", true, InstructionHandler(&instr_WINDOW_SET_TEXTURE_COLOR_MASK, REG_BOTH, REG_BOTH, REG_BOTH)},
     RawInstruction{"WINDOW_RESET_TEXTURE_COLOR_MASK", true, InstructionHandler(&instr_WINDOW_RESET_TEXTURE_COLOR_MASK)},
-    RawInstruction{"WINDOW_SET_ICON", true, InstructionHandler(&instr_WINDOW_SET_ICON, ONE_DATA)},
+    RawInstruction{"WINDOW_SET_ICON", true,
+        InstructionHandler(&instr_WINDOW_SET_ICON, ONE_DATA),
+        InstructionHandler(&instr_WINDOW_SET_ICON1, REG_BOTH)},
     RawInstruction{"FILE_OPEN", true, InstructionHandler(&instr_FILE_OPEN, REG, ONE_DATA)},
     RawInstruction{"FILE_CREATE", true, InstructionHandler(&instr_FILE_CREATE, REG, ONE_DATA)},
     RawInstruction{"FILE_SAVE", true, InstructionHandler(&instr_FILE_SAVE, REG)},

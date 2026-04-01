@@ -614,9 +614,18 @@ void instr_RAND(Runtime& runtime, InstructionView view)
 
 void instr_WINDOW_CREATE(Runtime& runtime, InstructionView view)
 {
-    uint16_t width = runtime.registries.read(view.r1());
-    uint16_t height = runtime.registries.read(view.r2());
+    uint16_t width = view.get_r1(runtime);
+    uint16_t height = view.get_r2(runtime);
     std::string name = runtime.utils.get_string_from_address(view.get_data(runtime));
+
+    runtime.graphical_backend.create_window(width, height, name);
+}
+
+void instr_WINDOW_CREATE3(Runtime& runtime, InstructionView view)
+{
+    uint16_t width = view.get_r1(runtime);
+    uint16_t height = view.get_r2(runtime);
+    std::string name = runtime.utils.get_string_from_address(view.get_r3(runtime));
 
     runtime.graphical_backend.create_window(width, height, name);
 }
@@ -629,8 +638,8 @@ void instr_WINDOW_CLOSE(Runtime& runtime, InstructionView view)
 void instr_WINDOW_SET_VIEWPORT_SIZE(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.set_viewport_size(
-        runtime.registries.read(view.r1()),
-        runtime.registries.read(view.r2())
+        view.get_r1(runtime),
+        view.get_r2(runtime)
     );
 }
 
@@ -655,9 +664,9 @@ void instr_WINDOW_SHOULD_CLOSE(Runtime& runtime, InstructionView view)
 void instr_WINDOW_CLEAR(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.clear_window({
-        static_cast<uint8_t>(runtime.registries.read(view.r1())),
-        static_cast<uint8_t>(runtime.registries.read(view.r2())),
-        static_cast<uint8_t>(runtime.registries.read(view.r3())),
+        static_cast<uint8_t>(view.get_r1(runtime)),
+        static_cast<uint8_t>(view.get_r2(runtime)),
+        static_cast<uint8_t>(view.get_r3(runtime)),
     });
 }
 
@@ -674,11 +683,27 @@ void instr_WINDOW_KEY_PRESSED(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_WINDOW_KEY_PRESSED2(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.graphical_backend.key_pressed(view.get_r2(runtime))
+    );
+}
+
 void instr_WINDOW_KEY_DOWN(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
         runtime.graphical_backend.key_down(view.get_data(runtime))
+    );
+}
+
+void instr_WINDOW_KEY_DOWN2(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.graphical_backend.key_down(view.get_r2(runtime))
     );
 }
 
@@ -689,6 +714,13 @@ void instr_WINDOW_SET_TARGET_FPS(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_WINDOW_SET_TARGET_FPS1(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_target_fps(
+        view.get_r1(runtime)
+    );
+}
+
 void instr_WINDOW_SET_TEXT_SIZE(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.set_text_size(
@@ -696,12 +728,19 @@ void instr_WINDOW_SET_TEXT_SIZE(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_WINDOW_SET_TEXT_SIZE1(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_text_size(
+        view.get_r1(runtime)
+    );
+}
+
 void instr_WINDOW_SET_TEXT_COLOR(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.set_text_color({
-        static_cast<uint8_t>(runtime.registries.read(view.r1())),
-        static_cast<uint8_t>(runtime.registries.read(view.r2())),
-        static_cast<uint8_t>(runtime.registries.read(view.r3())),
+        static_cast<uint8_t>(view.get_r1(runtime)),
+        static_cast<uint8_t>(view.get_r2(runtime)),
+        static_cast<uint8_t>(view.get_r3(runtime)),
         255 // Alpha
     });
 }
@@ -713,11 +752,27 @@ void instr_WINDOW_SET_FONT(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_WINDOW_SET_FONT1(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_font(
+        runtime.files[view.get_r1(runtime)]
+    );
+}
+
 void instr_WINDOW_DRAW_TEXT(Runtime& runtime, InstructionView view)
 {
-    uint16_t x = runtime.registries.read(view.r1());
-    uint16_t y = runtime.registries.read(view.r2());
+    uint16_t x = view.get_r1(runtime);
+    uint16_t y = view.get_r2(runtime);
     std::string text = runtime.utils.get_string_from_address(view.get_data(runtime));
+
+    runtime.graphical_backend.draw_text(text, x, y);
+}
+
+void instr_WINDOW_DRAW_TEXT3(Runtime& runtime, InstructionView view)
+{
+    uint16_t x = view.get_r1(runtime);
+    uint16_t y = view.get_r2(runtime);
+    std::string text = runtime.utils.get_string_from_address(view.get_r3(runtime));
 
     runtime.graphical_backend.draw_text(text, x, y);
 }
@@ -726,17 +781,26 @@ void instr_WINDOW_DRAW_TEXTURE(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.draw_texture(
         runtime.files[view.get_data(runtime)],
-        runtime.registries.read(view.r1()),
-        runtime.registries.read(view.r2())
+        view.get_r1(runtime),
+        view.get_r2(runtime)
+    );
+}
+
+void instr_WINDOW_DRAW_TEXTURE3(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.draw_texture(
+        runtime.files[view.get_r3(runtime)],
+        view.get_r1(runtime),
+        view.get_r2(runtime)
     );
 }
 
 void instr_WINDOW_SET_TEXTURE_COLOR_MASK(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.set_texture_color_mask({
-        static_cast<uint8_t>(runtime.registries.read(view.r1())),
-        static_cast<uint8_t>(runtime.registries.read(view.r2())),
-        static_cast<uint8_t>(runtime.registries.read(view.r3())),
+        static_cast<uint8_t>(view.get_r1(runtime)),
+        static_cast<uint8_t>(view.get_r2(runtime)),
+        static_cast<uint8_t>(view.get_r3(runtime)),
         255 // Alpha
     });
 }
@@ -750,6 +814,13 @@ void instr_WINDOW_SET_ICON(Runtime& runtime, InstructionView view)
 {
     runtime.graphical_backend.set_window_icon(
         runtime.files[view.get_data(runtime)]
+    );
+}
+
+void instr_WINDOW_SET_ICON1(Runtime& runtime, InstructionView view)
+{
+    runtime.graphical_backend.set_window_icon(
+        runtime.files[view.get_r1(runtime)]
     );
 }
 
@@ -875,4 +946,3 @@ void instr_CLOCK_RESET(Runtime& runtime, InstructionView view)
 {
     runtime.clocks.reset_clock(runtime.registries.read(view.r1()));
 }
-
