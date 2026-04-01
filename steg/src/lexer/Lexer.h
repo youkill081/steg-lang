@@ -50,6 +50,8 @@ namespace compiler
 
         std::size_t _browse_index = 0;
 
+        [[nodiscard]] char _decode_char() const;
+
         [[nodiscard]] LexerToken _parse_identifier_keyword(std::size_t line, std::size_t column) const;
         [[nodiscard]] LexerToken _parse_string(std::size_t line, std::size_t column) const;
         [[nodiscard]] LexerToken _parse_char(std::size_t line, std::size_t column) const;

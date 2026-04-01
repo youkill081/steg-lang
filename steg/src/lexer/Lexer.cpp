@@ -78,6 +78,34 @@ void Lexer::_skip_space_and_comment() const
     }
 }
 
+char Lexer::_decode_char() const
+{
+    if (!_parser.has_next())
+        throw LexerException("Unexpected end of input while parsing character");
+
+    const char current = _parser.get_next();
+
+    if (current == '\\') {
+        if (!_parser.has_next())
+            throw LexerException("Incomplete escape sequence");
+
+        char escape_char = _parser.get_next();
+        switch (escape_char) {
+        case 'n':  return '\n';
+        case 'r':  return '\r';
+        case 't':  return '\t';
+        case '\\': return '\\';
+        case '\'': return '\'';
+        case '\"': return '\"';
+        case '0':  return '\0';
+        default:
+            throw LexerException("Unknown escape sequence: \\" + std::string(1, escape_char));
+        }
+    }
+
+    return current;
+}
+
 LexerToken Lexer::_parse_identifier_keyword(const std::size_t line, const std::size_t column) const
 {
     std::string value;
@@ -111,21 +139,18 @@ LexerToken Lexer::_parse_identifier_keyword(const std::size_t line, const std::s
 
 LexerToken Lexer::_parse_char(std::size_t line, std::size_t column) const
 {
-    _parser.get_next(); // Skip the first "'"
+    _parser.get_next(); // Skip opening '
 
-    if (!_parser.has_next())
-        throw LexerException("Unterminated char");
-    char value = _parser.get_next();
-    if (!_parser.has_next() || _parser.peek_x() != '\'')
-        throw LexerException("Unterminated char");
+    const char value = _decode_char();
 
-    _parser.get_next(); // Skip the last "'"
+    if (!_parser.has_next() || _parser.get_next() != '\'')
+        throw LexerException("Unterminated char literal");
 
     return {
         .type = TOKEN_INTEGER,
         .category = get_token_category(TOKEN_INTEGER),
         .path = _parser.get_path(),
-        .value = std::to_string(value),
+        .value = std::to_string(static_cast<uint8_t>(value)),
         .line_number = line,
         .column_number = column
     };
