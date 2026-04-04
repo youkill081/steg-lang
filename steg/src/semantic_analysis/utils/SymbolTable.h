@@ -134,13 +134,17 @@ namespace compiler
             builtin("file_delete", v(T::VOID), {v(T::FILE)}, "FILE_DELETE");
             builtin("file_close", v(T::VOID), {v(T::FILE)}, "FILE_CLOSE");
             builtin("file_reset_cursor", v(T::VOID), {v(T::FILE)}, "FILE_RESET_CURSOR");
+            builtin("file_seek_cursor", v(T::VOID), {v(T::UINT32), v(T::FILE)}, "FILE_SEEK_CURSOR");
             builtin("file_clear_data", v(T::VOID), {v(T::FILE)}, "FILE_CLEAR_DATA");
-            builtin("file_read_byte", v(T::UINT8), {v(T::FILE)}, "FILE_READ_BYTE");
-            builtin("file_read_word", v(T::UINT16), {v(T::FILE)}, "FILE_READ_WORD");
-            builtin("file_append_byte", v(T::VOID), {v(T::UINT8), v(T::FILE)}, "FILE_APPEND_BYTE");
-            builtin("file_append_word", v(T::VOID), {v(T::UINT16), v(T::FILE)}, "FILE_APPEND_WORD");
-            builtin("file_is_byte_remaining", v(T::BOOL), {v(T::FILE)}, "FILE_IS_BYTE_REMAINING");
-            builtin("file_is_word_remaining", v(T::BOOL), {v(T::FILE)}, "FILE_IS_WORD_REMAINING");
+            builtin("file_read_uint8", v(T::UINT8), {v(T::FILE)}, "FILE_READ_BYTE");
+            builtin("file_read_uint16", v(T::UINT16), {v(T::FILE)}, "FILE_READ_WORD");
+            builtin("file_read_uint32", v(T::UINT32), {v(T::FILE)}, "FILE_READ_DOUBLEWORD");
+            builtin("file_write_uint8", v(T::VOID), {v(T::UINT8), v(T::FILE)}, "FILE_APPEND_BYTE");
+            builtin("file_write_uint16", v(T::VOID), {v(T::UINT16), v(T::FILE)}, "FILE_APPEND_WORD");
+            builtin("file_write_uint32", v(T::VOID), {v(T::UINT32), v(T::FILE)}, "FILE_APPEND_DOUBLEWORD");
+            builtin("file_is_uint8_remaining", v(T::BOOL), {v(T::FILE)}, "FILE_IS_BYTE_REMAINING");
+            builtin("file_is_uint16_remaining", v(T::BOOL), {v(T::FILE)}, "FILE_IS_WORD_REMAINING");
+            builtin("file_is_uint32_remaining", v(T::BOOL), {v(T::FILE)}, "FILE_IS_DOUBLEWORD_REMAINING");
 
             builtin("clock_create", v(T::CLOCK), {}, "CLOCK_CREATE");
             builtin("clock_delete", v(T::VOID), {v(T::CLOCK)}, "CLOCK_DELETE");

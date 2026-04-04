@@ -133,7 +133,7 @@ void instr_STORED_32(Runtime &runtime, InstructionView view)
 void instr_STORER_32(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write_uint32(
-        runtime.registries.read(view.r2()),
+        view.get_r2(runtime),
         view.get_r1(runtime) & 0xFFFFFFFF
     );
 }
@@ -149,7 +149,7 @@ void instr_STORED_16(Runtime &runtime, InstructionView view)
 void instr_STORER_16(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write_uint16(
-        runtime.registries.read(view.r2()),
+        view.get_r2(runtime),
         view.get_r1(runtime, 2) & 0xFFFF
     );
 }
@@ -165,7 +165,7 @@ void instr_STORED_8(Runtime &runtime, InstructionView view)
 void instr_STORER_8(Runtime &runtime, InstructionView view)
 {
     runtime.memory.write_uint8(
-        runtime.registries.read(view.r2()),
+        view.get_r2(runtime),
         view.get_r1(runtime, 1) & 0xFF
     );
 }
@@ -195,7 +195,7 @@ void instr_ADDR(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) + view.get_r2(runtime)
+        view.get_r1(runtime) + view.get_r2(runtime)
     );
 }
 
@@ -203,7 +203,7 @@ void instr_ADDD(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) + view.get_data(runtime)
+        view.get_r1(runtime) + view.get_data(runtime)
     );
 }
 
@@ -228,7 +228,7 @@ void instr_MULR(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) * view.get_r2(runtime)
+        view.get_r1(runtime) * view.get_r2(runtime)
     );
 }
 
@@ -236,7 +236,7 @@ void instr_MULD(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) * view.get_data(runtime)
+        view.get_r1(runtime) * view.get_data(runtime)
     );
 }
 
@@ -246,7 +246,7 @@ void instr_DIVR(Runtime& runtime, InstructionView view)
         throw InterpreterError("[DIV] Division by zero !");
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) / view.get_r2(runtime)
+        view.get_r1(runtime) / view.get_r2(runtime)
     );
 }
 
@@ -256,7 +256,7 @@ void instr_DIVD(Runtime& runtime, InstructionView view)
         throw InterpreterError("[DIV] Division by zero !");
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) / view.get_data(runtime)
+        view.get_r1(runtime) / view.get_data(runtime)
     );
 }
 
@@ -273,7 +273,7 @@ void instr_MINR(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::min(
-            runtime.registries.read(view.r1()),
+            view.get_r1(runtime),
             view.get_r2(runtime)
         )
     );
@@ -284,7 +284,7 @@ void instr_MIND(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::min(
-            runtime.registries.read(view.r1()),
+            view.get_r1(runtime),
             view.get_data(runtime)
         )
     );
@@ -295,7 +295,7 @@ void instr_MAXR(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::max(
-            runtime.registries.read(view.r1()),
+            view.get_r1(runtime),
             view.get_r2(runtime)
         )
     );
@@ -306,7 +306,7 @@ void instr_MAXD(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::max(
-            runtime.registries.read(view.r1()),
+            view.get_r1(runtime),
             view.get_data(runtime)
         )
     );
@@ -318,7 +318,7 @@ void instr_MODR(Runtime& runtime, InstructionView view)
         throw InterpreterError("[MOD] Modulo by zero !");
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) % view.get_r2(runtime)
+        view.get_r1(runtime) % view.get_r2(runtime)
     );
 }
 
@@ -328,7 +328,7 @@ void instr_MODD(Runtime& runtime, InstructionView view)
         throw InterpreterError("[MOD] Modulo by zero !");
     runtime.registries.write(
         view.r1(),
-        runtime.registries.read(view.r1()) % view.get_data(runtime)
+        view.get_r1(runtime) % view.get_data(runtime)
     );
 }
 
@@ -482,7 +482,7 @@ void instr_CMPD(Runtime &runtime, InstructionView view)
 {
     compute_CMP(
         runtime,
-        runtime.registries.read(view.r1()),
+        view.get_r1(runtime),
         view.get_data(runtime)
     );
 }
@@ -604,7 +604,7 @@ void instr_RET(Runtime& runtime, InstructionView view)
 
 void instr_PUSH(Runtime& runtime, InstructionView view)
 {
-    runtime.stack.push(runtime.registries.read(view.r1()));
+    runtime.stack.push(view.get_r1(runtime));
 }
 
 void instr_POP(Runtime& runtime, InstructionView view)
@@ -971,38 +971,43 @@ void instr_FILE_CREATE2(Runtime& runtime, InstructionView view)
 
 void instr_FILE_SAVE(Runtime& runtime, InstructionView view)
 {
-    runtime.files.get_file(runtime.registries.read(view.r1()))->save();
+    runtime.files.get_file(view.get_r1(runtime))->save();
 }
 
 void instr_FILE_DELETE(Runtime& runtime, InstructionView view)
 {
     runtime.files.delete_file(
-        runtime.registries.read(view.r1())
+        view.get_r1(runtime)
     );
 }
 
 void instr_FILE_CLOSE(Runtime& runtime, InstructionView view)
 {
     runtime.files.close_file(
-        runtime.registries.read(view.r1())
+        view.get_r1(runtime)
     );
 }
 
 void instr_FILE_RESET_CURSOR(Runtime& runtime, InstructionView view)
 {
-    runtime.files.get_file(runtime.registries.read(view.r1()))->reset_cursor();
+    runtime.files.get_file(view.get_r1(runtime))->reset_cursor();
+}
+
+void instr_FILE_SEEK_CURSOR(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->seek_cursor(view.get_r1(runtime));
 }
 
 void instr_FILE_CLEAR_DATA(Runtime& runtime, InstructionView view)
 {
-    runtime.files.get_file(runtime.registries.read(view.r1()))->clear_data();
+    runtime.files.get_file(view.get_r1(runtime))->clear_data();
 }
 
 void instr_FILE_READ_BYTE(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.files.get_file(runtime.registries.read(view.r2()))->read_byte()
+        runtime.files.get_file(view.get_r2(runtime))->read_byte()
     );
 }
 
@@ -1010,25 +1015,38 @@ void instr_FILE_READ_WORD(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.files.get_file(runtime.registries.read(view.r2()))->read_word()
+        runtime.files.get_file(view.get_r2(runtime))->read_word()
+    );
+}
+
+void instr_FILE_READ_DOUBLEWORD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.files.get_file(view.get_r2(runtime))->read_doubleword()
     );
 }
 
 void instr_FILE_APPEND_BYTE(Runtime& runtime, InstructionView view)
 {
-    runtime.files.get_file(runtime.registries.read(view.r2()))->append_byte(runtime.registries.read(view.r1()));
+    runtime.files.get_file(view.get_r2(runtime))->append_byte(view.get_r1(runtime));
 }
 
 void instr_FILE_APPEND_WORD(Runtime& runtime, InstructionView view)
 {
-    runtime.files.get_file(runtime.registries.read(view.r2()))->append_word(runtime.registries.read(view.r1()));
+    runtime.files.get_file(view.get_r2(runtime))->append_word(view.get_r1(runtime));
+}
+
+void instr_FILE_APPEND_DOUBLEWORD(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->append_doubleword(view.get_r1(runtime));
 }
 
 void instr_FILE_IS_BYTE_REMAINING(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.files.get_file(runtime.registries.read(view.r2()))->has_byte_remaining()
+        runtime.files.get_file(view.get_r2(runtime))->has_byte_remaining()
     );
 }
 
@@ -1036,7 +1054,15 @@ void instr_FILE_IS_WORD_REMAINING(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.files.get_file(runtime.registries.read(view.r2()))->has_word_remaining()
+        runtime.files.get_file(view.get_r2(runtime))->has_word_remaining()
+    );
+}
+
+void instr_FILE_IS_DOUBLEWORD_REMAINING(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.files.get_file(view.get_r2(runtime))->has_doubleword_remaining()
     );
 }
 
@@ -1051,7 +1077,7 @@ void instr_CLOCK_CREATE(Runtime& runtime, InstructionView view)
 void instr_CLOCK_DELETE(Runtime& runtime, InstructionView view)
 {
     runtime.clocks.delete_clock(
-        runtime.registries.read(view.r1())
+        view.get_r1(runtime)
     );
 }
 
@@ -1059,7 +1085,7 @@ void instr_CLOCK_GET_ELAPSED_MS(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.clocks.get_clock_time_ms(runtime.registries.read(view.r2()))
+        runtime.clocks.get_clock_time_ms(view.get_r2(runtime))
     );
 }
 
@@ -1067,11 +1093,11 @@ void instr_CLOCK_GET_ELAPSED_S(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
-        runtime.clocks.get_clock_time_s(runtime.registries.read(view.r2()))
+        runtime.clocks.get_clock_time_s(view.get_r2(runtime))
     );
 }
 
 void instr_CLOCK_RESET(Runtime& runtime, InstructionView view)
 {
-    runtime.clocks.reset_clock(runtime.registries.read(view.r1()));
+    runtime.clocks.reset_clock(view.get_r1(runtime));
 }

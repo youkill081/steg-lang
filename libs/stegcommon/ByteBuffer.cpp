@@ -81,11 +81,15 @@ void ByteBuffer::write_uint32(uint32_t value)
 
 uint8_t ByteBuffer::read_uint8()
 {
+    if (!remaining_uint8())
+        return 0;
     return buffer[cursor++];
 }
 
 uint16_t ByteBuffer::read_uint16()
 {
+    if (!remaining_uint16())
+        return 0;
     uint16_t v = (buffer[cursor] << 8) | buffer[cursor + 1];
     cursor += 2;
     return v;
@@ -93,6 +97,8 @@ uint16_t ByteBuffer::read_uint16()
 
 uint32_t ByteBuffer::read_uint32()
 {
+    if (!remaining_uint32())
+        return 0;
     uint32_t v =
         (buffer[cursor] << 24) |
         (buffer[cursor + 1] << 16) |
@@ -108,6 +114,11 @@ void ByteBuffer::reset_cursor()
     cursor = 0;
 }
 
+void ByteBuffer::seek_cursor(const uint32_t index)
+{
+    cursor = index;
+}
+
 size_t ByteBuffer::size() const
 {
     return buffer.size();
@@ -115,17 +126,18 @@ size_t ByteBuffer::size() const
 
 size_t ByteBuffer::remaining_uint8() const
 {
+    if (cursor >= buffer.size()) return 0;
     return buffer.size() - cursor;
 }
 
 size_t ByteBuffer::remaining_uint16() const
 {
-    return (buffer.size() - cursor) / 2;
+    return remaining_uint8() / 2;
 }
 
 size_t ByteBuffer::remaining_uint32() const
 {
-    return (buffer.size() - cursor) / 4;
+    return remaining_uint8() / 4;
 }
 
 const std::vector<uint8_t>& ByteBuffer::data() const

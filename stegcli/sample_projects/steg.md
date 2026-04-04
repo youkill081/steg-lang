@@ -88,6 +88,23 @@ Les touche correspondent exactement au code utilisé par Raylib.
 | window_key_pressed | (u32) -> bool | true uniquement à l'instant où la touche est pressée. |
 | window_key_down    | (u32) -> bool | true tant que la touche reste enfoncée.               |
 
+### Entrées Souris
+
+Les boutons correspondent aux codes Raylib : 0 = gauche, 1 = droit, 2 = milieu.
+
+| Fonction                     | Signature     | Description                                                              |
+|------------------------------|---------------|--------------------------------------------------------------------------|
+| window_mouse_x               | () -> int32   | Retourne la position X de la souris.                                     |
+| window_mouse_y               | () -> int32   | Retourne la position Y de la souris.                                     |
+| window_mouse_delta_x         | () -> int32   | Retourne le déplacement X de la souris depuis la dernière frame.         |
+| window_mouse_delta_y         | () -> int32   | Retourne le déplacement Y de la souris depuis la dernière frame.         |
+| window_mouse_button_pressed  | (u32) -> bool | true uniquement à l'instant où le bouton est pressé.                     |
+| window_mouse_button_down     | (u32) -> bool | true tant que le bouton reste enfoncé.                                   |
+| window_mouse_button_released | (u32) -> bool | true uniquement à l'instant où le bouton est relâché.                    |
+| window_mouse_wheel_delta     | () -> int32   | Retourne le mouvement de la molette (positif = vers le haut, 0 si rien). |
+| window_hide_cursor           | () -> void    | Cache le curseur de la souris.                                           |
+| window_show_cursor           | () -> void    | Affiche le curseur de la souris.                                         |
+
 ### Rendu & Style
 
 | Fonction            | Signature                | Description                                     |

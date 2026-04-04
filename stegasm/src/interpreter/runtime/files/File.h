@@ -60,15 +60,19 @@ public:
     void delete_file();
 
     void reset_cursor();
+    void seek_cursor(uint32_t);
     void clear_data();
 
     uint8_t read_byte();
     uint16_t read_word();
+    uint32_t read_doubleword();
 
     void append_byte(uint8_t byte);
     void append_word(uint16_t word);
+    void append_doubleword(uint32_t word);
 
     bool has_byte_remaining();
     bool has_word_remaining();
+    bool has_doubleword_remaining();
     FileBaseType get_file_type() override { return FILE_TYPE; }
 };

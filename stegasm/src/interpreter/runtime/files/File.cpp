@@ -137,6 +137,12 @@ void File::reset_cursor()
     this->_file_data.reset_cursor();
 }
 
+void File::seek_cursor(uint32_t index)
+{
+    this->read_data_if_needed();
+    this->_file_data.seek_cursor(index);
+}
+
 void File::clear_data()
 {
     this->read_data_if_needed();
@@ -157,6 +163,12 @@ uint16_t File::read_word()
     return this->_file_data.read_uint16();
 }
 
+uint32_t File::read_doubleword()
+{
+    this->read_data_if_needed();
+    return this->_file_data.read_uint32();
+}
+
 void File::append_byte(uint8_t byte)
 {
     this->read_data_if_needed();
@@ -171,6 +183,13 @@ void File::append_word(uint16_t word)
     this->_modified = true;
 }
 
+void File::append_doubleword(uint32_t word)
+{
+    this->read_data_if_needed();
+    this->_file_data.write_uint32(word);
+    this->_modified = true;
+}
+
 bool File::has_byte_remaining()
 {
     this->read_data_if_needed();
@@ -181,4 +200,10 @@ bool File::has_word_remaining()
 {
     this->read_data_if_needed();
     return this->_file_data.remaining_uint16() != 0;
+}
+
+bool File::has_doubleword_remaining()
+{
+    this->read_data_if_needed();
+    return this->_file_data.remaining_uint32() != 0;
 }
