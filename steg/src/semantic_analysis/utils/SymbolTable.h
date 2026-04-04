@@ -101,11 +101,9 @@ namespace compiler
             builtin("window_close", v(T::VOID), {}, "WINDOW_CLOSE");
             builtin("window_set_viewport_size", v(T::VOID), {v(T::UINT32), v(T::UINT32)}, "WINDOW_SET_VIEWPORT_SIZE");
             builtin("window_disable_viewport", v(T::VOID), {}, "WINDOW_DISABLE_VIEWPORT");
-            builtin("window_pool", v(T::VOID), {}, "WINDOW_POOL");
             builtin("window_should_close", v(T::BOOL), {}, "WINDOW_SHOULD_CLOSE");
             builtin("window_clear", v(T::VOID), {v(T::UINT8), v(T::UINT8), v(T::UINT8)}, "WINDOW_CLEAR");
             builtin("window_present", v(T::VOID), {}, "WINDOW_PRESENT");
-
             builtin("window_key_pressed", v(T::BOOL), {v(T::UINT32)}, "WINDOW_KEY_PRESSED");
             builtin("window_key_down", v(T::BOOL), {v(T::UINT32)}, "WINDOW_KEY_DOWN");
             builtin("window_set_target_fps", v(T::VOID), {v(T::UINT32)}, "WINDOW_SET_TARGET_FPS");

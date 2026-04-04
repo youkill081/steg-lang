@@ -49,7 +49,7 @@ constexpr std::string_view APP_NAME = R"(
 void displayHelp() {
     std::cout << AnsiColors::Bold << AnsiColors::Cyan << "USAGE:" << AnsiColors::Reset << "\n";
     std::cout << "  steg run <file.stegasm|file.steg> [-d]\n";
-    std::cout << "  steg build <file.stegasm|file.steg> <input.png> <output.png>\nD";
+    std::cout << "  steg build <file.stegasm|file.steg> <input.png> <output.png>\n";
     std::cout << "  steg run_img <img.png>\n\n";
     std::cout << AnsiColors::Bold << AnsiColors::Cyan << "OPTIONS:" << AnsiColors::Reset << "\n";
     std::cout << "  -d    Enable debug mode for compiler (Display, reg allocation, IR and AST code)\n";
