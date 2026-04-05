@@ -8,6 +8,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch: # <-- LE FAMEUX BOUTON MANUEL
 
 jobs:
   check-version:
@@ -35,6 +36,15 @@ jobs:
           TAG="v$VERSION"
           echo "Version: $VERSION | Tag: $TAG"
 
+          # If manual launch, force build
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual workflow dispatch detected. Forcing build."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Logique classique pour les push/PR
           if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
             echo "Tag $TAG already exists on remote. Skipping build."
             echo "should_build=false" >> $GITHUB_OUTPUT
@@ -98,10 +108,12 @@ jobs:
         with:
           name: steg_${{ matrix.os }}_${{ needs.check-version.outputs.version }}
           path: dist/
+
   tag:
     needs: [build, check-version]
     runs-on: ubuntu-latest
-    if: needs.check-version.outputs.should_build == 'true'
+    # Don't tag if manual launch
+    if: needs.check-version.outputs.should_build == 'true' && github.event_name != 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
@@ -112,10 +124,12 @@ jobs:
           git config user.email "github-actions@github.com"
           git tag v${{ needs.check-version.outputs.version }}
           git push origin v${{ needs.check-version.outputs.version }}
+
   release:
     needs: [ tag, check-version ]
     runs-on: ubuntu-latest
-    if: needs.check-version.outputs.should_build == 'true'
+    # Don't release if manual launch'
+    if: needs.check-version.outputs.should_build == 'true' && github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Download All Artifacts
