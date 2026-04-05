@@ -83,8 +83,8 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir dist
-          copy build\steg\steg.exe dist\steg_${{ matrix.os }}_${{ needs.check-version.outputs.version }}.exe
-          copy build\steg\lsp\steglsp.exe dist\steglsp_${{ matrix.os }}_${{ needs.check-version.outputs.version }}.exe
+          copy build\steg\Release\steg.exe dist\steg_${{ matrix.os }}_${{ needs.check-version.outputs.version }}.exe
+          copy build\steg\lsp\Release\steglsp.exe dist\steglsp_${{ matrix.os }}_${{ needs.check-version.outputs.version }}.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
