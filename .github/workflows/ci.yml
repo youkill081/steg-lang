@@ -71,25 +71,25 @@ jobs:
       - name: Configure CMake
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build Project
-        run: cmake --build build --config Release
+      - name: Build Targets
+        run: cmake --build build --target steg steglsp --config Release
 
       - name: Prepare Artifact (Linux)
         if: runner.os == 'Linux'
         run: |
-          # On suppose que l'exécutable principal est dans build/steg/
-          cp build/steg/steg ./build/${{ matrix.artifact_name }}
+          mkdir -p dist
+          cp build/steg/steg dist/
 
       - name: Prepare Artifact (Windows)
         if: runner.os == 'Windows'
         run: |
-          copy build\steg\Release\steg.exe build\${{ matrix.artifact_name }}
+          mkdir dist
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: build/${{ matrix.artifact_name }}
+          name: steg_${{ matrix.os }}_${{ needs.check-version.outputs.version }}
+          path: dist/
   tag:
     needs: build
     runs-on: ubuntu-latest
