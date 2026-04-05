@@ -34,36 +34,67 @@ void instr_TRUNC_8(Runtime &runtime, InstructionView view);
 void instr_TRUNC_16(Runtime &runtime, InstructionView view);
 void instr_ADDR(Runtime &runtime, InstructionView view);
 void instr_ADDD(Runtime &runtime, InstructionView view);
+void instr_FADDR(Runtime &runtime, InstructionView view);
+void instr_FADDD(Runtime &runtime, InstructionView view);
 void instr_SUBR(Runtime &runtime, InstructionView view);
 void instr_SUBD(Runtime &runtime, InstructionView view);
+void instr_FSUBR(Runtime &runtime, InstructionView view);
+void instr_FSUBD(Runtime &runtime, InstructionView view);
 void instr_MULR(Runtime &runtime, InstructionView view);
 void instr_MULD(Runtime &runtime, InstructionView view);
+void instr_FMULR(Runtime &runtime, InstructionView view);
+void instr_FMULD(Runtime &runtime, InstructionView view);
 void instr_DIVR(Runtime &runtime, InstructionView view);
 void instr_DIVD(Runtime &runtime, InstructionView view);
+void instr_FDIVR(Runtime &runtime, InstructionView view);
+void instr_FDIVD(Runtime &runtime, InstructionView view);
 void instr_NOT(Runtime &runtime, InstructionView view);
+void instr_FNOT(Runtime &runtime, InstructionView view);
 void instr_MINR(Runtime &runtime, InstructionView view);
 void instr_MIND(Runtime &runtime, InstructionView view);
+void instr_FMINR(Runtime &runtime, InstructionView view);
+void instr_FMIND(Runtime &runtime, InstructionView view);
 void instr_MAXR(Runtime &runtime, InstructionView view);
 void instr_MAXD(Runtime &runtime, InstructionView view);
+void instr_FMAXR(Runtime &runtime, InstructionView view);
+void instr_FMAXD(Runtime &runtime, InstructionView view);
 void instr_MODR(Runtime &runtime, InstructionView view);
 void instr_MODD(Runtime &runtime, InstructionView view);
+void instr_FMODR(Runtime &runtime, InstructionView view);
+void instr_FMODD(Runtime &runtime, InstructionView view);
 void instr_ADDR3(Runtime &runtime, InstructionView view);
 void instr_ADDD3(Runtime &runtime, InstructionView view);
+void instr_FADDD3(Runtime &runtime, InstructionView view);
+void instr_FADDR3(Runtime &runtime, InstructionView view);
 void instr_SUBR3(Runtime &runtime, InstructionView view);
 void instr_SUBD3(Runtime &runtime, InstructionView view);
+void instr_FSUBR3(Runtime &runtime, InstructionView view);
+void instr_FSUBD3(Runtime &runtime, InstructionView view);
 void instr_MULR3(Runtime &runtime, InstructionView view);
 void instr_MULD3(Runtime &runtime, InstructionView view);
+void instr_FMULD3(Runtime &runtime, InstructionView view);
+void instr_FMULR3(Runtime &runtime, InstructionView view);
 void instr_DIVR3(Runtime &runtime, InstructionView view);
 void instr_DIVD3(Runtime &runtime, InstructionView view);
+void instr_FDIVR3(Runtime &runtime, InstructionView view);
+void instr_FDIVD3(Runtime &runtime, InstructionView view);
 void instr_MINR3(Runtime &runtime, InstructionView view);
 void instr_MIND3(Runtime &runtime, InstructionView view);
+void instr_FMINR3(Runtime &runtime, InstructionView view);
+void instr_FMIND3(Runtime &runtime, InstructionView view);
 void instr_MAXR3(Runtime &runtime, InstructionView view);
 void instr_MAXD3(Runtime &runtime, InstructionView view);
+void instr_FMAXR3(Runtime &runtime, InstructionView view);
+void instr_FMAXD3(Runtime &runtime, InstructionView view);
 void instr_MODR3(Runtime &runtime, InstructionView view);
 void instr_MODD3(Runtime &runtime, InstructionView view);
+void instr_FMODR3(Runtime &runtime, InstructionView view);
+void instr_FMODD3(Runtime &runtime, InstructionView view);
 void instr_JMP(Runtime &runtime, InstructionView view);
 void instr_CMPR(Runtime &runtime, InstructionView view);
 void instr_CMPD(Runtime &runtime, InstructionView view);
+void instr_FCMPR(Runtime &runtime, InstructionView view);
+void instr_FCMPD(Runtime &runtime, InstructionView view);
 void instr_JE(Runtime &runtime, InstructionView view);
 void instr_JNE(Runtime &runtime, InstructionView view);
 void instr_JA(Runtime &runtime, InstructionView view);
@@ -74,6 +105,7 @@ void instr_DISPLAY_N(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_SN(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_C(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view);
+void instr_DISPLAY_F(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_STR(Runtime &runtime, InstructionView view);
 void instr_HALT(Runtime &runtime, InstructionView view);
 void instr_HALT1(Runtime &runtime, InstructionView view);
@@ -87,6 +119,10 @@ void instr_RET(Runtime &runtime, InstructionView view);
 void instr_PUSH(Runtime &runtime, InstructionView view);
 void instr_POP(Runtime &runtime, InstructionView view);
 void instr_RAND(Runtime &runtime, InstructionView view);
+void instr_ITOF(Runtime &runtime, InstructionView view);
+void instr_UTOF(Runtime &runtime, InstructionView view);
+void instr_FTOI(Runtime &runtime, InstructionView view);
+void instr_FTOU(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE3(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CLOSE(Runtime &runtime, InstructionView view);
@@ -244,11 +280,23 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_ADDR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_ADDD3, REG, REG_BOTH, ONE_DATA)
     },
+    RawInstruction{"FADD", true,
+        InstructionHandler(&instr_FADDD, REG, ONE_DATA),
+        InstructionHandler(&instr_FADDR, REG, REG_BOTH),
+        InstructionHandler(&instr_FADDR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FADDD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"SUB", true,
         InstructionHandler(&instr_SUBR, REG, REG_BOTH),
         InstructionHandler(&instr_SUBD, REG, ONE_DATA),
         InstructionHandler(&instr_SUBR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_SUBD3, REG, REG_BOTH, ONE_DATA)
+    },
+    RawInstruction{"FSUB", true,
+        InstructionHandler(&instr_FSUBR, REG, REG_BOTH),
+        InstructionHandler(&instr_FSUBD, REG, ONE_DATA),
+        InstructionHandler(&instr_FSUBR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FSUBD3, REG, REG_BOTH, ONE_DATA)
     },
     RawInstruction{"MUL", true,
         InstructionHandler(&instr_MULR, REG, REG_BOTH),
@@ -256,18 +304,37 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_MULR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_MULD3, REG, REG_BOTH, ONE_DATA)
     },
+    RawInstruction{"FMUL", true,
+        InstructionHandler(&instr_FMULR, REG, REG_BOTH),
+        InstructionHandler(&instr_FMULD, REG, ONE_DATA),
+        InstructionHandler(&instr_FMULR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FMULD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"DIV", true,
         InstructionHandler(&instr_DIVR, REG, REG_BOTH),
         InstructionHandler(&instr_DIVD, REG, ONE_DATA),
         InstructionHandler(&instr_DIVR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_DIVD3, REG, REG_BOTH, ONE_DATA)
     },
+    RawInstruction{"FDIV", true,
+        InstructionHandler(&instr_FDIVR, REG, REG_BOTH),
+        InstructionHandler(&instr_FDIVD, REG, ONE_DATA),
+        InstructionHandler(&instr_FDIVR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FDIVD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"NOT", true, InstructionHandler(&instr_NOT, REG, REG_BOTH)},
+    RawInstruction{"FNOT", true, InstructionHandler(&instr_FNOT, REG, REG_BOTH)},
     RawInstruction{"MIN", true,
         InstructionHandler(&instr_MINR, REG, REG_BOTH),
         InstructionHandler(&instr_MIND, REG, ONE_DATA),
         InstructionHandler(&instr_MINR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_MIND3, REG, REG_BOTH, ONE_DATA)
+    },
+    RawInstruction{"FMIN", true,
+        InstructionHandler(&instr_FMINR, REG, REG_BOTH),
+        InstructionHandler(&instr_FMIND, REG, ONE_DATA),
+        InstructionHandler(&instr_FMINR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FMIND3, REG, REG_BOTH, ONE_DATA)
     },
     RawInstruction{"MAX", true,
         InstructionHandler(&instr_MAXR, REG, REG_BOTH),
@@ -275,15 +342,31 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_MAXR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_MAXD3, REG, REG_BOTH, ONE_DATA)
     },
+    RawInstruction{"FMAX", true,
+        InstructionHandler(&instr_FMAXR, REG, REG_BOTH),
+        InstructionHandler(&instr_FMAXD, REG, ONE_DATA),
+        InstructionHandler(&instr_FMAXR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FMAXD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"MOD", true,
         InstructionHandler(&instr_MODR, REG, REG_BOTH),
         InstructionHandler(&instr_MODD, REG, ONE_DATA),
         InstructionHandler(&instr_MODR3, REG, REG_BOTH, REG_BOTH),
-        InstructionHandler(&instr_MODD3, REG, REG_BOTH, ONE_DATA)},
+        InstructionHandler(&instr_MODD3, REG, REG_BOTH, ONE_DATA)
+    },
+    RawInstruction{"FMOD", true,
+        InstructionHandler(&instr_FMODR, REG, REG_BOTH),
+        InstructionHandler(&instr_FMODD, REG, ONE_DATA),
+        InstructionHandler(&instr_FMODR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FMODD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"JMP", true, InstructionHandler(&instr_JMP, ONE_DATA)},
     RawInstruction{"CMP", true,
         InstructionHandler(&instr_CMPR, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_CMPD, REG, ONE_DATA)},
+    RawInstruction{"FCMP", true,
+        InstructionHandler(&instr_FCMPR, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_FCMPD, REG, ONE_DATA)},
     RawInstruction{"JE", true, InstructionHandler(&instr_JE, ONE_DATA)},
     RawInstruction{"JNE", true, InstructionHandler(&instr_JNE, ONE_DATA)},
     RawInstruction{"JA", true, InstructionHandler(&instr_JA, ONE_DATA)},
@@ -298,6 +381,8 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_DISPLAY_C, REG_BOTH)},
     RawInstruction{"DISPLAY_B", true,
         InstructionHandler(&instr_DISPLAY_B, REG_BOTH)},
+    RawInstruction{"DISPLAY_F", true,
+        InstructionHandler(&instr_DISPLAY_F, REG_BOTH)},
     RawInstruction{"DISPLAY_STR", true,
         InstructionHandler(&instr_DISPLAY_STR, REG_BOTH)},
     RawInstruction{"HALT", true,
@@ -314,6 +399,10 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"PUSH", true, InstructionHandler(&instr_PUSH, REG)},
     RawInstruction{"POP", true, InstructionHandler(&instr_POP, REG)},
     RawInstruction{"RAND", true, InstructionHandler(&instr_RAND, REG)},
+    RawInstruction{"ITOF", true, InstructionHandler(&instr_ITOF, REG, REG_BOTH)},
+    RawInstruction{"UTOF", true, InstructionHandler(&instr_UTOF, REG, REG_BOTH)},
+    RawInstruction{"FTOI", true, InstructionHandler(&instr_FTOI, REG, REG_BOTH)},
+    RawInstruction{"FTOU", true, InstructionHandler(&instr_FTOU, REG, REG_BOTH)},
     RawInstruction{"WINDOW_CREATE", true,
         InstructionHandler(&instr_WINDOW_CREATE, REG_BOTH, REG_BOTH, ONE_DATA),
         InstructionHandler(&instr_WINDOW_CREATE3, REG_BOTH, REG_BOTH, REG_BOTH)},

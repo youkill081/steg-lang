@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <random>
+#include <bit>
 
 #include "Logger.h"
 #include "interpreter/exceptions.h"
@@ -150,6 +151,26 @@ void instr_ADDD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FADDR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) + std::bit_cast<float>(view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_FADDD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) + std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 
 void instr_SUBR(Runtime &runtime, InstructionView view)
 {
@@ -167,6 +188,26 @@ void instr_SUBD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FSUBR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) - std::bit_cast<float>(view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_FSUBD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) - std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_MULR(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -180,6 +221,26 @@ void instr_MULD(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         view.get_r1(runtime) * view.get_data(runtime)
+    );
+}
+
+void instr_FMULR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) *std::bit_cast<float>( view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_FMULD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) * std::bit_cast<float>(view.get_data(runtime))
+        )
     );
 }
 
@@ -203,11 +264,43 @@ void instr_DIVD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FDIVR(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_r2(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) / std::bit_cast<float>(view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_FDIVD(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_data(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime)) / std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_NOT(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
         !view.get_r2(runtime)
+    );
+}
+
+void instr_FNOT(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>((std::bit_cast<float>(view.get_r2(runtime)) == 0.0f) ? 1.0f : 0.0f)
     );
 }
 
@@ -229,6 +322,32 @@ void instr_MIND(Runtime& runtime, InstructionView view)
         std::min(
             view.get_r1(runtime),
             view.get_data(runtime)
+        )
+    );
+}
+
+void instr_FMINR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmin(
+                std::bit_cast<float>(view.get_r1(runtime)),
+                std::bit_cast<float>(view.get_r2(runtime))
+            )
+        )
+    );
+}
+
+void instr_FMIND(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmin(
+                std::bit_cast<float>(view.get_r1(runtime)),
+                std::bit_cast<float>(view.get_data(runtime))
+            )
         )
     );
 }
@@ -255,6 +374,32 @@ void instr_MAXD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FMAXR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmax(
+                std::bit_cast<float>(view.get_r1(runtime)),
+                std::bit_cast<float>(view.get_r2(runtime))
+            )
+        )
+    );
+}
+
+void instr_FMAXD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmax(
+                std::bit_cast<float>(view.get_r1(runtime)),
+                std::bit_cast<float>(view.get_data(runtime))
+            )
+        )
+    );
+}
+
 void instr_MODR(Runtime& runtime, InstructionView view)
 {
     if (view.get_r2(runtime) == 0)
@@ -272,6 +417,30 @@ void instr_MODD(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         view.get_r1(runtime) % view.get_data(runtime)
+    );
+}
+
+void instr_FMODR(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_r2(runtime)) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmod(std::bit_cast<float>(view.get_r1(runtime)), std::bit_cast<float>(view.get_r2(runtime)))
+        )
+    );
+}
+
+void instr_FMODD(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_data(runtime)) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmod(std::bit_cast<float>(view.get_r1(runtime)), std::bit_cast<float>(view.get_data(runtime)))
+        )
     );
 }
 
@@ -293,6 +462,26 @@ void instr_ADDD3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FADDR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) + std::bit_cast<float>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_FADDD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) + std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_SUBR3(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -309,6 +498,26 @@ void instr_SUBD3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FSUBR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) - std::bit_cast<float>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_FSUBD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r2(runtime)) - std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_MULR3(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -322,6 +531,26 @@ void instr_MULD3(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         view.get_r2(runtime) * view.get_data(runtime)
+    );
+}
+
+void instr_FMULR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) * std::bit_cast<float>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_FMULD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) * std::bit_cast<float>(view.get_data(runtime))
+        )
     );
 }
 
@@ -345,6 +574,30 @@ void instr_DIVD3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FDIVR3(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_r3(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+                std::bit_cast<float>(view.get_r2(runtime)) / std::bit_cast<float>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_FDIVD3(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_data(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r2(runtime)) / std::bit_cast<float>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_MINR3(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -361,6 +614,26 @@ void instr_MIND3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FMINR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmin(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_r3(runtime)))
+        )
+    );
+}
+
+void instr_FMIND3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmin(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_data(runtime)))
+        )
+    );
+}
+
 void instr_MAXR3(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -374,6 +647,26 @@ void instr_MAXD3(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::max(view.get_r2(runtime), view.get_data(runtime))
+    );
+}
+
+void instr_FMAXR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmax(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_r3(runtime)))
+        )
+    );
+}
+
+void instr_FMAXD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmax(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_data(runtime)))
+        )
     );
 }
 
@@ -397,6 +690,30 @@ void instr_MODD3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FMODR3(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_r3(runtime)) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmod(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_r3(runtime)))
+        )
+    );
+}
+
+void instr_FMODD3(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<float>(view.get_data(runtime)) == 0)
+        throw InterpreterError("[MOD] Modulo by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fmod(std::bit_cast<float>(view.get_r2(runtime)), std::bit_cast<float>(view.get_data(runtime)))
+        )
+    );
+}
+
 void instr_JMP(Runtime &runtime, InstructionView view)
 {
     runtime.instruction_pointer = view.get_data(runtime);
@@ -410,6 +727,22 @@ void compute_CMP(Runtime &runtime, uint32_t first_value, uint32_t second_value)
 
     runtime.comparison_flag.signed_greater = static_cast<int32_t>(first_value) > static_cast<int32_t>(second_value);
     runtime.comparison_flag.signed_lower = static_cast<int32_t>(first_value) < static_cast<int32_t>(second_value);
+}
+
+void compute_FCMP(Runtime &runtime, float first_value, float second_value)
+{
+    runtime.comparison_flag.equal = false;
+    runtime.comparison_flag.greater = false;
+    runtime.comparison_flag.lower = false;
+
+    if (!std::isnan(first_value) && !std::isnan(second_value)) {
+        runtime.comparison_flag.equal = (first_value == second_value);
+        runtime.comparison_flag.greater = (first_value > second_value);
+        runtime.comparison_flag.lower = (first_value < second_value);
+    }
+
+    runtime.comparison_flag.signed_greater = runtime.comparison_flag.greater;
+    runtime.comparison_flag.signed_lower = runtime.comparison_flag.lower;
 }
 
 void instr_CMPR(Runtime &runtime, InstructionView view)
@@ -427,6 +760,24 @@ void instr_CMPD(Runtime &runtime, InstructionView view)
         runtime,
         view.get_r1(runtime),
         view.get_data(runtime)
+    );
+}
+
+void instr_FCMPR(Runtime& runtime, InstructionView view)
+{
+    compute_FCMP(
+        runtime,
+        std::bit_cast<float>(view.get_r1(runtime)),
+        std::bit_cast<float>(view.get_r2(runtime))
+    );
+}
+
+void instr_FCMPD(Runtime& runtime, InstructionView view)
+{
+    compute_FCMP(
+        runtime,
+        std::bit_cast<float>(view.get_r1(runtime)),
+        std::bit_cast<float>(view.get_data(runtime))
     );
 }
 
@@ -473,7 +824,7 @@ void instr_DISPLAY_N(Runtime &runtime, InstructionView view)
 
 void instr_DISPLAY_SN(Runtime& runtime, InstructionView view)
 {
-    std::cout << static_cast<int>(view.get_r1(runtime)) << std::endl;
+    std::cout << std::bit_cast<int>(view.get_r1(runtime)) << std::endl;
 }
 
 void instr_DISPLAY_C(Runtime &runtime, InstructionView view)
@@ -484,6 +835,11 @@ void instr_DISPLAY_C(Runtime &runtime, InstructionView view)
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view)
 {
     Logger::log_uint32_as_bit(view.get_r1(runtime));
+}
+
+void instr_DISPLAY_F(Runtime& runtime, InstructionView view)
+{
+    std::cout << std::bit_cast<float>(view.get_r1(runtime)) << std::endl;
 }
 
 void instr_DISPLAY_STR(Runtime& runtime, InstructionView view)
@@ -567,6 +923,46 @@ void instr_RAND(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         dist(rng)
+    );
+}
+
+void instr_ITOF(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            static_cast<float>(std::bit_cast<int>(view.get_r1(runtime)))
+        )
+    );
+}
+
+void instr_UTOF(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            static_cast<float>(view.get_r1(runtime))
+        )
+    );
+}
+
+void instr_FTOI(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        static_cast<int32_t>(
+            std::bit_cast<float>(view.get_r1(runtime))
+        )
+    );
+}
+
+void instr_FTOU(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        static_cast<uint32_t>(
+            std::bit_cast<float>(view.get_r1(runtime))
+        )
     );
 }
 
