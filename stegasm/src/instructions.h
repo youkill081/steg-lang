@@ -71,8 +71,10 @@ void instr_JSA(Runtime &runtime, InstructionView view);
 void instr_JB(Runtime &runtime, InstructionView view);
 void instr_JSB(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_N(Runtime &runtime, InstructionView view);
+void instr_DISPLAY_SN(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_C(Runtime &runtime, InstructionView view);
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view);
+void instr_DISPLAY_STR(Runtime &runtime, InstructionView view);
 void instr_HALT(Runtime &runtime, InstructionView view);
 void instr_HALT1(Runtime &runtime, InstructionView view);
 void instr_ALOCA(Runtime &runtime, InstructionView view);
@@ -290,10 +292,14 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"JSB", true, InstructionHandler(&instr_JSB, ONE_DATA)},
     RawInstruction{"DISPLAY_N", true,
         InstructionHandler(&instr_DISPLAY_N, REG_BOTH)},
+    RawInstruction{"DISPLAY_SN", true,
+        InstructionHandler(&instr_DISPLAY_SN, REG_BOTH)},
     RawInstruction{"DISPLAY_C", true,
         InstructionHandler(&instr_DISPLAY_C, REG_BOTH)},
     RawInstruction{"DISPLAY_B", true,
         InstructionHandler(&instr_DISPLAY_B, REG_BOTH)},
+    RawInstruction{"DISPLAY_STR", true,
+        InstructionHandler(&instr_DISPLAY_STR, REG_BOTH)},
     RawInstruction{"HALT", true,
         InstructionHandler(&instr_HALT),
         InstructionHandler(&instr_HALT1, REG_BOTH)},

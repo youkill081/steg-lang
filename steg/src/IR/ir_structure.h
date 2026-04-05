@@ -24,7 +24,7 @@ namespace compiler
         UNKNOWN,
         BOOL,
         UINT8, UINT16, UINT32,
-        INT8, INT16, INT32,
+        INT,
         PTR8, PTR16, PTR32,
         FILE,
         CLOCK
@@ -42,9 +42,7 @@ namespace compiler
 
         [[nodiscard]] int32_t as_int() const { return std::stoi(value); }
         [[nodiscard]] bool is_signed() const {
-            return value_type == IrValueType::INT8
-                || value_type == IrValueType::INT16
-                || value_type == IrValueType::INT32;
+            return value_type == IrValueType::INT;
         }
 
         [[nodiscard]] bool empty() const { return value.empty(); }
@@ -58,8 +56,8 @@ namespace compiler
         LT, GT, LEQ, GEQ,
         SLT, SGT, SLEQ, SGEQ, // Signed version
 
-        SEXT, // Sign extention
-        ZEXT, // Sign packing
+        ZEXTEND, // Sign extention
+        TRUNC, // Sign packing
 
         AND, OR,
 

@@ -158,11 +158,9 @@ IrOpCode IRLowering::load_opcode(IrValueType t)
     {
     case IrValueType::BOOL:
     case IrValueType::UINT8:
-    case IrValueType::PTR8:
-    case IrValueType::INT8: return IrOpCode::LOAD_8;
+    case IrValueType::PTR8: return IrOpCode::LOAD_8;
     case IrValueType::UINT16:
-    case IrValueType::PTR16:
-    case IrValueType::INT16: return IrOpCode::LOAD_16;
+    case IrValueType::PTR16: return IrOpCode::LOAD_16;
     default: return IrOpCode::LOAD_32;
     }
 }
@@ -173,11 +171,9 @@ IrOpCode IRLowering::store_opcode(IrValueType t)
     {
     case IrValueType::BOOL:
     case IrValueType::UINT8:
-    case IrValueType::PTR8:
-    case IrValueType::INT8: return IrOpCode::STORE_8;
+    case IrValueType::PTR8: return IrOpCode::STORE_8;
     case IrValueType::UINT16:
-    case IrValueType::PTR16:
-    case IrValueType::INT16: return IrOpCode::STORE_16;
+    case IrValueType::PTR16: return IrOpCode::STORE_16;
     default: return IrOpCode::STORE_32;
     }
 }

@@ -31,32 +31,26 @@ namespace compiler
             switch (base)
             {
             case ASTTypeNode::UINT8:
-            case ASTTypeNode::INT8:
             case ASTTypeNode::UINT16:
-            case ASTTypeNode::INT16:
             case ASTTypeNode::UINT32:
-            case ASTTypeNode::INT32: return true;
+            case ASTTypeNode::INT: return true;
             default: return false;
             }
         }
 
         [[nodiscard]] bool is_signed() const
         {
-            return base == ASTTypeNode::INT8 ||
-                base == ASTTypeNode::INT16 ||
-                base == ASTTypeNode::INT32;
+            return base == ASTTypeNode::INT;
         }
 
         [[nodiscard]] uint8_t bit_width() const
         {
             switch (base)
             {
-            case ASTTypeNode::UINT8:
-            case ASTTypeNode::INT8: return 8;
-            case ASTTypeNode::UINT16:
-            case ASTTypeNode::INT16: return 16;
+            case ASTTypeNode::UINT8: return 8;
+            case ASTTypeNode::UINT16: return 16;
             case ASTTypeNode::UINT32:
-            case ASTTypeNode::INT32: return 32;
+            case ASTTypeNode::INT: return 32;
             default: return 0;
             }
         }
@@ -106,9 +100,9 @@ namespace compiler
         const uint8_t width = std::max(a.bit_width(), b.bit_width());
         const bool sign = a.is_signed() || b.is_signed();
         if (width == 8)
-            return ResolvedType::from(sign ? ASTTypeNode::INT8 : ASTTypeNode::UINT8);
+            return ResolvedType::from(ASTTypeNode::UINT8);
         if (width == 16)
-            return ResolvedType::from(sign ? ASTTypeNode::INT16 : ASTTypeNode::UINT16);
-        return ResolvedType::from(sign ? ASTTypeNode::INT32 : ASTTypeNode::UINT32);
+            return ResolvedType::from(ASTTypeNode::UINT16);
+        return ResolvedType::from(sign ? ASTTypeNode::INT : ASTTypeNode::UINT32);
     }
 }

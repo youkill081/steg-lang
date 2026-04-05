@@ -471,6 +471,11 @@ void instr_DISPLAY_N(Runtime &runtime, InstructionView view)
     std::cout << view.get_r1(runtime) << std::endl;
 }
 
+void instr_DISPLAY_SN(Runtime& runtime, InstructionView view)
+{
+    std::cout << static_cast<int>(view.get_r1(runtime)) << std::endl;
+}
+
 void instr_DISPLAY_C(Runtime &runtime, InstructionView view)
 {
     std::cout << static_cast<char>(view.get_r1(runtime)) << std::flush;
@@ -479,6 +484,11 @@ void instr_DISPLAY_C(Runtime &runtime, InstructionView view)
 void instr_DISPLAY_B(Runtime &runtime, InstructionView view)
 {
     Logger::log_uint32_as_bit(view.get_r1(runtime));
+}
+
+void instr_DISPLAY_STR(Runtime& runtime, InstructionView view)
+{
+    std::cout << runtime.utils.get_string_from_address(view.get_r1(runtime)) << std::endl;
 }
 
 void instr_HALT(Runtime &runtime, InstructionView view)

@@ -18,11 +18,9 @@ namespace compiler
         enum Types
         {
             UINT8,
-            INT8,
             UINT16,
-            INT16,
             UINT32,
-            INT32,
+            INT,
             BOOL,
             STRING,
             VOID,
@@ -45,11 +43,9 @@ namespace compiler
 
     static inline std::map<ASTTypeNode::Types, std::string_view> ASTTypeNode_type_to_string = {
         {ASTTypeNode::Types::UINT8, "uint8"},
-        {ASTTypeNode::Types::INT8, "int8"},
         {ASTTypeNode::Types::UINT16, "uint16"},
-        {ASTTypeNode::Types::INT16, "int16"},
         {ASTTypeNode::Types::UINT32, "uint32"},
-        {ASTTypeNode::Types::INT32, "int32"},
+        {ASTTypeNode::Types::INT, "int"},
         {ASTTypeNode::Types::BOOL, "bool"},
         {ASTTypeNode::Types::STRING, "string"},
         {ASTTypeNode::Types::VOID, "void"},

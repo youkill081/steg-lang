@@ -27,7 +27,7 @@ namespace compiler
         as_expression(map(parseToken<TOKEN_INTEGER>, [](LexerToken token) {
             return std::make_unique<ASTLiteralExpressionNode>(
                 token.value,
-                std::make_unique<ASTTypeNode>(ASTTypeNode::INT32, 0, token),
+                std::make_unique<ASTTypeNode>(ASTTypeNode::INT, 0, token),
                 token
             );
         }));

@@ -16,9 +16,7 @@ std::string IRPrinter::format_value_type(const IrValueType t)
     case IrValueType::UINT8: return "u8";
     case IrValueType::UINT16: return "u16";
     case IrValueType::UINT32: return "u32";
-    case IrValueType::INT8: return "i8";
-    case IrValueType::INT16: return "i16";
-    case IrValueType::INT32: return "i32";
+    case IrValueType::INT: return "i32";
     case IrValueType::PTR8: return "ptr8";
     case IrValueType::PTR16: return "ptr16";
     case IrValueType::PTR32: return "ptr32";
@@ -97,9 +95,9 @@ std::string IRPrinter::format_instruction(const IrInstruction& i)
     case IrOpCode::OR: out << res << " = " << a1 << " || " << a2;
         break;
 
-    case IrOpCode::SEXT: out << res << " = sext " << a1;
+    case IrOpCode::TRUNC: out << res << " = trunc " << a1;
         break;
-    case IrOpCode::ZEXT: out << res << " = zext " << a1;
+    case IrOpCode::ZEXTEND: out << res << " = zextend " << a1;
         break;
 
     case IrOpCode::COPY: out << res << " = " << a1;

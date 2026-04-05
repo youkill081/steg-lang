@@ -93,6 +93,9 @@ namespace compiler
 
             builtin("print_n", v(T::VOID), {v(T::UINT32)}, "DISPLAY_N");
             builtin("print_c", v(T::VOID), {v(T::UINT8)}, "DISPLAY_C");
+            builtin("print_b", v(T::VOID), {v(T::UINT32)}, "DISPLAY_B");
+            builtin("print_sn", v(T::VOID), {v(T::INT)}, "DISPLAY_SN");
+            builtin("print_str", v(T::VOID), {v(T::UINT8, 1)}, "DISPLAY_STR");
             builtin("exit", v(T::VOID), {v(T::UINT8)}, "HALT");
             builtin("aloc", v(T::VOID, 1), {v(T::UINT32)}, "ALOC");
             builtin("free", v(T::VOID), {v(T::VOID, 1)}, "FREE");
@@ -122,12 +125,12 @@ namespace compiler
             builtin("window_set_icon", v(T::VOID), {v(T::FILE)}, "WINDOW_SET_ICON");
             builtin("window_mouse_x", v(T::UINT32), {}, "WINDOW_MOUSE_X");
             builtin("window_mouse_y", v(T::UINT32), {}, "WINDOW_MOUSE_Y");
-            builtin("window_mouse_delta_x", v(T::INT32), {}, "WINDOW_MOUSE_DELTA_X");
-            builtin("window_mouse_delta_y", v(T::INT32), {}, "WINDOW_MOUSE_DELTA_Y");
+            builtin("window_mouse_delta_x", v(T::INT), {}, "WINDOW_MOUSE_DELTA_X");
+            builtin("window_mouse_delta_y", v(T::INT), {}, "WINDOW_MOUSE_DELTA_Y");
             builtin("window_mouse_button_pressed", v(T::BOOL), {v(T::UINT32)}, "WINDOW_MOUSE_BUTTON_PRESSED");
             builtin("window_mouse_button_down", v(T::BOOL), {v(T::UINT32)}, "WINDOW_MOUSE_BUTTON_DOWN");
             builtin("window_mouse_button_released", v(T::BOOL), {v(T::UINT32)}, "WINDOW_MOUSE_BUTTON_RELEASED");
-            builtin("window_mouse_wheel_delta", v(T::INT32), {}, "WINDOW_MOUSE_WHEEL_DELTA");
+            builtin("window_mouse_wheel_delta", v(T::INT), {}, "WINDOW_MOUSE_WHEEL_DELTA");
             builtin("window_hide_cursor", v(T::VOID), {}, "WINDOW_HIDE_CURSOR");
             builtin("window_show_cursor", v(T::VOID), {}, "WINDOW_SHOW_CURSOR");
             builtin("window_framebuffer_create", v(T::FRAMEBUFFER), {v(T::UINT32), v(T::UINT32)}, "WINDOW_TEXTURE_FRAMEBUFFER_CREATE");

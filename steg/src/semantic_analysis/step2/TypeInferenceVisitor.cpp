@@ -23,9 +23,10 @@ ResolvedType TypeInferenceVisitor::check_assignable(
     if (from.is_numeric() && to.is_numeric()) {
         const ResolvedType promoted = promote(from, to);
         if (!promoted.is_void()) {
-            if (from.bit_width() > to.bit_width() || from.is_signed() && !to.is_signed())
+            if (from.bit_width() > to.bit_width())
                 type_hint(
-                    "Implicit conversion from " + from.to_string() + " to " + to.to_string(),
+                    "Narrowing conversion from " + from.to_string() + " to "
+                    + to.to_string() + ": possible data loss",
                     token
                 );
             return to;
@@ -187,13 +188,11 @@ void TypeInferenceVisitor::visit(ASTLiteralExpressionNode* node)
     }
 
 
-    if (node->type->type == ASTTypeNode::INT32) {
+    if (node->type->type == ASTTypeNode::INT) {
         const int64_t val = std::stoll(node->value);
 
         if (val < 0) {
-            if (val >= -128) node->resolved_type = ResolvedType::from(ASTTypeNode::INT8);
-            else if (val >= -32768) node->resolved_type = ResolvedType::from(ASTTypeNode::INT16);
-            else node->resolved_type = ResolvedType::from(ASTTypeNode::INT32);
+            node->resolved_type = ResolvedType::from(ASTTypeNode::INT);
         } else {
             if (val <= 255)   node->resolved_type = ResolvedType::from(ASTTypeNode::UINT8);
             else if (val <= 65535) node->resolved_type = ResolvedType::from(ASTTypeNode::UINT16);
@@ -270,10 +269,6 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             const ResolvedType promoted = promote(L, R);
             if (promoted.is_void())
                 type_error("Cannot compare " + L.to_string() + " with " + R.to_string(), node->token);
-            else
-                type_hint("Implicit promotion in comparison: " +
-                          L.to_string() + " vs " + R.to_string() + " -> " + promoted.to_string(),
-                          node->token);
         }
         node->resolved_type = ResolvedType::from(ASTTypeNode::BOOL);
         break;
@@ -311,9 +306,6 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             }
             else
             {
-                if (L != R)
-                    type_hint("Implicit promotion: " + L.to_string() + " and " +
-                              R.to_string() + " -> " + promoted.to_string(), node->token);
                 node->resolved_type = promoted;
             }
         }
@@ -341,11 +333,9 @@ void TypeInferenceVisitor::visit(ASTUnaryExpressionNode* node)
         }
         if (!t.is_signed()) {
             const uint8_t w = t.bit_width();
-            const ResolvedType signed_t = ResolvedType::from(
-                w == 8  ? ASTTypeNode::INT8  :
-                w == 16 ? ASTTypeNode::INT16 : ASTTypeNode::INT32
-            );
-            type_hint("Negation of unsigned " + t.to_string() + " promoted to " + signed_t.to_string(), node->token);
+            const ResolvedType signed_t = ResolvedType::from(ASTTypeNode::INT);
+            if (!dynamic_cast<ASTLiteralExpressionNode *>(node->expression.get())) // Don't hint if user type '-5'
+                type_hint("Negation of unsigned " + t.to_string() + " promoted to " + signed_t.to_string(), node->token);
             node->resolved_type = signed_t;
         } else {
             node->resolved_type = t;

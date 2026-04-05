@@ -38,11 +38,9 @@ std::string AsmGenerator::data_directive(IrValueType t)
     {
     case IrValueType::BOOL:
     case IrValueType::UINT8:
-    case IrValueType::PTR8:
-    case IrValueType::INT8: return "DB";
+    case IrValueType::PTR8: return "DB";
     case IrValueType::UINT16:
-    case IrValueType::PTR16:
-    case IrValueType::INT16: return "DW";
+    case IrValueType::PTR16: return "DW";
     default: return "DD";
     }
 }
@@ -151,15 +149,13 @@ uint8_t AsmGenerator::bits_for(IrValueType t)
     switch (t)
     {
     case IrValueType::BOOL:
-    case IrValueType::UINT8:
-    case IrValueType::INT8: return 8;
-    case IrValueType::UINT16:
-    case IrValueType::INT16: return 16;
+    case IrValueType::UINT8: return 8;
+    case IrValueType::UINT16: return 16;
     case IrValueType::PTR8:
     case IrValueType::PTR16:
     case IrValueType::PTR32:
     case IrValueType::UINT32:
-    case IrValueType::INT32:
+    case IrValueType::INT:
     default: return 32;
     }
 }
@@ -429,22 +425,21 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
     case IrOpCode::OR: emit_binop("MAX", instr);
         break;
 
-    case IrOpCode::SEXT:
+    case IrOpCode::ZEXTEND:
         {
             const IrValueType st = instr.arg1.value_type;
-            if (st == IrValueType::INT8 || st == IrValueType::UINT8)
+            if (st == IrValueType::UINT8)
                 emit_unop("EXTEND_8", instr);
             else
                 emit_unop("EXTEND_16", instr);
             break;
         }
-    case IrOpCode::ZEXT:
+    case IrOpCode::TRUNC:
         {
             const IrValueType st = instr.arg1.value_type;
-            if (st == IrValueType::UINT8 || st == IrValueType::INT8 ||
-                st == IrValueType::BOOL)
+            if (st == IrValueType::UINT8 || st == IrValueType::BOOL)
                 emit_unop("TRUNC_8", instr);
-            else if (st == IrValueType::UINT16 || st == IrValueType::INT16)
+            else if (st == IrValueType::UINT16)
                 emit_unop("TRUNC_16", instr);
             else
                 emit_unop("LOAD_32", instr);
