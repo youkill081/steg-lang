@@ -26,12 +26,17 @@ jobs:
           git fetch --tags
 
           VERSION=$(grep -oP 'project\(stegnocode VERSION \K[0-9.]+' CMakeLists.txt)
+
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Could not extract version from CMakeLists.txt"
+            exit 1
+          fi
+
           TAG="v$VERSION"
+          echo "Version: $VERSION | Tag: $TAG"
 
-          echo "Version: $VERSION"
-
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists. Skipping build."
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
+            echo "Tag $TAG already exists on remote. Skipping build."
             echo "should_build=false" >> $GITHUB_OUTPUT
           else
             echo "Tag $TAG does not exist. Building."
@@ -94,7 +99,7 @@ jobs:
           name: steg_${{ matrix.os }}_${{ needs.check-version.outputs.version }}
           path: dist/
   tag:
-    needs: build
+    needs: [build, check-version]
     runs-on: ubuntu-latest
     if: needs.check-version.outputs.should_build == 'true'
 
