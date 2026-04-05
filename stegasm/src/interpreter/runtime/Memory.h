@@ -39,6 +39,8 @@ private:
     [[nodiscard]] uint32_t find_address_block_index(uint32_t address) const;
     [[nodiscard]] uint32_t find_free_block_index(uint32_t size) const;
 public:
+    mutable uint32_t cached_block_index = 0; // Last block index used, used to avoid searching for free block when linear writing
+
     MemoryBlockSet();
 
     [[nodiscard]] const std::vector<MemoryBlock>& get_blocks() const { return blocks; }

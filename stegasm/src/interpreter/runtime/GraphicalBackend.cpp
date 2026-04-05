@@ -5,6 +5,7 @@
 #include "GraphicalBackend.h"
 
 #include <cmath>
+#include <cstring>
 
 #include "interpreter/exceptions.h"
 

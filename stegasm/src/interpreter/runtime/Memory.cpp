@@ -41,6 +41,7 @@ bool MemoryBlockSet::is_address_used(uint32_t address) const
 
 uint32_t MemoryBlockSet::allocate(uint32_t size)
 {
+    cached_block_index = 0;
     if (size == 0) throw MemoryError("Cannot allocate zero size");
     const uint32_t index = find_free_block_index(size);
 
@@ -56,6 +57,7 @@ uint32_t MemoryBlockSet::allocate(uint32_t size)
 void MemoryBlockSet::allocate_at(uint32_t address, uint32_t size)
 {
     if (size == 0) return;
+    cached_block_index = 0;
 
     uint64_t end = static_cast<uint64_t>(address) + static_cast<uint64_t>(size);
     if (end - 1 > MAX_VALUE_IN_UINT32) {
@@ -108,6 +110,7 @@ void MemoryBlockSet::allocate_at(uint32_t address, uint32_t size)
 
 void MemoryBlockSet::merge_all_free_block()
 {
+    cached_block_index = 0;
     if (blocks.empty()) return;
 
     for (size_t i = 0; i < blocks.size() - 1;)
@@ -126,18 +129,36 @@ void MemoryBlockSet::merge_all_free_block()
 
 uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
 {
-    for (uint32_t i = 0; i < blocks.size(); ++i)
+    if (cached_block_index < blocks.size())
     {
-        if (blocks[i].start <= address && address < blocks[i].start + blocks[i].size)
+        const MemoryBlock &cached_block = blocks[cached_block_index];
+        if (cached_block.start <= address && address < cached_block.start + cached_block.size)
         {
-            return i;
+            return cached_block_index; // Cache hit
         }
     }
-    throw MemoryError("Address " + std::to_string(address) + " is not in memory");
+
+    // Return the first block above the address
+    auto it = std::upper_bound(blocks.begin(), blocks.end(), address,
+        [](uint32_t addr, const MemoryBlock& block) {
+            return addr < block.start;
+        });
+
+    if (it == blocks.begin()) {
+        throw MemoryError("Address " + std::to_string(address) + " is not in memory");
+    }
+    it -= 1; // Change to the right block
+    if (address >= it->start + it->size) {
+        throw MemoryError("Address " + std::to_string(address) + " is not in memory");
+    }
+
+    cached_block_index = static_cast<uint32_t>(std::distance(blocks.begin(), it));
+    return cached_block_index;
 }
 
 void MemoryBlockSet::free(uint32_t address)
 {
+    cached_block_index = 0;
     const uint32_t index = find_address_block_index(address);
 
     if (blocks[index].free == FREE)
@@ -214,12 +235,11 @@ uint32_t Memory::read_uint32(uint32_t address) const
 
 void Memory::write_uint8(uint32_t address, uint8_t value)
 {
-    if (_blocks.is_address_free(address))
+    MemoryBlock &block = _blocks.get_block_for_address(address);
+    if (block.free == FREE)
         throw MemoryError("[SEGFAULT] Try to write at FREE address " + std::to_string(address));
 
-    MemoryBlock& block = _blocks.get_block_for_address(address);
     uint32_t offset = address - block.start;
-
     if (offset >= block.data.size())
         throw MemoryError("Internal error: offset out of range in write");
 
@@ -228,12 +248,11 @@ void Memory::write_uint8(uint32_t address, uint8_t value)
 
 void Memory::write_uint16(uint32_t address, uint16_t value)
 {
-    if (_blocks.is_address_free(address))
+    MemoryBlock &block = _blocks.get_block_for_address(address);
+    if (block.free == FREE)
         throw MemoryError("[SEGFAULT] Try to write uint16 at FREE address " + std::to_string(address));
 
-    MemoryBlock& block = _blocks.get_block_for_address(address);
     uint32_t offset = address - block.start;
-
     if (offset + 1 >= block.data.size())
         throw MemoryError("Write uint16 out of block bounds");
 
@@ -243,12 +262,11 @@ void Memory::write_uint16(uint32_t address, uint16_t value)
 
 void Memory::write_uint32(uint32_t address, uint32_t value)
 {
-    if (_blocks.is_address_free(address))
+    MemoryBlock &block = _blocks.get_block_for_address(address);
+    if (block.free == FREE)
         throw MemoryError("[SEGFAULT] Try to write uint32 at FREE address " + std::to_string(address));
 
-    MemoryBlock& block = _blocks.get_block_for_address(address);
     uint32_t offset = address - block.start;
-
     if (offset + 3 >= block.data.size())
         throw MemoryError("Write uint32 out of block bounds");
 
