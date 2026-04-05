@@ -52,6 +52,9 @@ set(STEGASM_LIB_SOURCES
         src/interpreter/runtime/files/Files.h
         src/interpreter/runtime/Clocks.cpp
         src/interpreter/runtime/Clocks.h
+        src/interpreter/runtime/Stack.h
+        src/interpreter/runtime/InstructionView.h
+        src/interpreter/runtime/InstructionViewImpl.h
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})

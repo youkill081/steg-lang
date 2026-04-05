@@ -5,67 +5,11 @@
 #include <iostream>
 #include <random>
 
-#include "instructions.h"
-
 #include "Logger.h"
 #include "interpreter/exceptions.h"
 #include "interpreter/runtime/Runtime.h"
 
-uint32_t InstructionView::get_data(const Runtime& rt, uint8_t size) const
-{
-    uint32_t val = get_raw_data();
-    if (data_type() == 0b10) {
-        switch (size) {
-        case 1: return rt.memory.read_uint8(val);
-        case 2: return rt.memory.read_uint16(val);
-        default: return rt.memory.read_uint32(val);
-        }
-    }
-    return val;
-}
-
-uint32_t InstructionView::get_r1(const Runtime& rt, uint8_t size) const
-{
-    uint32_t value = rt.registries.read(this->r1());
-    if (is_r1_addr())
-    {
-        switch (size) {
-        case 1: return rt.memory.read_uint8(value);
-        case 2: return rt.memory.read_uint16(value);
-        default: return rt.memory.read_uint32(value);
-        }
-    }
-    return value;
-}
-
-uint32_t InstructionView::get_r2(const Runtime& rt, uint8_t size) const
-{
-    uint32_t value = rt.registries.read(this->r2());
-    if (is_r2_addr())
-    {
-        switch (size) {
-        case 1: return rt.memory.read_uint8(value);
-        case 2: return rt.memory.read_uint16(value);
-        default: return rt.memory.read_uint32(value);
-        }
-    }
-    return value;
-}
-
-uint32_t InstructionView::get_r3(const Runtime& rt, uint8_t size) const
-{
-    uint32_t value = rt.registries.read(this->r3());
-    if (is_r3_addr())
-    {
-        switch (size) {
-        case 1: return rt.memory.read_uint8(value);
-        case 2: return rt.memory.read_uint16(value);
-        default: return rt.memory.read_uint32(value);
-        }
-    }
-    return value;
-}
-
+#include "interpreter/runtime/InstructionViewImpl.h"
 
 // ASM Instructions
 
@@ -76,12 +20,12 @@ void instr_EOF(Runtime& runtime, InstructionView view)
     runtime.is_running = false;
 }
 
-inline void instr_LOADD_32(Runtime &runtine, InstructionView view)
+void instr_LOADD_32(Runtime &runtine, InstructionView view)
 {
     runtine.registries.write(view.r1(), view.get_data(runtine));
 }
 
-inline void instr_LOADR_32(Runtime &runtine, InstructionView view)
+void instr_LOADR_32(Runtime &runtine, InstructionView view)
 {
     runtine.registries.write(
         view.r1(),
@@ -89,7 +33,7 @@ inline void instr_LOADR_32(Runtime &runtine, InstructionView view)
     );
 }
 
-inline void instr_LOADD_16(Runtime &runtime, InstructionView view)
+void instr_LOADD_16(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
@@ -97,7 +41,7 @@ inline void instr_LOADD_16(Runtime &runtime, InstructionView view)
     );
 }
 
-inline void instr_LOADR_16(Runtime &runtime, InstructionView view)
+void instr_LOADR_16(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
@@ -105,7 +49,7 @@ inline void instr_LOADR_16(Runtime &runtime, InstructionView view)
     );
 }
 
-inline void instr_LOADD_8(Runtime &runtime, InstructionView view)
+void instr_LOADD_8(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
@@ -113,7 +57,7 @@ inline void instr_LOADD_8(Runtime &runtime, InstructionView view)
     );
 }
 
-inline void instr_LOADR_8(Runtime &runtime, InstructionView view)
+void instr_LOADR_8(Runtime &runtime, InstructionView view)
 {
     runtime.registries.write(
         view.r1(),
@@ -592,13 +536,7 @@ void instr_CALL(Runtime& runtime, InstructionView view)
 
 void instr_RET(Runtime& runtime, InstructionView view)
 {
-    if (runtime.stack.empty())
-    {
-        throw InterpreterError("[RET] Try to pop empty stack");
-    }
-
-    runtime.instruction_pointer = runtime.stack.top();
-    runtime.stack.pop();
+    runtime.instruction_pointer = runtime.stack.pop();
 }
 
 void instr_PUSH(Runtime& runtime, InstructionView view)
@@ -608,10 +546,7 @@ void instr_PUSH(Runtime& runtime, InstructionView view)
 
 void instr_POP(Runtime& runtime, InstructionView view)
 {
-    if (runtime.stack.empty())
-        throw InterpreterError("[POP] Try to pop empty stack");
-    runtime.registries.write(view.r1(), runtime.stack.top());
-    runtime.stack.pop();
+    runtime.registries.write(view.r1(), runtime.stack.pop());
 }
 
 void instr_RAND(Runtime& runtime, InstructionView view)

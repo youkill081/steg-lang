@@ -9,8 +9,10 @@
 
 #include "Clocks.h"
 #include "GraphicalBackend.h"
+#include "InstructionView.h"
 #include "Memory.h"
 #include "Registries.h"
+#include "Stack.h"
 #include "Utils.h"
 #include "files/Files.h"
 
@@ -39,7 +41,7 @@ public:
     ComparisonFlag comparison_flag;
     Files files;
     Clocks clocks;
-    std::stack<uint32_t> stack{};
+    Stack stack{}; // Force usage of vector, more efficient than deque
     GraphicalBackend graphical_backend;
     Utils utils{*this};
 

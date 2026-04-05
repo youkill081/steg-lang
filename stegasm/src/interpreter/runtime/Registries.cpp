@@ -6,12 +6,7 @@
 
 #include "Logger.h"
 #include "../exceptions.h"
-
-void Registries::check_registry_valid(const uint16_t registry_number)
-{
-    if (registry_number > number_of_registries)
-        throw RegistryError("Invalid registry number " + std::to_string(registry_number));
-}
+#include "interpreter/runtime/InstructionView.h"
 
 void Registries::write(const RegNames registry_name, const uint32_t value)
 {
@@ -20,7 +15,6 @@ void Registries::write(const RegNames registry_name, const uint32_t value)
 
 void Registries::write(const uint16_t registry_number, const uint32_t value)
 {
-    check_registry_valid(registry_number);
     registries[registry_number] = value;
 }
 
@@ -31,7 +25,6 @@ uint32_t Registries::read(const RegNames registry_name) const
 
 uint32_t Registries::read(uint16_t registry_number) const
 {
-    check_registry_valid(registry_number);
     return registries[registry_number];
 }
 

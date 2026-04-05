@@ -11,8 +11,6 @@
 class Registries
 {
 private:
-    static void check_registry_valid(uint16_t registry_number);
-
     std::array<uint32_t, number_of_registries> registries{};
 public:
     void write(uint16_t registry_number, uint32_t value);
