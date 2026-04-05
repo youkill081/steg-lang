@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstdint>
+#include <algorithm>
 
 // ----- MemoryBlockSet -----
 
