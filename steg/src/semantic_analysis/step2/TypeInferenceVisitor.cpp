@@ -260,6 +260,7 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
     const ResolvedType R = node->right->resolved_type;
 
     const bool any_float = L.is_float() || R.is_float();
+    const bool any_signed = L.is_signed() || R.is_signed();
 
     switch (node->op_type)
     {
@@ -335,6 +336,15 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             }
             node->resolved_type = ResolvedType::from(ASTTypeNode::FLOAT);
             break;
+        } else if (any_signed)
+        {
+            switch (node->op_type)
+            {
+            case Op::MULTIPLICATION: node->op_type = Op::SIGNED_MULTIPLICATION;
+                break;
+            case Op::DIVISION: node->op_type = Op::SIGNED_DIVISION;
+                break;
+            }
         }
 
         {
@@ -416,6 +426,37 @@ void TypeInferenceVisitor::visit(ASTAssignExpressionStatement* node)
 
     const ResolvedType target_t = node->target->resolved_type;
     const ResolvedType value_t  = node->value->resolved_type;
+
+    const bool any_float = target_t.is_float() || value_t.is_float();
+
+    if (any_float)
+    {
+        switch (node->op)
+        {
+        case ASTAssignExpressionStatement::ADD_ASSIGN: node->op = ASTAssignExpressionStatement::ADD_ASSIGN_FLOAT;
+            break;
+        case ASTAssignExpressionStatement::SUB_ASSIGN: node->op = ASTAssignExpressionStatement::SUB_ASSIGN_FLOAT;
+            break;
+        case ASTAssignExpressionStatement::MUL_ASSIGN: node->op = ASTAssignExpressionStatement::MUL_ASSIGN_FLOAT;
+            break;
+        case ASTAssignExpressionStatement::DIV_ASSIGN: node->op = ASTAssignExpressionStatement::DIV_ASSIGN_FLOAT;
+            break;
+        default:;
+        }
+    }
+
+    const bool any_signed = target_t.is_signed() || value_t.is_signed();
+    if (any_signed)
+    {
+        switch (node->op)
+        {
+        case ASTAssignExpressionStatement::MUL_ASSIGN: node->op = ASTAssignExpressionStatement::MUL_ASSIGN_SIGNED;
+            break;
+        case ASTAssignExpressionStatement::DIV_ASSIGN: node->op = ASTAssignExpressionStatement::DIV_ASSIGN_SIGNED;
+        default:;
+        }
+    }
+
 
     check_assignable(value_t, target_t, node->value->token);
     node->resolved_type = target_t;

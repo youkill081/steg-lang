@@ -92,6 +92,9 @@ IrOpCode IRGenerator::binary_opcode(const ASTBinaryExpressionNode::binaryOperati
     case ASTBinaryExpressionNode::FLOAT_DIVISION: return IrOpCode::FDIV;
     case ASTBinaryExpressionNode::FLOAT_MODULO: return IrOpCode::FMOD;
 
+    case ASTBinaryExpressionNode::SIGNED_DIVISION: return IrOpCode::SDIV;
+    case ASTBinaryExpressionNode::SIGNED_MULTIPLICATION: return IrOpCode::SMUL;
+
     case ASTBinaryExpressionNode::ADDITION: return IrOpCode::ADD;
     case ASTBinaryExpressionNode::SUBTRACTION: return IrOpCode::SUB;
     case ASTBinaryExpressionNode::MULTIPLICATION: return IrOpCode::MUL;
@@ -140,6 +143,13 @@ IrOpCode IRGenerator::composed_opcode(const ASTAssignExpressionStatement::assign
     case ASTAssignExpressionStatement::SUB_ASSIGN: return IrOpCode::SUB;
     case ASTAssignExpressionStatement::MUL_ASSIGN: return IrOpCode::MUL;
     case ASTAssignExpressionStatement::DIV_ASSIGN: return IrOpCode::DIV;
+    case ASTAssignExpressionStatement::ADD_ASSIGN_FLOAT: return IrOpCode::FADD;
+    case ASTAssignExpressionStatement::SUB_ASSIGN_FLOAT: return IrOpCode::FSUB;
+    case ASTAssignExpressionStatement::MUL_ASSIGN_FLOAT: return IrOpCode::FMUL;
+    case ASTAssignExpressionStatement::DIV_ASSIGN_FLOAT: return IrOpCode::FDIV;
+    case ASTAssignExpressionStatement::DIV_ASSIGN_SIGNED: return IrOpCode::SDIV;
+    case ASTAssignExpressionStatement::MUL_ASSIGN_SIGNED: return IrOpCode::SMUL;
+
     default: return IrOpCode::ADD;
     }
 }
@@ -265,9 +275,7 @@ IrOperand IRGenerator::ensure_type(IrOperand op, IrValueType target_type) {
     const int src_rank = rank_of(op.value_type);
     const int dst_rank = rank_of(target_type);
 
-    if (src_rank < dst_rank)
-        add_instruction({IrOpCode::ZEXTEND,  dest, op});
-    else if (src_rank > dst_rank)
+    if (src_rank > dst_rank)
         add_instruction({IrOpCode::TRUNC, dest, op});
     else
         add_instruction({IrOpCode::COPY,  dest, op});
@@ -309,8 +317,13 @@ void IRGenerator::visit(ASTBinaryExpressionNode* node)
 
     if (any_float)
     {
-        left  = ensure_type(left,  IrValueType::FLOAT);
+        left = ensure_type(left, IrValueType::FLOAT);
         right = ensure_type(right, IrValueType::FLOAT);
+    }
+    else if (node->op_type == node->SIGNED_DIVISION || node->op_type == node->SIGNED_MULTIPLICATION)
+    {
+        left = ensure_type(left, IrValueType::INT);
+        right = ensure_type(right, IrValueType::INT);
     } else
     {
         const IrValueType operand_target = is_comparison
@@ -325,10 +338,7 @@ void IRGenerator::visit(ASTBinaryExpressionNode* node)
             IrOperand dest = temp_op(new_temp());
             dest.value_type = target;
 
-            if (rank_of(op.value_type) < rank_of(target))
-                add_instruction({IrOpCode::ZEXTEND, dest, op});
-            else
-                add_instruction({IrOpCode::COPY, dest, op});
+            add_instruction({IrOpCode::COPY, dest, op});
 
             op = dest;
         };
@@ -467,16 +477,18 @@ void IRGenerator::visit(ASTAssignExpressionStatement* node)
     auto val = eval(node->value.get());
     const IrValueType dest_type = resolved_to_ir_type(node->target->resolved_type);
 
-    if (node->op != ASTAssignExpressionStatement::ASSIGN)
+    if (node->op == ASTAssignExpressionStatement::ASSIGN)
+    {
+        val = ensure_type(val, dest_type);
+    } else
     {
         auto to = eval(node->target.get());
+        val = ensure_type(val, to.value_type);
         IrOperand dest = temp_op(new_temp());
         dest.value_type = dest_type;
         add_instruction({composed_opcode(node->op), dest, to, val});
         val = dest;
     }
-
-    val = ensure_type(val, dest_type);
 
     if (const auto* idx = dynamic_cast<ASTIndexExpressionNode*>(node->target.get()))
     {
@@ -690,6 +702,7 @@ void IRGenerator::visit(ASTFileProgramNode *file)
 {
     this->files.push_back({
         .name = file->name,
-        .path = file->path
+        .path = file->path,
+        .absolute_path = file->absolute_path
     });
 }

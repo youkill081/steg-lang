@@ -52,6 +52,7 @@ namespace compiler
         {ASTTypeNode::Types::STRING, "string"},
         {ASTTypeNode::Types::VOID, "void"},
         {ASTTypeNode::Types::FILE, "file"},
-        {ASTTypeNode::Types::CLOCK, "clock"}
+        {ASTTypeNode::Types::CLOCK, "clock"},
+        {ASTTypeNode::Types::FRAMEBUFFER, "framebuffer"}
     };
 }

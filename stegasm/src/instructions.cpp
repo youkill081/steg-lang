@@ -225,6 +225,26 @@ void instr_MULD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_SMULR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r1(runtime)) * std::bit_cast<int32_t>(view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_SMULD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r1(runtime)) * std::bit_cast<int32_t>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_FMULR(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -262,6 +282,30 @@ void instr_DIVD(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         view.get_r1(runtime) / view.get_data(runtime)
+    );
+}
+
+void instr_SDIVR(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<int32_t>(view.get_r2(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r1(runtime)) / std::bit_cast<int32_t>(view.get_r2(runtime))
+        )
+    );
+}
+
+void instr_SDIVD(Runtime& runtime, InstructionView view)
+{
+    if (std::bit_cast<int32_t>(view.get_data(runtime)) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r1(runtime)) / std::bit_cast<int32_t>(view.get_data(runtime))
+        )
     );
 }
 
@@ -505,6 +549,26 @@ void instr_FSQRTD(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_FABSR(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fabs(std::bit_cast<float>(view.get_r2(runtime)))
+        )
+    );
+}
+
+void instr_FABSD(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::fabs(std::bit_cast<float>(view.get_data(runtime)))
+        )
+    );
+}
+
 inline float degToRad(float degrees) {
     return degrees * (std::numbers::pi / 180.0);
 }
@@ -644,6 +708,26 @@ void instr_MULD3(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_SMULR3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r2(runtime)) * std::bit_cast<int32_t>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_SMULD3(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r2(runtime)) * std::bit_cast<int32_t>(view.get_data(runtime))
+        )
+    );
+}
+
 void instr_FMULR3(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(
@@ -681,6 +765,30 @@ void instr_DIVD3(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         view.get_r2(runtime) / view.get_data(runtime)
+    );
+}
+
+void instr_SDIVR3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_r3(runtime) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r2(runtime)) / std::bit_cast<int32_t>(view.get_r3(runtime))
+        )
+    );
+}
+
+void instr_SDIVD3(Runtime& runtime, InstructionView view)
+{
+    if (view.get_data(runtime) == 0)
+        throw InterpreterError("[DIV] Division by zero !");
+    runtime.registries.write(
+        view.r1(),
+        std::bit_cast<uint32_t>(
+            std::bit_cast<int32_t>(view.get_r2(runtime)) / std::bit_cast<int32_t>(view.get_data(runtime))
+        )
     );
 }
 

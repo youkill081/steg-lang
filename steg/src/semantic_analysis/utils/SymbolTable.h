@@ -108,6 +108,9 @@ namespace compiler
             builtin("sqrt", v(T::FLOAT), {v(T::FLOAT)}, "FSQRT");
             builtin("deg2rad", v(T::FLOAT), {v(T::FLOAT)}, "FDEG2RAD");
             builtin("rad2deg", v(T::FLOAT), {v(T::FLOAT)}, "FRAD2DEG");
+            builtin("fmax", v(T::FLOAT), {v(T::FLOAT), v(T::FLOAT)}, "FMAX");
+            builtin("fmin", v(T::FLOAT), {v(T::FLOAT), v(T::FLOAT)}, "FMIN");
+            builtin("fabs", v(T::FLOAT), {v(T::FLOAT)}, "FABS");
 
             builtin("window_create", v(T::VOID), {v(T::UINT32), v(T::UINT32), v(T::UINT8, 1)}, "WINDOW_CREATE");
             builtin("window_close", v(T::VOID), {}, "WINDOW_CLOSE");

@@ -56,6 +56,8 @@ namespace compiler
         FADD, FSUB, FMUL, FDIV, FMOD, // Float versions
         FNEG,
 
+        SDIV, SMUL,
+
         EQ, NEQ,
         LT, GT, LEQ, GEQ,
         SLT, SGT, SLEQ, SGEQ, // Signed version
@@ -118,6 +120,7 @@ namespace compiler
     struct IrFile {
         std::string name;
         std::string path;
+        std::string absolute_path;
     };
 
     struct IrGlobal {

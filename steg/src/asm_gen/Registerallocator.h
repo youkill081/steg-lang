@@ -18,7 +18,7 @@ namespace compiler
     static constexpr int k_reg_return      = 0;
     static constexpr int k_reg_param_first = 1;
     static constexpr int k_reg_param_last  = 6;
-    static constexpr int k_reg_free_first  = 7;
+    static constexpr int k_reg_free_first  = 10;
     static constexpr int k_reg_free_last   = 31;
     static constexpr int k_reg_free_count  = k_reg_free_last - k_reg_free_first + 1; // 25
 

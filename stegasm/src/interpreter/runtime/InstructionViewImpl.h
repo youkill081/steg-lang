@@ -31,7 +31,6 @@ inline uint32_t InstructionView::get_r2(const Runtime &rt, uint8_t size) const
 
 inline uint32_t InstructionView::get_r3(const Runtime &rt, uint8_t size) const
 {
-    const uint32_t h = header();
     const uint16_t reg_idx = r3();
     uint32_t value = rt.registries.read(reg_idx);
 

@@ -47,6 +47,9 @@ namespace compiler
             COMPARISON_AND,
             COMPARISON_OR,
 
+            SIGNED_MULTIPLICATION,
+            SIGNED_DIVISION,
+
             FLOAT_ADDITION,
             FLOAT_SUBTRACTION,
             FLOAT_MULTIPLICATION,
@@ -164,7 +167,15 @@ namespace compiler
             ADD_ASSIGN,
             SUB_ASSIGN,
             MUL_ASSIGN,
-            DIV_ASSIGN
+            DIV_ASSIGN,
+
+            ADD_ASSIGN_FLOAT,
+            SUB_ASSIGN_FLOAT,
+            MUL_ASSIGN_FLOAT,
+            DIV_ASSIGN_FLOAT,
+
+            MUL_ASSIGN_SIGNED,
+            DIV_ASSIGN_SIGNED,
         };
 
         ASTAssignExpressionStatement(

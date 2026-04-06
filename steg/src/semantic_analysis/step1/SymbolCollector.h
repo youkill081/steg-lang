@@ -120,21 +120,29 @@ namespace compiler
                 Linter::instance().report("File identifier already declared: " + node->name, node->token);
 
             const std::filesystem::path source_dir = node->token.path.parent_path();
-            const std::filesystem::path exec_dir   = std::filesystem::current_path();
+            const std::filesystem::path exec_dir = std::filesystem::current_path();
 
-            const std::filesystem::path relative_to_source = source_dir / node->path;
+            const std::filesystem::path path_source = source_dir / node->path;
+            const std::filesystem::path path_exec   = exec_dir   / node->path;
 
-            if (const std::filesystem::path relative_to_exec   = exec_dir   / node->path; !std::filesystem::exists(relative_to_source) &&
-                !std::filesystem::exists(relative_to_exec))
-            {
+            std::filesystem::path final_path;
+
+            if (std::filesystem::exists(path_source)) {
+                final_path = std::filesystem::absolute(path_source);
+            } else if (std::filesystem::exists(path_exec)) {
+                final_path = std::filesystem::absolute(path_exec);
+            } else {
                 Linter::instance().report(
                     "File not found: '" + node->path + "'\n"
-                    "  Tried: " + relative_to_source.string() + "\n"
-                    "  Tried: " + relative_to_exec.string(),
+                    "  Tried: " + path_source.string() + "\n"
+                    "  Tried: " + path_exec.string(),
                     node->token,
                     LintData::Severity::ERR
                 );
+                final_path = std::filesystem::absolute(path_source);
             }
+
+            node->absolute_path = final_path.string();
 
             if (table.get(node->name) != nullptr)
             {

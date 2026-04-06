@@ -42,10 +42,14 @@ void instr_FSUBR(Runtime &runtime, InstructionView view);
 void instr_FSUBD(Runtime &runtime, InstructionView view);
 void instr_MULR(Runtime &runtime, InstructionView view);
 void instr_MULD(Runtime &runtime, InstructionView view);
+void instr_SMULR(Runtime &runtime, InstructionView view);
+void instr_SMULD(Runtime &runtime, InstructionView view);
 void instr_FMULR(Runtime &runtime, InstructionView view);
 void instr_FMULD(Runtime &runtime, InstructionView view);
 void instr_DIVR(Runtime &runtime, InstructionView view);
 void instr_DIVD(Runtime &runtime, InstructionView view);
+void instr_SDIVR(Runtime &runtime, InstructionView view);
+void instr_SDIVD(Runtime &runtime, InstructionView view);
 void instr_FDIVR(Runtime &runtime, InstructionView view);
 void instr_FDIVD(Runtime &runtime, InstructionView view);
 void instr_NOT(Runtime &runtime, InstructionView view);
@@ -68,6 +72,8 @@ void instr_FCOSR(Runtime &runtime, InstructionView view);
 void instr_FCOSD(Runtime &runtime, InstructionView view);
 void instr_FSQRTR(Runtime &runtime, InstructionView view);
 void instr_FSQRTD(Runtime &runtime, InstructionView view);
+void instr_FABSR(Runtime &runtime, InstructionView view);
+void instr_FABSD(Runtime &runtime, InstructionView view);
 void instr_FDEG2RADR(Runtime &runtime, InstructionView view);
 void instr_FDEG2RADD(Runtime &runtime, InstructionView view);
 void instr_FRAD2DEGR(Runtime &runtime, InstructionView view);
@@ -82,10 +88,14 @@ void instr_FSUBR3(Runtime &runtime, InstructionView view);
 void instr_FSUBD3(Runtime &runtime, InstructionView view);
 void instr_MULR3(Runtime &runtime, InstructionView view);
 void instr_MULD3(Runtime &runtime, InstructionView view);
+void instr_SMULR3(Runtime &runtime, InstructionView view);
+void instr_SMULD3(Runtime &runtime, InstructionView view);
 void instr_FMULD3(Runtime &runtime, InstructionView view);
 void instr_FMULR3(Runtime &runtime, InstructionView view);
 void instr_DIVR3(Runtime &runtime, InstructionView view);
 void instr_DIVD3(Runtime &runtime, InstructionView view);
+void instr_SDIVR3(Runtime &runtime, InstructionView view);
+void instr_SDIVD3(Runtime &runtime, InstructionView view);
 void instr_FDIVR3(Runtime &runtime, InstructionView view);
 void instr_FDIVD3(Runtime &runtime, InstructionView view);
 void instr_MINR3(Runtime &runtime, InstructionView view);
@@ -320,6 +330,12 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_FMULR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_FMULD3, REG, REG_BOTH, ONE_DATA)
     },
+    RawInstruction{"SMUL", true,
+        InstructionHandler(&instr_SMULR, REG, REG_BOTH),
+        InstructionHandler(&instr_SMULD, REG, ONE_DATA),
+        InstructionHandler(&instr_SMULR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_SMULD3, REG, REG_BOTH, ONE_DATA)
+    },
     RawInstruction{"DIV", true,
         InstructionHandler(&instr_DIVR, REG, REG_BOTH),
         InstructionHandler(&instr_DIVD, REG, ONE_DATA),
@@ -331,6 +347,12 @@ constexpr std::array rawInstructionSet =
         InstructionHandler(&instr_FDIVD, REG, ONE_DATA),
         InstructionHandler(&instr_FDIVR3, REG, REG_BOTH, REG_BOTH),
         InstructionHandler(&instr_FDIVD3, REG, REG_BOTH, ONE_DATA)
+    },
+    RawInstruction{"SDIV", true,
+        InstructionHandler(&instr_SDIVR, REG, REG_BOTH),
+        InstructionHandler(&instr_SDIVD, REG, ONE_DATA),
+        InstructionHandler(&instr_SDIVR3, REG, REG_BOTH, REG_BOTH),
+        InstructionHandler(&instr_SDIVD3, REG, REG_BOTH, ONE_DATA)
     },
     RawInstruction{"NOT", true, InstructionHandler(&instr_NOT, REG, REG_BOTH)},
     RawInstruction{"FNOT", true, InstructionHandler(&instr_FNOT, REG, REG_BOTH)},
@@ -381,6 +403,10 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"FSQRT", true,
         InstructionHandler(&instr_FSQRTR, REG, REG_BOTH),
         InstructionHandler(&instr_FSQRTD, REG, ONE_DATA),
+    },
+    RawInstruction{"FABS", true,
+        InstructionHandler(&instr_FABSR, REG, REG_BOTH),
+        InstructionHandler(&instr_FABSD, REG, ONE_DATA),
     },
     RawInstruction{"FDEG2RAD", true,
         InstructionHandler(&instr_FDEG2RADR, REG, REG_BOTH),

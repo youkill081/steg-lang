@@ -181,6 +181,10 @@ std::string IRPrinter::format_instruction(const IrInstruction& i)
         break;
     case IrOpCode::FTOU: out << res << " = float_to_uint (" << a1 << ")";
         break;
+    case IrOpCode::SDIV: out << res << " = " << a1 << " /.s " << a2;
+        break;
+    case IrOpCode::SMUL: out << res << " = " << a1 << " *.s " << a2;
+        break;
     }
 
     out << " [instr -> " << i.instr_nbr << "]";

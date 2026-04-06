@@ -31,9 +31,9 @@ namespace compiler
         // R0 = Return Value
         // R1–R6 = Parameter or skratch
         // R7–R31 = general usage
-        static constexpr auto k_sdst = "R4";
-        static constexpr auto k_ssrc1 = "R5";
-        static constexpr auto k_ssrc2 = "R6";
+        static constexpr auto k_sdst = "R7";
+        static constexpr auto k_ssrc1 = "R8";
+        static constexpr auto k_ssrc2 = "R9";
 
         const std::vector<std::shared_ptr<IrBasicBlock>>& _blocks;
         const std::vector<IrGlobal>& _globals;

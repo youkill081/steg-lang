@@ -15,8 +15,8 @@ AsmGenerator::AsmGenerator(
 {
     for (const auto &g : _globals)
         _global_types[g.name] = g.type;
-    for (const auto &[name, path] : _files)
-        _file_names.insert(name);
+    for (const auto &f : _files)
+        _file_names.insert(f.name);
 }
 
 std::string AsmGenerator::generate()
@@ -59,7 +59,9 @@ void AsmGenerator::emit_files_section()
 {
     d("section .files");
     for (const auto& f : _files)
-        d("    " + f.name + " \"" + f.path + '"');
+    {
+        d("    " + f.name + " \"" + f.absolute_path + '"');
+    }
 }
 
 void AsmGenerator::emit_data_section()
@@ -368,7 +370,11 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
         break;
     case IrOpCode::MUL: emit_binop("MUL", instr);
         break;
+    case IrOpCode::SMUL: emit_binop("SMUL", instr);
+        break;
     case IrOpCode::DIV: emit_binop("DIV", instr);
+        break;
+    case IrOpCode::SDIV: emit_binop("SDIV", instr);
         break;
     case IrOpCode::MOD: emit_binop("MOD", instr);
         break;
