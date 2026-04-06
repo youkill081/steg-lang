@@ -103,6 +103,7 @@ namespace compiler
             builtin("rand", v(T::UINT32), {}, "RAND");
             builtin("debug_r", v(T::VOID), {}, "DEBUG_R");
             builtin("debug_m", v(T::VOID), {}, "DEBUG_M");
+            builtin("debug_t", v(T::VOID), {v(T::UINT32)}, "DEBUG_T");
             builtin("sin", v(T::FLOAT), {v(T::FLOAT)}, "FSIN");
             builtin("cos", v(T::FLOAT), {v(T::FLOAT)}, "FCOS");
             builtin("sqrt", v(T::FLOAT), {v(T::FLOAT)}, "FSQRT");

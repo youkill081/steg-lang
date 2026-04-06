@@ -12,6 +12,7 @@
 #include "interpreter/runtime/Runtime.h"
 
 #include "interpreter/runtime/InstructionViewImpl.h"
+#include "interpreter/runtime/TimeDebugger.h"
 
 // ASM Instructions
 
@@ -1110,6 +1111,20 @@ void instr_DEBUG_M(Runtime& runtime, InstructionView view)
 {
     Logger::log("DEBUG_MEMORY", "instr_DEBUG_MEMORY");
     runtime.memory.display();
+}
+
+
+
+void instr_DEBUG_TR(Runtime& runtime, InstructionView view)
+{
+    const uint32_t clock_id = view.get_r1(runtime);
+    TimeDebugger::process_debug_t(clock_id);
+}
+
+void instr_DEBUG_TD(Runtime& runtime, InstructionView view)
+{
+    const uint32_t clock_id = view.get_data(runtime);
+    TimeDebugger::process_debug_t(clock_id);
 }
 
 void instr_CALL(Runtime& runtime, InstructionView view)

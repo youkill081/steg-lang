@@ -134,6 +134,8 @@ void instr_ALOCR(Runtime &runtime, InstructionView view);
 void instr_FREE(Runtime &runtime, InstructionView view);
 void instr_DEBUG_R(Runtime &runtime, InstructionView view);
 void instr_DEBUG_M(Runtime &runtime, InstructionView view);
+void instr_DEBUG_TR(Runtime &runtime, InstructionView view);
+void instr_DEBUG_TD(Runtime &runtime, InstructionView view);
 void instr_CALL(Runtime &runtime, InstructionView view);
 void instr_RET(Runtime &runtime, InstructionView view);
 void instr_PUSH(Runtime &runtime, InstructionView view);
@@ -450,6 +452,9 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"FREE", true, InstructionHandler(&instr_FREE, REG)},
     RawInstruction{"DEBUG_R", true, InstructionHandler(&instr_DEBUG_R)},
     RawInstruction{"DEBUG_M", true, InstructionHandler(&instr_DEBUG_M)},
+    RawInstruction{"DEBUG_T", true,
+        InstructionHandler(&instr_DEBUG_TR, REG_BOTH),
+        InstructionHandler(&instr_DEBUG_TD, ONE_DATA)},
     RawInstruction{"CALL", true, InstructionHandler(&instr_CALL, ONE_DATA)},
     RawInstruction{"RET", true, InstructionHandler(&instr_RET)},
     RawInstruction{"PUSH", true, InstructionHandler(&instr_PUSH, REG)},

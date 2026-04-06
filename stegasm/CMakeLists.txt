@@ -55,6 +55,7 @@ set(STEGASM_LIB_SOURCES
         src/interpreter/runtime/Stack.h
         src/interpreter/runtime/InstructionView.h
         src/interpreter/runtime/InstructionViewImpl.h
+        src/interpreter/runtime/TimeDebugger.h
 )
 
 add_library(stegasm_lib STATIC ${STEGASM_LIB_SOURCES})
