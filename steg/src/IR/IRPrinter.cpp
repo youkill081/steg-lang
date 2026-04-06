@@ -17,6 +17,7 @@ std::string IRPrinter::format_value_type(const IrValueType t)
     case IrValueType::UINT16: return "u16";
     case IrValueType::UINT32: return "u32";
     case IrValueType::INT: return "i32";
+    case IrValueType::FLOAT: return "f32";
     case IrValueType::PTR8: return "ptr8";
     case IrValueType::PTR16: return "ptr16";
     case IrValueType::PTR32: return "ptr32";
@@ -148,6 +149,38 @@ std::string IRPrinter::format_instruction(const IrInstruction& i)
             out << ")";
             break;
         }
+    case IrOpCode::FADD: out << res << " = " << a1 << " +.f " << a2;
+        break;
+    case IrOpCode::FSUB: out << res << " = " << a1 << " -.f " << a2;
+        break;
+    case IrOpCode::FMUL: out << res << " = " << a1 << " *.f " << a2;
+        break;
+    case IrOpCode::FDIV: out << res << " = " << a1 << " /.f " << a2;
+        break;
+    case IrOpCode::FMOD: out << res << " = " << a1 << " %.f " << a2;
+        break;
+    case IrOpCode::FNEG: out << res << " = -.f" << a1;
+        break;
+    case IrOpCode::FEQ: out << res << " = " << a1 << " ==.f " << a2;
+        break;
+    case IrOpCode::FNEQ: out << res << " = " << a1 << " !=.f " << a2;
+        break;
+    case IrOpCode::FLT: out << res << " = " << a1 << " <.f " << a2;
+        break;
+    case IrOpCode::FGT: out << res << " = " << a1 << " >.f " << a2;
+        break;
+    case IrOpCode::FLEQ: out << res << " = " << a1 << " <=.f " << a2;
+        break;
+    case IrOpCode::FGEQ: out << res << " = " << a1 << " >=.f " << a2;
+        break;
+    case IrOpCode::ITOF: out << res << " = int_to_float (" << a1 << ")";
+        break;
+    case IrOpCode::UTOF: out << res << " = uint_to_float (" << a1 << ")";
+        break;
+    case IrOpCode::FTOI: out << res << " = float_to_int (" << a1 << ")";
+        break;
+    case IrOpCode::FTOU: out << res << " = float_to_uint (" << a1 << ")";
+        break;
     }
 
     out << " [instr -> " << i.instr_nbr << "]";

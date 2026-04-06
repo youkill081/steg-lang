@@ -208,9 +208,26 @@ LexerToken Lexer::_parse_number(std::size_t line, std::size_t column) const
     while (_parser.has_next() && std::isdigit(_parser.peek_x())) {
         value += _parser.get_next();
     }
+
+    bool is_float = false;
+    if (_parser.has_next() && _parser.peek_x() == '.')
+    {
+        is_float = true;
+        value += _parser.get_next(); // the '.'
+
+        while (_parser.has_next() && std::isdigit(_parser.peek_x())) {
+            value += _parser.get_next();
+        }
+    }
+
+    if (_parser.has_next() && (_parser.peek_x() == 'f' || _parser.peek_x() == 'F')) {
+        is_float = true;
+        _parser.get_next(); // Ignore the f/F
+    }
+
     return {
-        .type = TOKEN_INTEGER,
-        .category = get_token_category(TOKEN_INTEGER),
+        .type = is_float ? TOKEN_FLOAT : TOKEN_INTEGER,
+        .category = get_token_category(is_float ? TOKEN_FLOAT : TOKEN_INTEGER),
         .path = _parser.get_path(),
         .value = value,
         .line_number = line,

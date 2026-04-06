@@ -45,6 +45,7 @@ namespace compiler
         TOKEN_TYPE_UINT16,
         TOKEN_TYPE_UINT32,
         TOKEN_TYPE_INT,
+        TOKEN_TYPE_FLOAT,
         TOKEN_TYPE_BOOL,
         TOKEN_TYPE_VOID,
         TOKEN_TYPE_FILE,
@@ -90,6 +91,7 @@ namespace compiler
         TOKEN_DIV_ASSIGNMENT,
 
         TOKEN_INTEGER,
+        TOKEN_FLOAT,
         TOKEN_IDENTIFIER, // Variable identifier, for example
         TOKEN_STRING,
         TOKEN_BOF, // Automatically added by lexer at the beginning of the file
@@ -124,6 +126,7 @@ namespace compiler
         TokenEntry{"uint16", TOKEN_TYPE_UINT16},
         TokenEntry{"uint32", TOKEN_TYPE_UINT32},
         TokenEntry{"int", TOKEN_TYPE_INT},
+        TokenEntry{"float", TOKEN_TYPE_FLOAT},
         TokenEntry{"bool", TOKEN_TYPE_BOOL},
         TokenEntry{"void", TOKEN_TYPE_VOID},
         TokenEntry{"file", TOKEN_TYPE_FILE},
@@ -190,6 +193,7 @@ namespace compiler
         {TOKEN_TYPE_UINT16, "TOKEN_TYPE_UINT16"},
         {TOKEN_TYPE_UINT32, "TOKEN_TYPE_UINT32"},
         {TOKEN_TYPE_INT, "TOKEN_TYPE_INT"},
+        {TOKEN_TYPE_FLOAT, "TOKEN_TYPE_FLOAT"},
         {TOKEN_TYPE_BOOL, "TOKEN_TYPE_BOOL"},
         {TOKEN_TYPE_VOID, "TOKEN_TYPE_VOID"},
         {TOKEN_TYPE_FRAMEBUFFER, "TOKEN_TYPE_FRAMEBUFFER"},
@@ -227,6 +231,7 @@ namespace compiler
         {TOKEN_MUL_ASSIGNMENT, "TOKEN_MUL_ASSIGNMENT"},
         {TOKEN_DIV_ASSIGNMENT, "TOKEN_DIV_ASSIGNMENT"},
         {TOKEN_INTEGER, "TOKEN_INTEGER"},
+        {TOKEN_FLOAT, "TOKEN_FLOAT"},
         {TOKEN_IDENTIFIER, "TOKEN_IDENTIFIER"},
         {TOKEN_STRING, "TOKEN_STRING"},
         {TOKEN_BOF, "TOKEN_BOF"},
@@ -286,6 +291,7 @@ namespace compiler
     {TOKEN_BOOL_TRUE, TOKEN_CATH_KEYWORD},
     {TOKEN_BOOL_FALSE, TOKEN_CATH_KEYWORD},
     {TOKEN_INTEGER, TOKEN_CATH_NUMBER},
+    {TOKEN_FLOAT, TOKEN_CATH_NUMBER},
     {TOKEN_STRING, TOKEN_CATH_STRING}
 };
 }

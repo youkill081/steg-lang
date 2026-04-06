@@ -24,6 +24,9 @@ namespace compiler
             { return base == ASTTypeNode::VOID && !is_pointer(); }
         [[nodiscard]] bool is_bool() const
             { return base == ASTTypeNode::BOOL && !is_pointer(); }
+        [[nodiscard]] bool is_float() const
+            { return base == ASTTypeNode::FLOAT && !is_pointer(); }
+
 
         [[nodiscard]] bool is_numeric() const
         {
@@ -33,6 +36,7 @@ namespace compiler
             case ASTTypeNode::UINT8:
             case ASTTypeNode::UINT16:
             case ASTTypeNode::UINT32:
+            case ASTTypeNode::FLOAT:
             case ASTTypeNode::INT: return true;
             default: return false;
             }
@@ -96,6 +100,9 @@ namespace compiler
 
         if (!a.is_numeric() || !b.is_numeric())
             return ResolvedType::from(ASTTypeNode::VOID);
+
+        if (a.is_float() || b.is_float())
+            return ResolvedType::from(ASTTypeNode::FLOAT);
 
         const uint8_t width = std::max(a.bit_width(), b.bit_width());
         const bool sign = a.is_signed() || b.is_signed();

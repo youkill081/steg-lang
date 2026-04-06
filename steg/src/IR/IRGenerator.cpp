@@ -16,6 +16,7 @@ int rank_of(IrValueType t)
     case IrValueType::UINT8: return 8;
     case IrValueType::UINT16: return 16;
     case IrValueType::UINT32:
+    case IrValueType::FLOAT:
     case IrValueType::INT: return 32;
     default: return 0;
     }
@@ -85,6 +86,12 @@ IrOpCode IRGenerator::binary_opcode(const ASTBinaryExpressionNode::binaryOperati
 {
     switch (op)
     {
+    case ASTBinaryExpressionNode::FLOAT_ADDITION: return IrOpCode::FADD;
+    case ASTBinaryExpressionNode::FLOAT_SUBTRACTION: return IrOpCode::FSUB;
+    case ASTBinaryExpressionNode::FLOAT_MULTIPLICATION: return IrOpCode::FMUL;
+    case ASTBinaryExpressionNode::FLOAT_DIVISION: return IrOpCode::FDIV;
+    case ASTBinaryExpressionNode::FLOAT_MODULO: return IrOpCode::FMOD;
+
     case ASTBinaryExpressionNode::ADDITION: return IrOpCode::ADD;
     case ASTBinaryExpressionNode::SUBTRACTION: return IrOpCode::SUB;
     case ASTBinaryExpressionNode::MULTIPLICATION: return IrOpCode::MUL;
@@ -118,10 +125,9 @@ IrOpCode IRGenerator::unary_opcode(const ASTUnaryExpressionNode::unaryOperationT
 {
     switch (op)
     {
-    case ASTUnaryExpressionNode::unaryOperationType::NEGATION:
-        return IrOpCode::NEG;
-    case ASTUnaryExpressionNode::unaryOperationType::NOT:
-        return IrOpCode::NOT;
+    case ASTUnaryExpressionNode::unaryOperationType::NEGATION: return IrOpCode::NEG;
+    case ASTUnaryExpressionNode::unaryOperationType::FLOAT_NEGATION: return IrOpCode::FNEG;
+    case ASTUnaryExpressionNode::unaryOperationType::NOT: return IrOpCode::NOT;
     }
     return IrOpCode::NEG;
 }
@@ -163,6 +169,7 @@ IrValueType IRGenerator::resolved_to_ir_type(const ResolvedType& t)
     case ASTTypeNode::BOOL: return IrValueType::BOOL;
     case ASTTypeNode::UINT8: return IrValueType::UINT8;
     case ASTTypeNode::UINT16: return IrValueType::UINT16;
+    case ASTTypeNode::FLOAT:  return IrValueType::FLOAT;
     case ASTTypeNode::FILE:
     case ASTTypeNode::CLOCK:
     case ASTTypeNode::UINT32: return IrValueType::UINT32;
@@ -235,11 +242,28 @@ IrOperand IRGenerator::ensure_type(IrOperand op, IrValueType target_type) {
         return op;
     }
 
-    const int src_rank = rank_of(op.value_type);
-    const int dst_rank = rank_of(target_type);
-
     IrOperand dest = temp_op(new_temp());
     dest.value_type = target_type;
+
+    const bool src_float = op.value_type == IrValueType::FLOAT;
+    const bool dst_float = target_type  == IrValueType::FLOAT;
+
+    if (!src_float && dst_float) {
+        // int/uint → float
+        const IrOpCode cast = (op.value_type == IrValueType::INT) ? IrOpCode::ITOF : IrOpCode::UTOF;
+        add_instruction({cast, dest, op});
+        return dest;
+    }
+
+    if (src_float && !dst_float) {
+        // float → int/uint
+        const IrOpCode cast = (target_type == IrValueType::INT) ? IrOpCode::FTOI : IrOpCode::FTOU;
+        add_instruction({cast, dest, op});
+        return dest;
+    }
+
+    const int src_rank = rank_of(op.value_type);
+    const int dst_rank = rank_of(target_type);
 
     if (src_rank < dst_rank)
         add_instruction({IrOpCode::ZEXTEND,  dest, op});
@@ -268,6 +292,8 @@ void IRGenerator::visit(ASTBinaryExpressionNode* node)
     const IrValueType left_type   = left.value_type;
     const IrValueType right_type  = right.value_type;
 
+    const bool any_float = left_type == IrValueType::FLOAT || right_type == IrValueType::FLOAT;
+
     const bool is_comparison = [&] {
         using T = ASTBinaryExpressionNode::binaryOperationType;
         switch (node->op_type) {
@@ -281,34 +307,70 @@ void IRGenerator::visit(ASTBinaryExpressionNode* node)
         }
     }();
 
-    const IrValueType operand_target = is_comparison
-        ? wider_type(left_type, right_type)
-        : result_type;
-
-    auto widen_if_needed = [&](IrOperand& op, IrValueType target)
+    if (any_float)
     {
-        if (op.value_type == target || op.value_type == IrValueType::UNKNOWN)
-            return;
+        left  = ensure_type(left,  IrValueType::FLOAT);
+        right = ensure_type(right, IrValueType::FLOAT);
+    } else
+    {
+        const IrValueType operand_target = is_comparison
+            ? wider_type(left_type, right_type)
+            : result_type;
 
-        IrOperand dest = temp_op(new_temp());
-        dest.value_type = target;
+        auto widen_if_needed = [&](IrOperand& op, IrValueType target)
+        {
+            if (op.value_type == target || op.value_type == IrValueType::UNKNOWN)
+                return;
 
-        if (rank_of(op.value_type) < rank_of(target))
-            add_instruction({IrOpCode::ZEXTEND, dest, op});
-        else
-            add_instruction({IrOpCode::COPY, dest, op});
+            IrOperand dest = temp_op(new_temp());
+            dest.value_type = target;
 
-        op = dest;
-    };
+            if (rank_of(op.value_type) < rank_of(target))
+                add_instruction({IrOpCode::ZEXTEND, dest, op});
+            else
+                add_instruction({IrOpCode::COPY, dest, op});
 
-    widen_if_needed(left,  operand_target);
-    widen_if_needed(right, operand_target);
+            op = dest;
+        };
+
+        widen_if_needed(left,  operand_target);
+        widen_if_needed(right, operand_target);
+    }
 
     IrOperand dest = temp_op(new_temp());
     dest.value_type = result_type;
 
-    const bool signed_op = is_value_type_signed(left_type) || is_value_type_signed(right_type);
-    add_instruction({binary_opcode(node->op_type, signed_op), dest, left, right});
+    IrOpCode opcode = IrOpCode::ADD;
+    if (any_float && is_comparison)
+    {
+        // If is float -> use float comparisons
+        using T = ASTBinaryExpressionNode::binaryOperationType;
+        switch (node->op_type)
+        {
+        case T::COMPARISON_EQUAL: opcode = IrOpCode::FEQ;
+            break;
+        case T::COMPARISON_NOT_EQUAL: opcode = IrOpCode::FNEQ;
+            break;
+        case T::COMPARISON_LESS: opcode = IrOpCode::FLT;
+            break;
+        case T::COMPARISON_GREATER: opcode = IrOpCode::FGT;
+            break;
+        case T::COMPARISON_LESS_OR_EQUAL: opcode = IrOpCode::FLEQ;
+            break;
+        case T::COMPARISON_GREATER_OR_EQUAL: opcode = IrOpCode::FGEQ;
+            break;
+        default: opcode = IrOpCode::FEQ;
+            break;
+        }
+    }
+    else if (any_float) {
+        opcode = binary_opcode(node->op_type, false);
+    } else {
+        const bool signed_op = is_value_type_signed(left_type) || is_value_type_signed(right_type);
+        opcode = binary_opcode(node->op_type, signed_op);
+    }
+
+    add_instruction({opcode, dest, left, right});
     _current_operand = dest;
 }
 
@@ -483,7 +545,9 @@ void IRGenerator::visit(ASTVariableStatement* node)
 
     if (node->expression)
     {
-        const auto val = eval(node->expression.get());
+        auto val = eval(node->expression.get());
+        const IrValueType dest_type = resolved_to_ir_type(ResolvedType::from(node->type));
+        val = ensure_type(val, dest_type);
         add_instruction({IrOpCode::COPY, temp_op(node->name), val});
     }
 }

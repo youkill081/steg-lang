@@ -45,7 +45,13 @@ namespace compiler
             COMPARISON_LESS_OR_EQUAL,
             COMPARISON_GREATER_OR_EQUAL,
             COMPARISON_AND,
-            COMPARISON_OR
+            COMPARISON_OR,
+
+            FLOAT_ADDITION,
+            FLOAT_SUBTRACTION,
+            FLOAT_MULTIPLICATION,
+            FLOAT_DIVISION,
+            FLOAT_MODULO,
         };
 
         ASTBinaryExpressionNode(
@@ -61,6 +67,7 @@ namespace compiler
         std::unique_ptr<ASTExpressionNode> left;
         std::unique_ptr<ASTExpressionNode> right;
         binaryOperationType op_type;
+        bool is_float_cmp = false;
     };
 
 
@@ -70,7 +77,9 @@ namespace compiler
         enum unaryOperationType
         {
             NEGATION,
-            NOT
+            NOT,
+
+            FLOAT_NEGATION,
         };
 
         ASTUnaryExpressionNode(

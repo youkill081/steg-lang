@@ -254,7 +254,7 @@ void AsmGenerator::emit_unop(const char* mnemonic, const IrInstruction& instr)
     finalize_dst(instr.result, dst);
 }
 
-void AsmGenerator::emit_cmp_bool(const IrInstruction& instr, const char* jmp_true)
+void AsmGenerator::emit_cmp_bool(const IrInstruction& instr, const char* jmp_true, bool is_float)
 {
     bool imm1, imm2;
     const std::string a = resolve_src(instr.arg1, k_ssrc1, imm1);
@@ -268,7 +268,7 @@ void AsmGenerator::emit_cmp_bool(const IrInstruction& instr, const char* jmp_tru
         return k_ssrc1;
     }();
 
-    c("    CMP " + ra + ", " + b);
+    c("    " + std::string(is_float ? "FCMP" : "CMP") + " " + ra + ", " + b);
 
     const std::string lbl_true = fresh_label();
     const std::string lbl_end = fresh_label();
@@ -282,7 +282,7 @@ void AsmGenerator::emit_cmp_bool(const IrInstruction& instr, const char* jmp_tru
     finalize_dst(instr.result, dst);
 }
 
-void AsmGenerator::emit_cmp_bool_inv(const IrInstruction& instr, const char* jmp_false)
+void AsmGenerator::emit_cmp_bool_inv(const IrInstruction& instr, const char* jmp_false, bool is_float)
 {
     bool imm1, imm2;
     const std::string a = resolve_src(instr.arg1, k_ssrc1, imm1);
@@ -296,7 +296,7 @@ void AsmGenerator::emit_cmp_bool_inv(const IrInstruction& instr, const char* jmp
         return k_ssrc1;
     }();
 
-    c("    CMP " + ra + ", " + b);
+    c("    " + std::string(is_float ? "FCMP" : "CMP") + " " + ra + ", " + b);
 
     const std::string lbl_false = fresh_label();
     const std::string lbl_end = fresh_label();
@@ -372,7 +372,16 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
         break;
     case IrOpCode::MOD: emit_binop("MOD", instr);
         break;
-
+    case IrOpCode::FADD: emit_binop("FADD", instr);
+        break;
+    case IrOpCode::FSUB: emit_binop("FSUB", instr);
+        break;
+    case IrOpCode::FMUL: emit_binop("FMUL", instr);
+        break;
+    case IrOpCode::FDIV: emit_binop("FDIV", instr);
+        break;
+    case IrOpCode::FMOD: emit_binop("FMOD", instr);
+        break;
     case IrOpCode::NEG:
         {
             bool imm;
@@ -392,32 +401,64 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
             finalize_dst(instr.result, dst);
             break;
         }
+    case IrOpCode::FNEG:
+        {
+            bool imm;
+            const std::string src = resolve_src(instr.arg1, k_ssrc1, imm);
+            const std::string dst = resolve_dst(instr.result);
+
+            const std::string rs = [&]() -> std::string
+            {
+                if (!imm) return src;
+                c("    LOAD_32 " + std::string(k_ssrc1) + ", " + src);
+                return k_ssrc1;
+            }();
+
+            c("    LOAD_32 " + std::string(k_ssrc2) + ", 0.0");
+            c("    FSUB " + dst + ", " + std::string(k_ssrc2) + ", " + rs);
+            finalize_dst(instr.result, dst);
+            break;
+        }
 
     case IrOpCode::NOT: emit_unop("NOT", instr);
         break;
 
     // Unsigned comparison
-    case IrOpCode::EQ: emit_cmp_bool(instr, "JE");
+    case IrOpCode::EQ: emit_cmp_bool(instr, "JE", false);
         break;
-    case IrOpCode::NEQ: emit_cmp_bool(instr, "JNE");
+    case IrOpCode::NEQ: emit_cmp_bool(instr, "JNE", false);
         break;
-    case IrOpCode::LT: emit_cmp_bool(instr, "JB");
+    case IrOpCode::LT: emit_cmp_bool(instr, "JB", false);
         break;
-    case IrOpCode::GT: emit_cmp_bool(instr, "JA");
+    case IrOpCode::GT: emit_cmp_bool(instr, "JA", false);
         break;
-    case IrOpCode::LEQ: emit_cmp_bool_inv(instr, "JA");
+    case IrOpCode::LEQ: emit_cmp_bool_inv(instr, "JA", false);
         break;
-    case IrOpCode::GEQ: emit_cmp_bool_inv(instr, "JB");
+    case IrOpCode::GEQ: emit_cmp_bool_inv(instr, "JB", false);
+        break;
+
+    // Float comparison
+    case IrOpCode::FEQ: emit_cmp_bool(instr, "JE", true);
+        break;
+    case IrOpCode::FNEQ: emit_cmp_bool(instr, "JNE", true);
+        break;
+    case IrOpCode::FLT: emit_cmp_bool(instr, "JB", true);
+        break;
+    case IrOpCode::FGT: emit_cmp_bool(instr, "JA", true);
+        break;
+    case IrOpCode::FLEQ:emit_cmp_bool_inv(instr, "JA", true);
+        break;
+    case IrOpCode::FGEQ:emit_cmp_bool_inv(instr, "JB", true);
         break;
 
     // Signed comparison
-    case IrOpCode::SLT: emit_cmp_bool(instr, "JSB");
+    case IrOpCode::SLT: emit_cmp_bool(instr, "JSB", false);
         break;
-    case IrOpCode::SGT: emit_cmp_bool(instr, "JSA");
+    case IrOpCode::SGT: emit_cmp_bool(instr, "JSA", false);
         break;
-    case IrOpCode::SLEQ: emit_cmp_bool_inv(instr, "JSA");
+    case IrOpCode::SLEQ: emit_cmp_bool_inv(instr, "JSA", false);
         break;
-    case IrOpCode::SGEQ: emit_cmp_bool_inv(instr, "JSB");
+    case IrOpCode::SGEQ: emit_cmp_bool_inv(instr, "JSB", false);
         break;
 
     case IrOpCode::AND: emit_binop("MUL", instr);
@@ -649,6 +690,17 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
             }
             break;
         }
+
+
+
+    case IrOpCode::ITOF: emit_unop("ITOF", instr);
+        break;
+    case IrOpCode::UTOF: emit_unop("UTOF", instr);
+        break;
+    case IrOpCode::FTOI: emit_unop("FTOI", instr);
+        break;
+    case IrOpCode::FTOU: emit_unop("FTOU", instr);
+        break;
     }
 }
 

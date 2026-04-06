@@ -25,6 +25,7 @@ namespace compiler
             map(parseToken<TOKEN_TYPE_UINT16>, [](const auto &t) { return std::make_pair(ASTTypeNode::UINT16, t); }),
             map(parseToken<TOKEN_TYPE_UINT32>, [](const auto &t) { return std::make_pair(ASTTypeNode::UINT32, t); }),
             map(parseToken<TOKEN_TYPE_INT>, [](const auto &t) { return std::make_pair(ASTTypeNode::INT,  t); }),
+            map(parseToken<TOKEN_TYPE_FLOAT>, [](const auto &t) { return std::make_pair(ASTTypeNode::FLOAT,  t); }),
             map(parseToken<TOKEN_TYPE_BOOL>, [](const auto &t) { return std::make_pair(ASTTypeNode::BOOL,   t); }),
             map(parseToken<TOKEN_TYPE_FILE>, [](const auto &t) { return std::make_pair(ASTTypeNode::FILE,   t); }),
             map(parseToken<TOKEN_TYPE_CLOCK>, [](const auto &t) { return std::make_pair(ASTTypeNode::CLOCK,  t); }),

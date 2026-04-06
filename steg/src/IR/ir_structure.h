@@ -25,6 +25,7 @@ namespace compiler
         BOOL,
         UINT8, UINT16, UINT32,
         INT,
+        FLOAT,
         PTR8, PTR16, PTR32,
         FILE,
         CLOCK
@@ -52,9 +53,18 @@ namespace compiler
         ADD, SUB, MUL, DIV, MOD,
         NEG, NOT,
 
+        FADD, FSUB, FMUL, FDIV, FMOD, // Float versions
+        FNEG,
+
         EQ, NEQ,
         LT, GT, LEQ, GEQ,
         SLT, SGT, SLEQ, SGEQ, // Signed version
+
+        FEQ, FNEQ, // Float versions
+        FLT, FGT, FLEQ, FGEQ,
+
+        ITOF, UTOF, // int->float ; unsigned->float
+        FTOI, FTOU, // float->int ; float->unsigned
 
         ZEXTEND, // Sign extention
         TRUNC, // Sign packing

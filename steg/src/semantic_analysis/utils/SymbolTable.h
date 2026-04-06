@@ -96,6 +96,7 @@ namespace compiler
             builtin("print_b", v(T::VOID), {v(T::UINT32)}, "DISPLAY_B");
             builtin("print_sn", v(T::VOID), {v(T::INT)}, "DISPLAY_SN");
             builtin("print_str", v(T::VOID), {v(T::UINT8, 1)}, "DISPLAY_STR");
+            builtin("print_f", v(T::VOID), {v(T::FLOAT)}, "DISPLAY_F");
             builtin("exit", v(T::VOID), {v(T::UINT8)}, "HALT");
             builtin("aloc", v(T::VOID, 1), {v(T::UINT32)}, "ALOC");
             builtin("free", v(T::VOID), {v(T::VOID, 1)}, "FREE");

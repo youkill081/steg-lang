@@ -20,6 +20,19 @@ ResolvedType TypeInferenceVisitor::check_assignable(
         }
     }
 
+    // int -> float
+    if (from.is_numeric() && !from.is_float() && to.is_float())
+        return to;
+
+    // float -> int
+    if (from.is_float() && to.is_numeric() && !to.is_float()) {
+        type_hint(
+            "Implicit conversion from float to " + to.to_string() + ": possible precision loss",
+            token
+        );
+        return to;
+    }
+
     if (from.is_numeric() && to.is_numeric()) {
         const ResolvedType promoted = promote(from, to);
         if (!promoted.is_void()) {
@@ -187,6 +200,10 @@ void TypeInferenceVisitor::visit(ASTLiteralExpressionNode* node)
         return;
     }
 
+    if (node->type->type == ASTTypeNode::FLOAT) {
+        node->resolved_type = ResolvedType::from(ASTTypeNode::FLOAT);
+        return;
+    }
 
     if (node->type->type == ASTTypeNode::INT) {
         const int64_t val = std::stoll(node->value);
@@ -242,11 +259,12 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
     const ResolvedType L = node->left->resolved_type;
     const ResolvedType R = node->right->resolved_type;
 
+    const bool any_float = L.is_float() || R.is_float();
+
     switch (node->op_type)
     {
     case Op::COMPARISON_AND:
     case Op::COMPARISON_OR:
-        // Opérandes doivent être bool ou numeric, pas FILE/CLOCK/opaque
         if (is_opaque(L) || is_opaque(R))
             type_error("Logical operator not allowed on opaque types", node->token);
         node->resolved_type = ResolvedType::from(ASTTypeNode::BOOL);
@@ -264,6 +282,8 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             node->resolved_type = ResolvedType::from(ASTTypeNode::BOOL);
             break;
         }
+        if (any_float)
+            node->is_float_cmp = true;
         if (L != R)
         {
             const ResolvedType promoted = promote(L, R);
@@ -297,6 +317,26 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             break;
         }
 
+        if (any_float)
+        {
+            switch (node->op_type)
+            {
+            case Op::ADDITION: node->op_type = Op::FLOAT_ADDITION;
+                break;
+            case Op::SUBTRACTION: node->op_type = Op::FLOAT_SUBTRACTION;
+                break;
+            case Op::MULTIPLICATION: node->op_type = Op::FLOAT_MULTIPLICATION;
+                break;
+            case Op::DIVISION: node->op_type = Op::FLOAT_DIVISION;
+                break;
+            case Op::MODULO: node->op_type = Op::FLOAT_MODULO;
+                break;
+            default: type_error("No float operand for this binary " + L.to_string() + " and " + R.to_string(), node->token);
+            }
+            node->resolved_type = ResolvedType::from(ASTTypeNode::FLOAT);
+            break;
+        }
+
         {
             const ResolvedType promoted = promote(L, R);
             if (promoted.is_void())
@@ -310,6 +350,12 @@ void TypeInferenceVisitor::visit(ASTBinaryExpressionNode* node)
             }
         }
         break;
+    case ASTBinaryExpressionNode::FLOAT_ADDITION:
+    case ASTBinaryExpressionNode::FLOAT_SUBTRACTION:
+    case ASTBinaryExpressionNode::FLOAT_MULTIPLICATION:
+    case ASTBinaryExpressionNode::FLOAT_DIVISION:
+    case ASTBinaryExpressionNode::FLOAT_MODULO:
+        node->resolved_type = ResolvedType::from(ASTTypeNode::FLOAT);
     }
 }
 
@@ -329,6 +375,11 @@ void TypeInferenceVisitor::visit(ASTUnaryExpressionNode* node)
         if (!t.is_numeric()) {
             type_error("Negation applied to non-numeric type: " + t.to_string(), node->token);
             node->resolved_type = ResolvedType::from(ASTTypeNode::VOID);
+            return;
+        }
+        if (t.is_float()) {
+            node->op_type = Op::FLOAT_NEGATION;
+            node->resolved_type = ResolvedType::from(ASTTypeNode::FLOAT);
             return;
         }
         if (!t.is_signed()) {

@@ -16,6 +16,7 @@ namespace compiler
         choice(
             parseParenthesizedExpr,
             parseLiteral,
+            parseLiteralFloat,
             parseBool,
             parseStringLiteral ,
             parseFunctionCall ,

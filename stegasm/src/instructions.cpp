@@ -931,7 +931,7 @@ void instr_ITOF(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::bit_cast<uint32_t>(
-            static_cast<float>(std::bit_cast<int>(view.get_r1(runtime)))
+            static_cast<float>(std::bit_cast<int>(view.get_r2(runtime)))
         )
     );
 }
@@ -941,7 +941,7 @@ void instr_UTOF(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         std::bit_cast<uint32_t>(
-            static_cast<float>(view.get_r1(runtime))
+            static_cast<float>(view.get_r2(runtime))
         )
     );
 }
@@ -951,7 +951,7 @@ void instr_FTOI(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         static_cast<int32_t>(
-            std::bit_cast<float>(view.get_r1(runtime))
+            std::bit_cast<float>(view.get_r2(runtime))
         )
     );
 }
@@ -961,7 +961,7 @@ void instr_FTOU(Runtime& runtime, InstructionView view)
     runtime.registries.write(
         view.r1(),
         static_cast<uint32_t>(
-            std::bit_cast<float>(view.get_r1(runtime))
+            std::bit_cast<float>(view.get_r2(runtime))
         )
     );
 }

@@ -80,8 +80,8 @@ namespace compiler
 
         void emit_binop(const char* mnemonic, const IrInstruction& instr);
         void emit_unop(const char* mnemonic, const IrInstruction& instr);
-        void emit_cmp_bool(const IrInstruction& instr, const char* jmp_true);
-        void emit_cmp_bool_inv(const IrInstruction& instr, const char* jmp_false);
+        void emit_cmp_bool(const IrInstruction& instr, const char* jmp_true, bool is_float);
+        void emit_cmp_bool_inv(const IrInstruction& instr, const char* jmp_false, bool is_float);
         void emit_load_ir(const IrInstruction& instr, uint8_t bits);
         void emit_store_ir(const IrInstruction& instr, uint8_t bits);
 

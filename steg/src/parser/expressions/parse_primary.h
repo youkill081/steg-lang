@@ -32,6 +32,16 @@ namespace compiler
             );
         }));
 
+    /* Literal Float */
+    inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseLiteralFloat =
+        as_expression(map(parseToken<TOKEN_FLOAT>, [](LexerToken token) {
+            return std::make_unique<ASTLiteralExpressionNode>(
+                token.value,
+                std::make_unique<ASTTypeNode>(ASTTypeNode::FLOAT, 0, token),
+                token
+            );
+        }));
+
     /* Bool */
     inline Parser<std::unique_ptr<ASTExpressionNode>, TokenSpan> parseBool =
         choice(

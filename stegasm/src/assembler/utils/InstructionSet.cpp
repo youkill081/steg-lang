@@ -10,6 +10,7 @@
 #include "assembler/Assembler.h"
 
 #include <iostream>
+#include <utils.h>
 
 using namespace assembler;
 

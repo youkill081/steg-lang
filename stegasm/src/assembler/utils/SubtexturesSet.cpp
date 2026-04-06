@@ -4,6 +4,8 @@
 
 #include "SubtexturesSet.h"
 
+#include <utils.h>
+
 #include "utils.h"
 #include "assembler/Assembler.h"
 #include "assembler/assembler_exception.h"
