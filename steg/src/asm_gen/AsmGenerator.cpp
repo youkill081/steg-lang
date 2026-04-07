@@ -653,45 +653,28 @@ void AsmGenerator::emit_instruction(const IrInstruction& instr)
 
     case IrOpCode::BUILTIN_CALL:
         {
-            std::vector<std::string> used_params;
-
-            for (std::size_t i = 0; i < instr.call_args.size() && i < 6; ++i)
-            {
-                bool imm;
-                const std::string arg = resolve_src(instr.call_args[i], k_ssrc1, imm);
-                const std::string param = "R" + std::to_string(static_cast<int>(i) + 1);
-
-                if (arg != param)
-                {
-                    uint8_t bits = bits_for(instr.call_args[i].value_type);
-                    c("    LOAD_" + std::to_string(bits) + " " + param + ", " + arg);
-                }
-
-                used_params.push_back(param);
+            std::string dst = "";
+            bool has_return = !instr.result.empty();
+            if (has_return) {
+                dst = resolve_dst(instr.result);
             }
 
             std::string line = "    " + instr.arg1.value;
-            bool has_return = !instr.result.empty();
-            if (has_return)
-            {
-                line += " R0";
+
+            if (has_return) {
+                line += " " + dst;
             }
 
-            for (std::size_t i = 0; i < used_params.size(); ++i)
+            for (std::size_t i = 0; i < instr.call_args.size(); ++i)
             {
-                line += " " + used_params[i];
+                bool imm;
+                const std::string arg_loc = resolve_src(instr.call_args[i], k_ssrc1, imm);
+                line += " " + arg_loc;
             }
 
             c(line);
 
-            if (has_return)
-            {
-                const std::string dst = resolve_dst(instr.result);
-                if (dst != "R0")
-                {
-                    uint8_t bits = bits_for(instr.result.value_type);
-                    c("    LOAD_" + std::to_string(bits) + " " + dst + ", R0");
-                }
+            if (has_return) {
                 finalize_dst(instr.result, dst);
             }
             break;
