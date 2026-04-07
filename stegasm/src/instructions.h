@@ -145,6 +145,10 @@ void instr_ITOF(Runtime &runtime, InstructionView view);
 void instr_UTOF(Runtime &runtime, InstructionView view);
 void instr_FTOI(Runtime &runtime, InstructionView view);
 void instr_FTOU(Runtime &runtime, InstructionView view);
+void instr_MAP_IMAGER(Runtime &runtime, InstructionView view);
+void instr_MAP_IMAGED(Runtime &runtime, InstructionView view);
+void instr_MAP_IMAGE_X(Runtime &runtime, InstructionView view);
+void instr_MAP_IMAGE_SIZE_Y(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CREATE3(Runtime &runtime, InstructionView view);
 void instr_WINDOW_CLOSE(Runtime &runtime, InstructionView view);
@@ -464,6 +468,11 @@ constexpr std::array rawInstructionSet =
     RawInstruction{"UTOF", true, InstructionHandler(&instr_UTOF, REG, REG_BOTH)},
     RawInstruction{"FTOI", true, InstructionHandler(&instr_FTOI, REG, REG_BOTH)},
     RawInstruction{"FTOU", true, InstructionHandler(&instr_FTOU, REG, REG_BOTH)},
+    RawInstruction{"MAP_IMAGE", true,
+        InstructionHandler(&instr_MAP_IMAGER, REG, REG_BOTH),
+        InstructionHandler(&instr_MAP_IMAGED, REG, ONE_DATA)},
+    RawInstruction{"MAP_IMAGE_SIZE_X", true, InstructionHandler(&instr_MAP_IMAGE_X, REG)},
+    RawInstruction{"MAP_IMAGE_SIZE_Y", true, InstructionHandler(&instr_MAP_IMAGE_SIZE_Y, REG)},
     RawInstruction{"WINDOW_CREATE", true,
         InstructionHandler(&instr_WINDOW_CREATE, REG_BOTH, REG_BOTH, ONE_DATA),
         InstructionHandler(&instr_WINDOW_CREATE3, REG_BOTH, REG_BOTH, REG_BOTH)},

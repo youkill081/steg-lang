@@ -113,6 +113,10 @@ namespace compiler
             builtin("fmin", v(T::FLOAT), {v(T::FLOAT), v(T::FLOAT)}, "FMIN");
             builtin("fabs", v(T::FLOAT), {v(T::FLOAT)}, "FABS");
 
+            builtin("image_map", v(T::UINT32, 1), {v(T::FILE)}, "MAP_IMAGE");
+            builtin("last_image_size_x", v(T::UINT32), {}, "MAP_IMAGE_SIZE_X");
+            builtin("last_image_size_y", v(T::UINT32), {}, "MAP_IMAGE_SIZE_Y");
+
             builtin("window_create", v(T::VOID), {v(T::UINT32), v(T::UINT32), v(T::UINT8, 1)}, "WINDOW_CREATE");
             builtin("window_close", v(T::VOID), {}, "WINDOW_CLOSE");
             builtin("window_set_viewport_size", v(T::VOID), {v(T::UINT32), v(T::UINT32)}, "WINDOW_SET_VIEWPORT_SIZE");

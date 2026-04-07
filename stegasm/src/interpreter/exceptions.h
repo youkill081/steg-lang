@@ -41,3 +41,8 @@ class ClockError final: public InterpreterError
 {
     using InterpreterError::InterpreterError;
 };
+
+class UtilsError final: public InterpreterError
+{
+    using InterpreterError::InterpreterError;
+};

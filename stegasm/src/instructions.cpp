@@ -1199,6 +1199,40 @@ void instr_FTOU(Runtime& runtime, InstructionView view)
     );
 }
 
+void instr_MAP_IMAGER(Runtime& runtime, InstructionView view)
+{
+    const auto path = runtime.files.get_file(view.get_r2(runtime))->get_path();
+    runtime.registries.write(
+        view.r1(),
+        runtime.utils.load_image_and_map(path)
+    );
+}
+
+void instr_MAP_IMAGED(Runtime& runtime, InstructionView view)
+{
+    const auto path = runtime.files.get_file(view.get_data(runtime))->get_path();
+    runtime.registries.write(
+        view.r1(),
+        runtime.utils.load_image_and_map(path)
+    );
+}
+
+void instr_MAP_IMAGE_X(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.utils.get_last_image_width()
+    );
+}
+
+void instr_MAP_IMAGE_SIZE_Y(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(
+        view.r1(),
+        runtime.utils.get_last_image_height()
+    );
+}
+
 void instr_WINDOW_CREATE(Runtime& runtime, InstructionView view)
 {
     uint32_t width = view.get_r1(runtime);
