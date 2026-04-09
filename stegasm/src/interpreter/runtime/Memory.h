@@ -34,8 +34,13 @@ struct MemoryBlock
 class MemoryBlockSet
 {
 private:
-    std::vector<MemoryBlock> blocks;
+    static constexpr uint32_t CACHE_SIZE = 512;
+    static constexpr uint32_t CACHE_MASK = CACHE_SIZE - 1;
 
+    std::vector<MemoryBlock> blocks;
+    uint32_t _hash_cache[CACHE_SIZE];
+
+    void invalidate_cache();
     void merge_all_free_block();
     [[nodiscard]] uint32_t find_address_block_index(uint32_t address) const;
     [[nodiscard]] uint32_t find_free_block_index(uint32_t size) const;

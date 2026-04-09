@@ -42,7 +42,7 @@ bool MemoryBlockSet::is_address_used(uint32_t address) const
 
 uint32_t MemoryBlockSet::allocate(uint32_t size)
 {
-    cached_block_index = 0;
+    invalidate_cache();
     if (size == 0) throw MemoryError("Cannot allocate zero size");
     const uint32_t index = find_free_block_index(size);
 
@@ -58,7 +58,7 @@ uint32_t MemoryBlockSet::allocate(uint32_t size)
 void MemoryBlockSet::allocate_at(uint32_t address, uint32_t size)
 {
     if (size == 0) return;
-    cached_block_index = 0;
+    invalidate_cache();
 
     uint64_t end = static_cast<uint64_t>(address) + static_cast<uint64_t>(size);
     if (end - 1 > MAX_VALUE_IN_UINT32) {
@@ -109,9 +109,14 @@ void MemoryBlockSet::allocate_at(uint32_t address, uint32_t size)
     }
 }
 
+void MemoryBlockSet::invalidate_cache() {
+    std::ranges::fill(_hash_cache, 0xFFFFFFFF);
+    cached_block_index = 0xFFFFFFFF;
+}
+
 void MemoryBlockSet::merge_all_free_block()
 {
-    cached_block_index = 0;
+    invalidate_cache();
     if (blocks.empty()) return;
 
     for (size_t i = 0; i < blocks.size() - 1;)
@@ -130,7 +135,7 @@ void MemoryBlockSet::merge_all_free_block()
 
 uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
 {
-    if (cached_block_index < blocks.size())
+    if (cached_block_index < blocks.size()) // Optimized for vector iteration
     {
         const MemoryBlock &cached_block = blocks[cached_block_index];
         if (cached_block.start <= address && address < cached_block.start + cached_block.size)
@@ -139,6 +144,17 @@ uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
         }
     }
 
+    const uint32_t hash_idx = (address >> 12) & CACHE_MASK; // Checking in the cache
+    uint32_t entry = _hash_cache[hash_idx];
+    if (entry < blocks.size()) {
+        const auto &b = blocks[entry];
+        if (address >= b.start && address < b.start + b.size) {
+            cached_block_index = entry;
+            return entry;
+        }
+    }
+
+    // Fallback to upper_bound search (log2(N)+O(1))
     // Return the first block above the address
     auto it = std::upper_bound(blocks.begin(), blocks.end(), address,
         [](uint32_t addr, const MemoryBlock& block) {
@@ -159,7 +175,7 @@ uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
 
 void MemoryBlockSet::free(uint32_t address)
 {
-    cached_block_index = 0;
+    invalidate_cache();
     const uint32_t index = find_address_block_index(address);
 
     if (blocks[index].free == FREE)
