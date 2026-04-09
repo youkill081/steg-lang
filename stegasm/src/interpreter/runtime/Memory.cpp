@@ -16,6 +16,7 @@
 MemoryBlockSet::MemoryBlockSet()
 {
     blocks.emplace_back(0u, MAX_VALUE_IN_UINT32, FREE);
+    invalidate_cache();
 }
 
 uint32_t MemoryBlockSet::find_free_block_index(uint32_t size) const
@@ -111,7 +112,6 @@ void MemoryBlockSet::allocate_at(uint32_t address, uint32_t size)
 
 void MemoryBlockSet::invalidate_cache() {
     std::ranges::fill(_hash_cache, 0xFFFFFFFF);
-    cached_block_index = 0xFFFFFFFF;
 }
 
 void MemoryBlockSet::merge_all_free_block()
@@ -133,23 +133,32 @@ void MemoryBlockSet::merge_all_free_block()
     }
 }
 
+void MemoryBlockSet::update_just_read(uint32_t block_idx) const {
+    if (_just_read_cache[0] == block_idx) return;
+
+    _just_read_cache[3] = _just_read_cache[2];
+    _just_read_cache[2] = _just_read_cache[1];
+    _just_read_cache[1] = _just_read_cache[0];
+    _just_read_cache[0] = block_idx;
+}
+
 uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
 {
-    if (cached_block_index < blocks.size()) // Optimized for vector iteration
+    for (uint32_t idx : _just_read_cache) // Only 4 elements to iterate
     {
-        const MemoryBlock &cached_block = blocks[cached_block_index];
-        if (cached_block.start <= address && address < cached_block.start + cached_block.size)
+        if (idx < blocks.size())
         {
-            return cached_block_index; // Cache hit
+            const auto &b = blocks[idx];
+            if (address >= b.start && address < b.start + b.size) return idx;
         }
     }
 
-    const uint32_t hash_idx = (address >> 12) & CACHE_MASK; // Checking in the cache
+    const uint32_t hash_idx = (address >> 5) & CACHE_MASK; // Checking in the cache
     uint32_t entry = _hash_cache[hash_idx];
     if (entry < blocks.size()) {
         const auto &b = blocks[entry];
         if (address >= b.start && address < b.start + b.size) {
-            cached_block_index = entry;
+            update_just_read(entry);
             return entry;
         }
     }
@@ -169,8 +178,10 @@ uint32_t MemoryBlockSet::find_address_block_index(uint32_t address) const
         throw MemoryError("Address " + std::to_string(address) + " is not in memory");
     }
 
-    cached_block_index = static_cast<uint32_t>(std::distance(blocks.begin(), it));
-    return cached_block_index;
+    const uint32_t block_idx = static_cast<uint32_t>(std::distance(blocks.begin(), it));
+    update_just_read(block_idx);
+    _hash_cache[hash_idx] = block_idx;
+    return block_idx;
 }
 
 void MemoryBlockSet::free(uint32_t address)

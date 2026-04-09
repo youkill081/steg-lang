@@ -36,17 +36,18 @@ class MemoryBlockSet
 private:
     static constexpr uint32_t CACHE_SIZE = 512;
     static constexpr uint32_t CACHE_MASK = CACHE_SIZE - 1;
+    static constexpr uint32_t JUST_READ_CACHE_SIZE = 4;
 
     std::vector<MemoryBlock> blocks;
-    uint32_t _hash_cache[CACHE_SIZE];
+    mutable uint32_t _just_read_cache[JUST_READ_CACHE_SIZE]; // Equivalent to L1 cache, store 4 most recent read blocks
+    mutable uint32_t _hash_cache[CACHE_SIZE]; // Caches based memory cache
 
     void invalidate_cache();
     void merge_all_free_block();
+    void update_just_read(uint32_t block_idx) const;
     [[nodiscard]] uint32_t find_address_block_index(uint32_t address) const;
     [[nodiscard]] uint32_t find_free_block_index(uint32_t size) const;
 public:
-    mutable uint32_t cached_block_index = 0; // Last block index used, used to avoid searching for free block when linear writing
-
     MemoryBlockSet();
 
     [[nodiscard]] const std::vector<MemoryBlock>& get_blocks() const { return blocks; }

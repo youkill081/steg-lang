@@ -3,7 +3,7 @@ import { display_player_pos, update_player_pos } from "./game/player_helper.steg
 import { cast_rays } from "./renderer.steg";
 
 fn main() -> void {
-    load_level(rand() % 59);
+    load_level(0);
 
     window_create(1280, 800, "WolfenSteg");
     window_set_target_fps(60);
@@ -18,6 +18,8 @@ fn main() -> void {
 
         window_framebuffer_sync(buf);
         window_framebuffer_draw(buf, 0, 0);
+
+        debug_t(1);
 
         window_present();
     }
