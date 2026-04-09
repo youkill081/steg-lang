@@ -19,8 +19,6 @@ fn main() -> void {
         window_framebuffer_sync(buf);
         window_framebuffer_draw(buf, 0, 0);
 
-        debug_t(1);
-
         window_present();
     }
 }
