@@ -13,7 +13,19 @@
 
 uint32_t Vm::run(ByteBuffer& buffer)
 {
+/*
+ * Vm Ignition
+ */
+
     Runtime runtime = Loader::load(buffer);
+
+    const LoadedInstruction *curr_instruction = runtime.instructions.data();
+    const LoadedInstruction *instructions_beg  = runtime.instructions.data();
+    const LoadedInstruction *instructions_end = instructions_beg + runtime.instructions.size();
+
+    runtime.curr_instruction = &curr_instruction;
+    runtime.instructions_beg = instructions_beg;
+    runtime.instructions_end = instructions_end;
 
 #ifdef ENABLE_INSTRUCTION_COUNTER
     uint64_t instruction_count = 0;
@@ -23,11 +35,19 @@ uint32_t Vm::run(ByteBuffer& buffer)
     auto last_time = std::chrono::steady_clock::now();
 #endif
 
+
+/*
+ * Vm Running
+ */
+
+
     while (runtime.is_running)
     {
-        const auto &current_instr = runtime.instructions[runtime.instruction_pointer];
-        runtime.instruction_pointer++;
-        current_instr.handler.fn(runtime, current_instr.view);
+        if (curr_instruction >= instructions_end)
+            break;
+        const LoadedInstruction *current_instr = curr_instruction;
+        curr_instruction++;
+        current_instr->handler.fn(runtime, current_instr->view);
 
 #ifdef ENABLE_INSTRUCTION_COUNTER
         instruction_count++;

@@ -47,7 +47,9 @@ public:
 
     std::vector<LoadedInstruction> instructions{};
 
-    uint64_t instruction_pointer = 0;
+    const LoadedInstruction **curr_instruction   = nullptr;
+    const LoadedInstruction *instructions_beg = nullptr;
+    const LoadedInstruction *instructions_end = nullptr;
 
     bool is_running = true;
     uint32_t return_value = 0;

@@ -1192,7 +1192,7 @@ void instr_FMODD3(Runtime& runtime, InstructionView view)
 
 void instr_JMP(Runtime &runtime, InstructionView view)
 {
-    runtime.instruction_pointer = view.get_data(runtime);
+    *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void compute_CMP(Runtime &runtime, uint32_t first_value, uint32_t second_value)
@@ -1260,37 +1260,37 @@ void instr_FCMPD(Runtime& runtime, InstructionView view)
 void instr_JE(Runtime& runtime, InstructionView view)
 {
     if (runtime.comparison_flag.equal)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_JNE(Runtime& runtime, InstructionView view)
 {
     if (not runtime.comparison_flag.equal)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_JA(Runtime& runtime, InstructionView view)
 {
     if (runtime.comparison_flag.greater)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_JSA(Runtime& runtime, InstructionView view)
 {
     if (runtime.comparison_flag.signed_greater)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_JB(Runtime& runtime, InstructionView view)
 {
     if (runtime.comparison_flag.lower)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_JSB(Runtime& runtime, InstructionView view)
 {
     if (runtime.comparison_flag.signed_lower)
-        runtime.instruction_pointer = view.get_data(runtime);
+        *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_DISPLAY_N(Runtime &runtime, InstructionView view)
@@ -1386,13 +1386,13 @@ void instr_DEBUG_TD(Runtime& runtime, InstructionView view)
 
 void instr_CALL(Runtime& runtime, InstructionView view)
 {
-    runtime.stack.push(runtime.instruction_pointer);
-    runtime.instruction_pointer = view.get_data(runtime);
+    runtime.stack.push(*runtime.curr_instruction - runtime.instructions_beg);
+    *runtime.curr_instruction = runtime.instructions_beg + view.get_data(runtime);
 }
 
 void instr_RET(Runtime& runtime, InstructionView view)
 {
-    runtime.instruction_pointer = runtime.stack.pop();
+    *runtime.curr_instruction = runtime.instructions_beg + runtime.stack.pop();
 }
 
 void instr_PUSH(Runtime& runtime, InstructionView view)
