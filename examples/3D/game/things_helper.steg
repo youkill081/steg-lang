@@ -39,113 +39,89 @@ export fn init_things(file p1) -> void {
     }
 }
 
-export fn sort_things() -> void {
-    float px = get_px();
-    float py = get_py();
-
-    uint32 i = 0;
-    while (i < num_things) {
-        uint32 ix = file_read_little_uint32_at(things_x, i * 4);
-        uint32 iy = file_read_little_uint32_at(things_y, i * 4);
-        float fx = ix / 10000.0;
-        float fy = iy / 10000.0;
-
-        float dx = fx - px;
-        float dy = fy - py;
-        float dist = (dx * dx) + (dy * dy);
-
-        file_seek_cursor(i * 4, things_dist);
-        file_write_little_uint32(dist * 10000.0, things_dist);
-        file_seek_cursor(i * 4, things_order);
-        file_write_little_uint32(i, things_order);
-
-        i += 1;
-    }
-
-    i = 0;
-    while (i < num_things) {
-        uint32 j = 0;
-        while (j < num_things - i - 1) {
-            uint32 idx_j    = file_read_little_uint32_at(things_order, j * 4);
-            uint32 idx_next = file_read_little_uint32_at(things_order, (j + 1) * 4);
-
-            uint32 dist_j    = file_read_little_uint32_at(things_dist, idx_j * 4);
-            uint32 dist_next = file_read_little_uint32_at(things_dist, idx_next * 4);
-
-            if (dist_j < dist_next) {
-                file_seek_cursor(j * 4, things_order);
-                file_write_little_uint32(idx_next, things_order);
-                file_seek_cursor((j + 1) * 4, things_order);
-                file_write_little_uint32(idx_j, things_order);
-            }
-            j += 1;
-        }
-        i += 1;
-    }
-}
-
 int g_sx       = 0;
 int g_sy       = 0;
 int g_height   = 0;
 float g_dist   = 0.0;
+uint32 g_iz_dist = 0;
 uint32 g_sprite_offset = 0;
 uint32 g_pixel_pool    = 0;
 uint16 g_first_col     = 0;
 
-
-fn draw_scaled_pixel(uint32 @fb, uint32 @zb, uint32 color, int px, int py) -> void {
-    int next_px = g_sx + (((px + 1) * g_height) / 64);
-    int next_py = g_sy + (((py + 1) * g_height) / 64);
-    int scr_x = g_sx + ((px * g_height) / 64);
-    int scr_y = g_sy + ((py * g_height) / 64);
-    int sx = next_px - scr_x;
-    int sy = next_py - scr_y;
-    if (sx < 1) { sx = 1; }
-    if (sy < 1) { sy = 1; }
-
-    int cx = scr_x;
-    if (cx < 0) { cx = 0; }
-    while (cx < scr_x + sx && cx < 320) {
-        uint32 z_val = zb[cx];
-        float wd = z_val / 10000.0;
-        if (g_dist < wd) {
-            int cy = scr_y;
-            if (cy < 0) { cy = 0; }
-            while (cy < scr_y + sy && cy < 200) {
-                fb[(cy * 320) + cx] = color;
-                cy += 1;
-            }
-        }
-        cx += 1;
-    }
-}
-
-fn draw_post(uint32 @fb, uint32 @zb, uint16 col, uint16 start_row, uint16 end_row) -> void {
+fn draw_post(uint32 @fb, uint32 @zb, uint16 start_row, uint16 end_row, int cx_start, int cx_end) -> void {
     uint16 row = start_row;
     while (row < end_row) {
         uint8 ci = file_read_uint8_at(VSWAP, g_pixel_pool);
         g_pixel_pool += 1;
         uint32 color = file_read_little_uint32_at(palette, ci * 4);
 
-        draw_scaled_pixel(fb, zb, color, col, 63 - row);
+        int py = 63 - row;
+        int scr_y = g_sy + ((py * g_height) >> 6);
+        int next_py = g_sy + (((py + 1) * g_height) >> 6);
 
+        int cy_start = scr_y;
+        if (cy_start < 0) { cy_start = 0; }
+        int cy_end = next_py;
+        if (cy_end > 200) { cy_end = 200; }
+
+        if (cy_start < cy_end) {
+            int cx = cx_start;
+            while (cx < cx_end) {
+                if (g_iz_dist < zb[cx]) {
+                    int cy = cy_start;
+                    int fb_idx = (cy * 320) + cx;
+                    while (cy < cy_end) {
+                        fb[fb_idx] = color;
+                        fb_idx += 320; // Avance directe en mémoire
+                        cy += 1;
+                    }
+                }
+                cx += 1;
+            }
+        }
         row += 1;
     }
 }
 
 fn draw_sprite_col(uint32 @fb, uint32 @zb, uint16 col) -> void {
+    int scr_x = g_sx + ((col * g_height) >> 6);
+    int next_px = g_sx + (((col + 1) * g_height) >> 6);
+
+    int cx_start = scr_x;
+    if (cx_start < 0) { cx_start = 0; }
+    int cx_end = next_px;
+    if (cx_end > 320) { cx_end = 320; }
+
     uint16 rel = file_read_little_uint16_at(VSWAP, g_sprite_offset + 4 + (2 * (col - g_first_col)));
     uint32 cmd = g_sprite_offset + rel;
+
+    int visible = 0;
+    if (cx_start < cx_end) {
+        int tcx = cx_start;
+        while (tcx < cx_end) {
+            if (g_iz_dist < zb[tcx]) {
+                visible = 1;
+                break;
+            }
+            tcx += 1;
+        }
+    }
 
     uint16 safety = 0;
     while (safety < 100) {
         safety += 1;
         uint16 end_raw = file_read_little_uint16_at(VSWAP, cmd);
         if (end_raw == 0) { break; }
-        uint16 end_row   = end_raw / 2;
-        uint16 start_row = file_read_little_uint16_at(VSWAP, cmd + 4) / 2;
+
+        uint16 end_row   = end_raw >> 1;
+        uint16 start_row = file_read_little_uint16_at(VSWAP, cmd + 4) >> 1;
         cmd += 6;
-        draw_post(fb, zb, col, start_row, end_row);
+
+        if (visible == 1) {
+            draw_post(fb, zb, start_row, end_row, cx_start, cx_end);
+        } else {
+            g_pixel_pool += (end_row - start_row);
+        }
     }
 }
 
@@ -166,7 +142,6 @@ fn draw_sprite(uint32 @fb, uint32 @zb, uint16 sprite_index) -> void {
         col += 1;
     }
 }
-
 
 export fn draw_things(framebuffer buf, framebuffer z_buffer) -> void {
     uint32 @zb = window_framebuffer_get_address(z_buffer);
@@ -191,13 +166,20 @@ export fn draw_things(framebuffer buf, framebuffer z_buffer) -> void {
         if (rx > 0.1) {
             float ry = -rx_w * sin_a + ry_w * cos_a;
 
-            float th = 200.0 / rx;
-            g_sx = 160.0 + (ry / rx) * 277.13 - (th / 2.0);
+            float inv_rx = 1.0 / rx;
+            float th = 200.0 * inv_rx;
+
+            float f_sx = 160.0 + (ry * inv_rx * 277.13) - (th * 0.5);
+            g_sx = f_sx;
 
             if (g_sx + th > 0 && g_sx < 320) {
-                g_sy = (200.0 - th) / 2.0;
+                float f_sy = (200.0 - th) * 0.5;
+                g_sy = f_sy;
                 g_height = th;
                 g_dist = rx;
+
+                float f_iz = (rx * 10000.0) - 1.0;
+                g_iz_dist = f_iz;
 
                 draw_sprite(fb, zb, file_read_little_uint16_at(things_tex, idx * 2));
             }
