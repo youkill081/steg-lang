@@ -1,6 +1,14 @@
 file plane0 = 0;
 file plane1 = 0;
 
+export fn get_plane0() -> file {
+    return plane0;
+}
+
+export fn get_plane1() -> file {
+    return plane1;
+}
+
 export fn init_map_helper(file p0, file p1) -> void {
     plane0 = p0;
     plane1 = p1;

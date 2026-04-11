@@ -5,10 +5,19 @@ float  DDA_RDX     = 0.0;
 float  DDA_RDY     = 0.0;
 uint16 DDA_WALL_ID = 0;
 uint32 draw_color  = 0;
+framebuffer z_buffer_fb = 0;
 
 import { map_is_wall, map_get_wall } from "./game/map_helper.steg";
 import { get_pa, get_px, get_py }    from "./game/player_helper.steg";
 import { texture_get_pixel, wall_to_tex_id, texture_get_pixel_at } from "./game/texture_helper.steg";
+
+export fn init_renderer() -> void {
+    z_buffer_fb = window_framebuffer_create(320, 1);
+}
+
+export fn get_zbuffer() -> framebuffer {
+    return z_buffer_fb;
+}
 
 fn dda_init_side(float pos, float dir, int cell, float delta) -> float {
     if (dir < 0.0) { return (pos - cell) * delta; }
@@ -132,6 +141,8 @@ export fn cast_rays(framebuffer buf) -> void {
     float py = get_py();
     int x = 0;
 
+    uint32 @zb = window_framebuffer_get_address(z_buffer_fb);
+
     while (x < 320) {
         float rdx  = cos(deg2rad(ray_a));
         float rdy  = sin(deg2rad(ray_a));
@@ -141,7 +152,10 @@ export fn cast_rays(framebuffer buf) -> void {
         if (diff_angle < -180.0) { diff_angle += 360.0; }
         if (diff_angle >  180.0) { diff_angle -= 360.0; }
 
-        draw_column(buf, x, dist * cos(deg2rad(diff_angle)));
+        float perp_dist = dist * cos(deg2rad(diff_angle));
+        zb[x] = perp_dist * 10000.0;
+
+        draw_column(buf, x, perp_dist);
 
         ray_a += ray_step;
         x += 1;

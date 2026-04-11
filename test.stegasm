@@ -1,0 +1,6 @@
+section .text
+    LOAD_32 R1 85
+    LOAD_32 R2 R1
+    DISPLAY_N R1
+    DISPLAY_N R2
+    HALT

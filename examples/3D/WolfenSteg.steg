@@ -1,20 +1,25 @@
 import { load_level } from "./file_loader.steg";
 import { display_player_pos, update_player_pos } from "./game/player_helper.steg";
-import { cast_rays } from "./renderer.steg";
+import { cast_rays, init_renderer, get_zbuffer } from "./renderer.steg";
+import { sort_things, draw_things } from "./game/things_helper.steg";
 
 fn main() -> void {
-    load_level(0);
+    load_level(2);
 
     window_create(1280, 800, "WolfenSteg");
     window_set_target_fps(60);
     window_set_viewport_size(320, 200);
     framebuffer buf = window_framebuffer_create(320, 200);
 
+    init_renderer();
+
     while (!window_should_close()) {
         window_clear(0, 0, 0);
 
-        cast_rays(buf);
         update_player_pos();
+        cast_rays(buf);
+        sort_things();
+        draw_things(buf, get_zbuffer());
 
         window_framebuffer_sync(buf);
         window_framebuffer_draw(buf, 0, 0);

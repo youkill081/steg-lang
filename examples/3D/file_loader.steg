@@ -131,6 +131,79 @@ fn load_vswap_walls() -> file {
     return wall_data;
 }
 
+fn load_vswap_sprites() -> file {
+    uint16 num_chunks = file_read_little_uint16_at(VSWAP, 0);
+    uint16 sprites_start = file_read_little_uint16_at(VSWAP, 2);
+    uint16 sounds_start = file_read_little_uint16_at(VSWAP, 4);
+
+    uint32 offsets_base = 6;
+    uint32 lengths_base = 6 + (num_chunks * 4);
+
+    file raw_sprites = file_create("");
+
+    uint16 i = sprites_start;
+    while (i < sounds_start) {
+        uint32 chunk_offset = file_read_little_uint32_at(VSWAP, offsets_base + (i * 4));
+        uint16 chunk_length = file_read_little_uint16_at(VSWAP, lengths_base + (i * 2));
+
+        uint32 j = 0;
+        uint32 base_offset = file_size(raw_sprites);
+        while (j < 4096) {
+            file_write_uint8(255, raw_sprites);
+            j += 1;
+        }
+
+        if (chunk_length >= 4) {
+            uint16 leftpix = file_read_little_uint16_at(VSWAP, chunk_offset);
+            uint16 rightpix = file_read_little_uint16_at(VSWAP, chunk_offset + 2);
+
+            if (leftpix <= rightpix && rightpix < 64) {
+                uint16 nbCol = rightpix - leftpix + 1;
+
+                uint16 col = leftpix;
+                while (col <= rightpix) {
+                    uint16 colOffsetRel = file_read_little_uint16_at(VSWAP, chunk_offset + 4 + (2 * (col - leftpix)));
+                    uint32 colOffset = chunk_offset + colOffsetRel;
+
+                    uint16 safety = 0;
+                    while (safety < 100) {
+                        safety += 1;
+
+                        uint16 endRowRaw = file_read_little_uint16_at(VSWAP, colOffset);
+                        if (endRowRaw == 0) {
+                            break;
+                        }
+                        uint16 endRow = endRowRaw / 2;
+
+                        uint16 pixPoolRel = file_read_little_uint16_at(VSWAP, colOffset + 2);
+                        uint32 pixPtr = chunk_offset + pixPoolRel;
+
+                        uint16 startRow = file_read_little_uint16_at(VSWAP, colOffset + 4) / 2;
+                        colOffset += 6;
+
+                        uint16 row = startRow;
+                        while (row < endRow) {
+                            uint8 pix = file_read_uint8_at(VSWAP, pixPtr);
+                            pixPtr += 1;
+
+                            uint32 addr = base_offset + (col * 64) + row;
+                            file_seek_cursor(addr, raw_sprites);
+                            file_write_uint8(pix, raw_sprites);
+
+                            row += 1;
+                        }
+                    }
+                    col += 1;
+                }
+            }
+        }
+        file_seek_cursor(file_size(raw_sprites), raw_sprites);
+        i += 1;
+    }
+
+    return raw_sprites;
+}
+
 export fn load_level(uint8 level) -> void {
     file_seek_cursor(0, MAPHEAD);
     uint16 rlew_tag = file_read_little_uint16(MAPHEAD);
@@ -168,5 +241,5 @@ export fn load_level(uint8 level) -> void {
     file wall_data = load_vswap_walls();
 
     // Send to the game
-    load(plane0, plane1, wall_data, num_walls);
+    load(plane0, plane1, wall_data, num_walls, VSWAP);
 }

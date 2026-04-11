@@ -1,0 +1,17 @@
+import { palette } from "./texture_helper.steg";
+
+file vswap_file = 0;
+uint16 first_sprite_index = 0;
+
+export fn init_sprites(file vswap) -> void {
+    vswap_file = vswap;
+    first_sprite_index = file_read_little_uint16_at(vswap, 2);
+}
+
+export fn get_vswap() -> file {
+    return vswap_file;
+}
+
+export fn get_first_sprite() -> uint16 {
+    return first_sprite_index;
+}
