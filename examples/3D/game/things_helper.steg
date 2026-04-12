@@ -3,6 +3,7 @@ file things_x     = 0;
 file things_y     = 0;
 file things_tex   = 0;
 file things_dist  = 0;
+file things_colidable = 0;
 uint32 num_things = 0;
 
 file visible_things = 0;
@@ -15,6 +16,17 @@ import { VSWAP } from "../file_loader.steg";
 
 /* Initiation */
 
+fn is_prop_solid(uint16 val) -> bool {
+    if (val == 24 || val == 25 || val == 26 || val == 28 || val == 30 ||
+        val == 31 || val == 33 || val == 34 || val == 35 || val == 36 ||
+        val == 39 || val == 40 || val == 41 || val == 45 || val == 58 ||
+        val == 59 || val == 60 || val == 62 || val == 63 || val == 68 || val == 69) {
+        return true;
+    }
+
+    return false;
+}
+
 export fn init_things(file p1) -> void {
     uint32 i = 0;
 
@@ -24,6 +36,7 @@ export fn init_things(file p1) -> void {
     things_y     = file_create("");
     things_tex   = file_create("");
     things_dist  = file_create("");
+    things_colidable  = file_create("");
 
     file_reset_cursor(p1);
     while (i < 64 * 64) {
@@ -41,8 +54,21 @@ export fn init_things(file p1) -> void {
             file_append_little_uint32(num_things, things_order);
             num_things += 1;
         }
+
+        if (is_prop_solid(value)) {
+            file_append_uint8(1, things_colidable);
+        } else {
+            file_append_uint8(0, things_colidable);
+        }
+
         i += 1;
     }
+}
+
+/* Is Solid */
+
+export fn is_solid_thing(uint8 x, uint8 y) -> bool {
+    return file_read_uint8_at(things_colidable, (y * 64) + x) == 1;
 }
 
 /* Sort */

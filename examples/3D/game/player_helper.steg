@@ -9,6 +9,7 @@ export fn get_py() -> float { return py; }
 import { map_is_wall, map_is_door } from "./map_helper.steg"
 import { try_open_door, get_door_openness } from "./door_helper.steg"
 import { draw_static_things } from "./static_things_helper.steg";
+import { is_solid_thing } from "./things_helper.steg";
 
 export fn load_player_helper(file p1) -> void
 {
@@ -103,7 +104,7 @@ fn is_blocked(float x, float y) -> bool {
         }
     }
 
-    return false;
+    return is_solid_thing(tx, ty);
 }
 
 export fn update_player_pos() -> void {
