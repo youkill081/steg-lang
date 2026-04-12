@@ -5,14 +5,20 @@ file things_tex   = 0;
 file things_dist  = 0;
 uint32 num_things = 0;
 
+file visible_things = 0;
+uint32 num_visible = 0;
+
 import { get_px, get_py, get_pa } from "./player_helper.steg";
 import { get_first_sprite } from "./sprite_helper.steg";
 import { palette } from "./texture_helper.steg";
 import { VSWAP } from "../file_loader.steg";
 
+/* Initiation */
+
 export fn init_things(file p1) -> void {
     uint32 i = 0;
 
+    visible_things = file_create("");
     things_order = file_create("");
     things_x     = file_create("");
     things_y     = file_create("");
@@ -38,6 +44,51 @@ export fn init_things(file p1) -> void {
         i += 1;
     }
 }
+
+/* Sort */
+
+fn swap_visible(int i, int j) -> void {
+    uint32 dist_i = file_read_little_uint32_at(visible_things, i * 8);
+    uint32 idx_i  = file_read_little_uint32_at(visible_things, (i * 8) + 4);
+
+    uint32 dist_j = file_read_little_uint32_at(visible_things, j * 8);
+    uint32 idx_j  = file_read_little_uint32_at(visible_things, (j * 8) + 4);
+
+    file_seek_cursor(i * 8, visible_things);
+    file_write_little_uint32(dist_j, visible_things);
+    file_seek_cursor((i * 8) + 4, visible_things);
+    file_write_little_uint32(idx_j, visible_things);
+
+    file_seek_cursor(j * 8, visible_things);
+    file_write_little_uint32(dist_i, visible_things);
+    file_seek_cursor(j * 8 + 4, visible_things);
+    file_write_little_uint32(idx_i, visible_things);
+}
+
+fn sort_things_quicksort(int low, int high) -> void {
+    if (low < high) {
+        uint32 pivot_dist = file_read_little_uint32_at(visible_things, high * 8);
+        int i = low - 1;
+        int j = low;
+
+        while (j <= high - 1) {
+            if (file_read_little_uint32_at(visible_things, j * 8) > pivot_dist) {
+                i += 1;
+                swap_visible(i, j);
+            }
+            j += 1;
+        }
+        swap_visible(i + 1, high);
+        int pi = i + 1;
+
+        sort_things_quicksort(low, pi - 1);
+        sort_things_quicksort(pi + 1, high);
+    }
+}
+
+/*
+* Drawing
+*/
 
 int g_sx = 0;
 int g_sy = 0;
@@ -144,8 +195,6 @@ fn draw_sprite(uint32 @fb, file zb, uint16 sprite_index) -> void {
 }
 
 export fn draw_things(framebuffer buf, file z_buffer) -> void {
-    uint32 @fb = window_framebuffer_get_address(buf);
-
     float px = get_px();
     float py = get_py();
     float pa = deg2rad(get_pa());
@@ -153,36 +202,71 @@ export fn draw_things(framebuffer buf, file z_buffer) -> void {
     float cos_a = cos(pa);
     float sin_a = sin(pa);
 
+    num_visible = 0;
     uint32 i = 0;
+
+    /* Get Visible Things */
     while (i < num_things) {
         uint32 idx = file_read_little_uint32_at(things_order, i * 4);
 
         float rx_w = (file_read_little_uint32_at(things_x, idx * 4) / 10000.0) - px;
         float ry_w = (file_read_little_uint32_at(things_y, idx * 4) / 10000.0) - py;
 
-        float rx =  rx_w * cos_a + ry_w * sin_a;
+        float rx = rx_w * cos_a + ry_w * sin_a;
 
         if (rx > 0.1) {
             float ry = -rx_w * sin_a + ry_w * cos_a;
-
             float inv_rx = 1.0 / rx;
             float th = 200.0 * inv_rx;
-
             float f_sx = 160.0 + (ry * inv_rx * 277.13) - (th * 0.5);
-            g_sx = f_sx;
 
-            if (g_sx + th > 0 && g_sx < 320) {
-                float f_sy = (200.0 - th) * 0.5;
-                g_sy = f_sy;
-                g_height = th;
-                g_dist = rx;
+            if (f_sx + th > 0 && f_sx < 320) {
+                uint32 dist_int = rx * 10000.0;
 
-                float f_iz = (rx * 10000.0) - 1.0;
-                g_iz_dist = f_iz;
-
-                draw_sprite(fb, z_buffer, file_read_little_uint16_at(things_tex, idx * 2));
+                file_seek_cursor(num_visible * 8, visible_things);
+                file_write_little_uint32(dist_int, visible_things);
+                file_seek_cursor(num_visible * 8 + 4, visible_things);
+                file_write_little_uint32(idx, visible_things);
+                num_visible += 1;
             }
         }
         i += 1;
+    }
+
+    // Sort them
+    if (num_visible > 1) {
+        sort_things_quicksort(0, num_visible - 1);
+    }
+
+    // And draw
+    uint32 @fb = window_framebuffer_get_address(buf);
+    uint32 v = 0;
+
+    while (v < num_visible) {
+        uint32 idx = file_read_little_uint32_at(visible_things, (v * 8) + 4);
+
+        float rx_w = (file_read_little_uint32_at(things_x, idx * 4) / 10000.0) - px;
+        float ry_w = (file_read_little_uint32_at(things_y, idx * 4) / 10000.0) - py;
+
+        float rx = rx_w * cos_a + ry_w * sin_a;
+        float ry = -rx_w * sin_a + ry_w * cos_a;
+
+        float inv_rx = 1.0 / rx;
+        float th = 200.0 * inv_rx;
+
+        float f_sx = 160.0 + (ry * inv_rx * 277.13) - (th * 0.5);
+
+        g_sx = f_sx;
+        float f_sy = (200.0 - th) * 0.5;
+        g_sy = f_sy;
+        g_height = th;
+        g_dist = rx;
+
+        float f_iz = (rx * 10000.0) - 1.0;
+        g_iz_dist = f_iz;
+
+        draw_sprite(fb, z_buffer, file_read_little_uint16_at(things_tex, idx * 2));
+
+        v += 1;
     }
 }
