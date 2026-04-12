@@ -28,11 +28,11 @@ ByteBuffer FileHandler::encode(const Parameters& parameters)
 
     // Write file name size
     std::string file_name = path.filename().string();
-    end.write_uint32_big(file_name.size());
+    end.append_uint32_big(file_name.size());
 
     // Write file name
     for (const auto & c : file_name) {
-        end.write_uint8(c);
+        end.append_uint8(c);
     }
 
     // Write file data
@@ -41,7 +41,7 @@ ByteBuffer FileHandler::encode(const Parameters& parameters)
     int byte; // EOF is int need int to finish loop
     while ((byte = file.get()) != EOF)
     {
-        end.write_uint8(byte);
+        end.append_uint8(byte);
     }
 
     Logger::log("File ready to be encoded", "FileHandler");

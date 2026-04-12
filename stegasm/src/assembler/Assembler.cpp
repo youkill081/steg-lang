@@ -166,61 +166,61 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile, Li
     linter.error_guard([&]
     {
         // Push Variables
-        buffer.write_uint32_big(compiledFile.variables.size());
+        buffer.append_uint32_big(compiledFile.variables.size());
         for (const auto &variable : compiledFile.variables)
         {
-            buffer.write_uint8(variable.flags);
-            buffer.write_uint32_big(compiledFile.variables.get_variable_address(variable));
-            buffer.write_uint16_big(variable.value.size());
+            buffer.append_uint8(variable.flags);
+            buffer.append_uint32_big(compiledFile.variables.get_variable_address(variable));
+            buffer.append_uint16_big(variable.value.size());
             for (const auto &data : variable.value)
             {
                 switch (variable.type)
                 {
                     case VARIABLE_UINT8:
-                        buffer.write_uint8(std::get<uint8_t>(data));
+                        buffer.append_uint8(std::get<uint8_t>(data));
                         break;
                     case VARIABLE_UINT16:
-                        buffer.write_uint16_big(std::get<uint16_t>(data));
+                        buffer.append_uint16_big(std::get<uint16_t>(data));
                         break;
                     case VARIABLE_UINT32:
-                        buffer.write_uint32_big(std::get<uint32_t>(data));
+                        buffer.append_uint32_big(std::get<uint32_t>(data));
                         break;
                 }
             }
         }
 
         // Push Files
-        buffer.write_uint32_big(compiledFile.files.size());
+        buffer.append_uint32_big(compiledFile.files.size());
         for (auto &file : compiledFile.files)
         {
             file.file_data.reset_cursor();
 
-            buffer.write_uint16_big(file.descriptor);
+            buffer.append_uint16_big(file.descriptor);
 
-            buffer.write_uint8(file.extension.size());
+            buffer.append_uint8(file.extension.size());
             for (const auto &c : file.extension)
-                buffer.write_uint8(c);
+                buffer.append_uint8(c);
 
-            buffer.write_uint32_big(file.file_data.remaining_uint8());
+            buffer.append_uint32_big(file.file_data.remaining_uint8());
             while (file.file_data.remaining_uint8())
-                buffer.write_uint8(file.file_data.read_uint8());
+                buffer.append_uint8(file.file_data.read_uint8());
         }
 
         // Push subtextures
-        buffer.write_uint32_big(compiledFile.subtextures.size());
+        buffer.append_uint32_big(compiledFile.subtextures.size());
         for (const auto &sub : compiledFile.subtextures)
         {
-            buffer.write_uint16_big(sub.origin_file.descriptor);
-            buffer.write_uint16_big(sub.descriptor);
-            buffer.write_uint16_big(sub.x);
-            buffer.write_uint16_big(sub.y);
-            buffer.write_uint16_big(sub.width);
-            buffer.write_uint16_big(sub.height);
+            buffer.append_uint16_big(sub.origin_file.descriptor);
+            buffer.append_uint16_big(sub.descriptor);
+            buffer.append_uint16_big(sub.x);
+            buffer.append_uint16_big(sub.y);
+            buffer.append_uint16_big(sub.width);
+            buffer.append_uint16_big(sub.height);
         }
 
         for (const auto& instruction : compiledFile.instructions)
         {
-            buffer.write_uint8(instruction.desc.opcode);
+            buffer.append_uint8(instruction.desc.opcode);
 
             buffer.push_bit((instruction.handler_number >> 1) & 1);
             buffer.push_bit(instruction.handler_number & 1);
@@ -269,7 +269,7 @@ ByteBuffer Assembler::compiled_file_to_bytebuffer(CompiledFile &compiledFile, Li
 
             if (instruction.instruction_parameters.data_value.data_count != NO_DATA)
             {
-                buffer.write_uint32_big(instruction.instruction_parameters.data_value.value);
+                buffer.append_uint32_big(instruction.instruction_parameters.data_value.value);
             }
         }
     });

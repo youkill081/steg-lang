@@ -30,7 +30,7 @@ void FileSet::push_file(
     std::ifstream file_stream(path, std::ios::binary);
     int byte = 0;
     while ((byte = file_stream.get()) != EOF)
-        new_file.file_data.write_uint8(byte);
+        new_file.file_data.append_uint8(byte);
     if (this->contains(new_file))
         Linter::error("Duplicate file  \"" + new_file.user_name + "\" !");
     this->insert(new_file);

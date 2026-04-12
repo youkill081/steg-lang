@@ -273,6 +273,11 @@ void instr_FILE_APPEND_WORD(Runtime &runtime, InstructionView view);
 void instr_FILE_APPEND_WORD_LITTLE(Runtime &runtime, InstructionView view);
 void instr_FILE_APPEND_DOUBLEWORD(Runtime &runtime, InstructionView view);
 void instr_FILE_APPEND_DOUBLEWORD_LITTLE(Runtime &runtime, InstructionView view);
+void instr_FILE_WRITE_BYTE(Runtime &runtime, InstructionView view);
+void instr_FILE_WRITE_WORD(Runtime &runtime, InstructionView view);
+void instr_FILE_WRITE_WORD_LITTLE(Runtime &runtime, InstructionView view);
+void instr_FILE_WRITE_DOUBLEWORD(Runtime &runtime, InstructionView view);
+void instr_FILE_WRITE_DOUBLEWORD_LITTLE(Runtime &runtime, InstructionView view);
 void instr_FILE_IS_BYTE_REMAINING(Runtime &runtime, InstructionView view);
 void instr_FILE_IS_WORD_REMAINING(Runtime &runtime, InstructionView view);
 void instr_FILE_IS_DOUBLEWORD_REMAINING(Runtime &runtime, InstructionView view);
@@ -685,6 +690,11 @@ struct InstructionDesc
     X(FILE_APPEND_WORD_LITTLE, true, InstructionHandler(&instr_FILE_APPEND_WORD_LITTLE, REG, REG)) \
     X(FILE_APPEND_DOUBLEWORD, true, InstructionHandler(&instr_FILE_APPEND_DOUBLEWORD, REG, REG)) \
     X(FILE_APPEND_DOUBLEWORD_LITTLE, true, InstructionHandler(&instr_FILE_APPEND_DOUBLEWORD_LITTLE, REG, REG)) \
+    X(FILE_WRITE_BYTE, true, InstructionHandler(&instr_FILE_WRITE_BYTE, REG, REG)) \
+    X(FILE_WRITE_WORD, true, InstructionHandler(&instr_FILE_WRITE_WORD, REG, REG)) \
+    X(FILE_WRITE_WORD_LITTLE, true, InstructionHandler(&instr_FILE_WRITE_WORD_LITTLE, REG, REG)) \
+    X(FILE_WRITE_DOUBLEWORD, true, InstructionHandler(&instr_FILE_WRITE_DOUBLEWORD, REG, REG)) \
+    X(FILE_WRITE_DOUBLEWORD_LITTLE, true, InstructionHandler(&instr_FILE_WRITE_DOUBLEWORD_LITTLE, REG, REG)) \
     X(FILE_IS_BYTE_REMAINING, true, InstructionHandler(&instr_FILE_IS_BYTE_REMAINING, REG, REG)) \
     X(FILE_IS_WORD_REMAINING, true, InstructionHandler(&instr_FILE_IS_WORD_REMAINING, REG, REG)) \
     X(FILE_IS_DOUBLEWORD_REMAINING, true, InstructionHandler(&instr_FILE_IS_DOUBLEWORD_REMAINING, REG, REG)) \

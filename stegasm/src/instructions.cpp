@@ -2143,6 +2143,31 @@ void instr_FILE_APPEND_DOUBLEWORD_LITTLE(Runtime& runtime, InstructionView view)
     runtime.files.get_file(view.get_r2(runtime))->append_doubleword_little(view.get_r1(runtime));
 }
 
+void instr_FILE_WRITE_BYTE(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->write_byte(view.get_r1(runtime));
+}
+
+void instr_FILE_WRITE_WORD(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->write_word_big(view.get_r1(runtime));
+}
+
+void instr_FILE_WRITE_WORD_LITTLE(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->write_word_little(view.get_r1(runtime));
+}
+
+void instr_FILE_WRITE_DOUBLEWORD(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->write_doubleword_big(view.get_r1(runtime));
+}
+
+void instr_FILE_WRITE_DOUBLEWORD_LITTLE(Runtime& runtime, InstructionView view)
+{
+    runtime.files.get_file(view.get_r2(runtime))->write_doubleword_little(view.get_r1(runtime));
+}
+
 void instr_FILE_IS_BYTE_REMAINING(Runtime& runtime, InstructionView view)
 {
     runtime.registries.write(

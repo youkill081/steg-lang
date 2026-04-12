@@ -18,7 +18,7 @@ ByteBuffer StringHandler::encode(const Parameters& parameters)
 
     ByteBuffer buffer;
     for (auto & c : parameters.get_parameters()[0])
-        buffer.write_uint8(c);
+        buffer.append_uint8(c);
     return buffer;
 }
 

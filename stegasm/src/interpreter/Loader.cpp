@@ -71,7 +71,7 @@ void Loader::init_files(ByteBuffer& buffer, Runtime& runtime)
         uint32_t size = buffer.read_uint32();
         ByteBuffer data;
         for (int y = 0; y < size; y++)
-            data.write_uint8(buffer.read_uint8());
+            data.append_uint8(buffer.read_uint8());
         data.reset_cursor();
 
         runtime.files.push_file(descriptor, std::make_shared<File>(data, extension));

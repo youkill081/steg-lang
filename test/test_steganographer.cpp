@@ -50,7 +50,7 @@ protected:
         ByteBuffer buffer;
         for (char c : str)
         {
-            buffer.write_uint8(static_cast<uint8_t>(c));
+            buffer.append_uint8(static_cast<uint8_t>(c));
         }
         return buffer;
     }
@@ -207,7 +207,7 @@ TEST_F(SteganographerTest, EncodeDecodeTextFile)
     char byte;
     while (in_file.get(byte))
     {
-        data.write_uint8(static_cast<uint8_t>(byte));
+        data.append_uint8(static_cast<uint8_t>(byte));
     }
     in_file.close();
 
@@ -265,7 +265,7 @@ TEST_F(SteganographerTest, EncodeDecodeBinaryFile)
     ByteBuffer data;
     for (uint8_t byte : binary_data)
     {
-        data.write_uint8(byte);
+        data.append_uint8(byte);
     }
 
     // Encoder

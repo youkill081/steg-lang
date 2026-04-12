@@ -77,6 +77,12 @@ public:
     void append_doubleword_big(uint32_t word);
     void append_doubleword_little(uint32_t word);
 
+    void write_byte(uint8_t byte);
+    void write_word_big(uint16_t word);
+    void write_word_little(uint16_t word);
+    void write_doubleword_big(uint32_t word);
+    void write_doubleword_little(uint32_t word);
+
     bool has_byte_remaining();
     bool has_word_remaining();
     bool has_doubleword_remaining();

@@ -7,7 +7,7 @@
 ByteBuffer::ByteBuffer(std::initializer_list<uint8_t> data)
 {
     for (auto &byte : data)
-        this->write_uint8(byte);
+        this->append_uint8(byte);
 }
 
 void ByteBuffer::push_bit(bool bit)
@@ -19,7 +19,7 @@ void ByteBuffer::push_bit(bool bit)
     write_bit_count++;
 
     if (write_bit_count == 8){
-        this->write_uint8(write_bit_buffer);
+        this->append_uint8(write_bit_buffer);
         write_bit_buffer = 0;
         write_bit_count = 0;
     }
@@ -60,37 +60,94 @@ uint32_t ByteBuffer::get_crc32() const
     return crc ^ 0xFFFFFFFF;
 }
 
-void ByteBuffer::write_uint8(uint8_t value)
+void ByteBuffer::append_uint8(uint8_t value)
 {
     this->buffer.push_back(value);
 }
 
-void ByteBuffer::write_uint16_big(uint16_t value)
+void ByteBuffer::append_uint16_big(uint16_t value)
 {
     buffer.push_back((value >> 8) & 0xFF);
     buffer.push_back(value & 0xFF);
+}
+
+void ByteBuffer::append_uint16_little(uint16_t value)
+{
+    buffer.push_back(value & 0xFF);
+    buffer.push_back((value >> 8) & 0xFF);
+}
+
+void ByteBuffer::append_uint32_big(uint32_t value)
+{
+    buffer.push_back((value >> 24) & 0xFF);
+    buffer.push_back((value >> 16) & 0xFF);
+    buffer.push_back((value >> 8) & 0xFF);
+    buffer.push_back(value & 0xFF);
+}
+
+void ByteBuffer::append_uint32_little(uint32_t value)
+{
+    buffer.push_back(value & 0xFF);
+    buffer.push_back((value >> 8) & 0xFF);
+    buffer.push_back((value >> 16) & 0xFF);
+    buffer.push_back((value >> 24) & 0xFF);
+}
+
+void ByteBuffer::write_uint8(uint8_t value)
+{
+    const size_t next_pos = cursor + 1;
+    if (next_pos > buffer.size()) {
+        buffer.resize(next_pos);
+    }
+    buffer[cursor++] = value;
+}
+
+void ByteBuffer::write_uint16_big(uint16_t value)
+{
+    const size_t next_pos = cursor + 2;
+    if (next_pos > buffer.size()) {
+        buffer.resize(next_pos);
+    }
+
+    buffer[cursor++] = static_cast<uint8_t>(value >> 8);
+    buffer[cursor++] = static_cast<uint8_t>(value & 0xFF);
 }
 
 void ByteBuffer::write_uint16_little(uint16_t value)
 {
-    buffer.push_back(value & 0xFF);
-    buffer.push_back((value >> 8) & 0xFF);
+    const size_t next_pos = cursor + 2;
+    if (next_pos > buffer.size()) {
+        buffer.resize(next_pos);
+    }
+
+    buffer[cursor++] = static_cast<uint8_t>(value & 0xFF);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 8);
 }
 
 void ByteBuffer::write_uint32_big(uint32_t value)
 {
-    buffer.push_back((value >> 24) & 0xFF);
-    buffer.push_back((value >> 16) & 0xFF);
-    buffer.push_back((value >> 8) & 0xFF);
-    buffer.push_back(value & 0xFF);
+    const size_t next_pos = cursor + 4;
+    if (next_pos > buffer.size()) {
+        buffer.resize(next_pos);
+    }
+
+    buffer[cursor++] = static_cast<uint8_t>(value >> 24);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 16);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 8);
+    buffer[cursor++] = static_cast<uint8_t>(value & 0xFF);
 }
 
 void ByteBuffer::write_uint32_little(uint32_t value)
 {
-    buffer.push_back(value & 0xFF);
-    buffer.push_back((value >> 8) & 0xFF);
-    buffer.push_back((value >> 16) & 0xFF);
-    buffer.push_back((value >> 24) & 0xFF);
+    const size_t next_pos = cursor + 4;
+    if (next_pos > buffer.size()) {
+        buffer.resize(next_pos);
+    }
+
+    buffer[cursor++] = static_cast<uint8_t>(value & 0xFF);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 8);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 16);
+    buffer[cursor++] = static_cast<uint8_t>(value >> 24);
 }
 
 uint8_t ByteBuffer::read_uint8()

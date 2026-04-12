@@ -73,7 +73,7 @@ void File::read_data_if_needed()
 
     int byte;
     while ((byte = file_stream.get()) != EOF)
-        this->_file_data.write_uint8(static_cast<uint8_t>(byte));
+        this->_file_data.append_uint8(static_cast<uint8_t>(byte));
 
     this->_file_data.reset_cursor();
     this->_modified = false;
@@ -190,32 +190,67 @@ uint32_t File::read_doubleword_little()
 void File::append_byte(uint8_t byte)
 {
     this->read_data_if_needed();
-    this->_file_data.write_uint8(byte);
+    this->_file_data.append_uint8(byte);
     this->_modified = true;
 }
 
 void File::append_word_big(uint16_t word)
 {
     this->read_data_if_needed();
-    this->_file_data.write_uint16_big(word);
+    this->_file_data.append_uint16_big(word);
     this->_modified = true;
 }
 
 void File::append_word_little(uint16_t word)
 {
     this->read_data_if_needed();
-    this->_file_data.write_uint16_little(word);
+    this->_file_data.append_uint16_little(word);
     this->_modified = true;
 }
 
 void File::append_doubleword_big(uint32_t word)
 {
     this->read_data_if_needed();
-    this->_file_data.write_uint32_big(word);
+    this->_file_data.append_uint32_big(word);
     this->_modified = true;
 }
 
 void File::append_doubleword_little(uint32_t word)
+{
+    this->read_data_if_needed();
+    this->_file_data.append_uint32_little(word);
+    this->_modified = true;
+}
+
+void File::write_byte(uint8_t byte)
+{
+    this->read_data_if_needed();
+    this->_file_data.write_uint8(byte);
+    this->_modified = true;
+}
+
+void File::write_word_big(uint16_t word)
+{
+    this->read_data_if_needed();
+    this->_file_data.write_uint16_big(word);
+    this->_modified = true;
+}
+
+void File::write_word_little(uint16_t word)
+{
+    this->read_data_if_needed();
+    this->_file_data.write_uint16_little(word);
+    this->_modified = true;
+}
+
+void File::write_doubleword_big(uint32_t word)
+{
+    this->read_data_if_needed();
+    this->_file_data.write_uint32_big(word);
+    this->_modified = true;
+}
+
+void File::write_doubleword_little(uint32_t word)
 {
     this->read_data_if_needed();
     this->_file_data.write_uint32_little(word);

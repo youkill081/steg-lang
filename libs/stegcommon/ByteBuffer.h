@@ -39,6 +39,12 @@ public:
     void push_bit(bool bit); // Used to fill buffer bit by bit
     [[nodiscard]] uint32_t get_crc32() const; // calculate crc32 of the bytebuffer
 
+    void append_uint8(uint8_t value);
+    void append_uint16_big(uint16_t value);
+    void append_uint16_little(uint16_t value);
+    void append_uint32_big(uint32_t value);
+    void append_uint32_little(uint32_t value);
+
     void write_uint8(uint8_t value);
     void write_uint16_big(uint16_t value);
     void write_uint16_little(uint16_t value);
@@ -48,7 +54,6 @@ public:
     uint8_t read_uint8();
     uint16_t read_uint16();
     uint32_t read_uint32();
-;
     uint16_t read_little_uint16();
     uint32_t read_little_uint32();
 
