@@ -58,7 +58,7 @@ uint32_t Vm::run(ByteBuffer& buffer)
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - last_time);
 
             if (elapsed.count() >= 1) {
-                std::cout << "[Counter] Ops/sec: " << instruction_count << std::endl;
+                std::cout << "[Counter] Ips/sec: " << instruction_count << std::endl;
                 instruction_count = 0;
                 last_time = current_time;
             }
