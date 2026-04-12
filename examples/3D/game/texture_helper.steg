@@ -14,7 +14,7 @@ export fn init_texture_helper(file raw_textures, uint16 count) -> void {
     while (i < total_pixels) {
         uint8  color_index = file_read_uint8_at(raw_textures, i);
         uint32 color = file_read_little_uint32_at(palette, color_index * 4);
-        file_write_little_uint32(color, wall_textures);
+        file_append_little_uint32(color, wall_textures);
         i += 1;
     }
 }
@@ -24,10 +24,19 @@ export fn texture_get_pixel(uint16 tex_id, uint8 tex_x, uint8 tex_y) -> uint32 {
     return file_read_little_uint32_at(wall_textures, offset);
 }
 
-export fn wall_to_tex_id(uint16 wall_id, uint8 side, bool is_door, bool is_door_frame) -> uint16 {
+export fn wall_to_tex_id(uint16 wall_id, uint8 side, uint16 door_id, bool is_door_frame) -> uint16 {
     uint16 base_wall = wall_id;
-    if (is_door == true) {
-        return 98;
+
+    if (door_id != 0) {
+        if (door_id == 90) { return 99; }
+        if (door_id == 91) { return 98; }
+        if (door_id == 92) { return 105; }
+        if (door_id == 93) { return 104; }
+        if (door_id == 94) { return 105; }
+        if (door_id == 95) { return 104; }
+        if (door_id == 100) { return 103; }
+        if (door_id == 101) { return 102; }
+        return 99;
     }
     if (is_door_frame == true) {
         return 101;

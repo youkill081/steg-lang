@@ -28,11 +28,11 @@ export fn init_things(file p1) -> void {
             uint32 ix = fx * 10000.0;
             uint32 iy = fy * 10000.0;
 
-            file_write_little_uint32(ix, things_x);
-            file_write_little_uint32(iy, things_y);
-            file_write_little_uint16(value - 21, things_tex);
-            file_write_little_uint32(0, things_dist);
-            file_write_little_uint32(num_things, things_order);
+            file_append_little_uint32(ix, things_x);
+            file_append_little_uint32(iy, things_y);
+            file_append_little_uint16(value - 21, things_tex);
+            file_append_little_uint32(0, things_dist);
+            file_append_little_uint32(num_things, things_order);
             num_things += 1;
         }
         i += 1;

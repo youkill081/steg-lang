@@ -26,3 +26,8 @@ export fn map_is_wall(int x, int y) -> bool {
     uint16 id = map_get_wall(x, y);
     return id > 0 && id < 63;
 }
+
+export fn map_is_door(int x, int y) -> bool {
+    uint16 id = map_get_wall(x, y);
+    return id >= 90 && id <= 101;
+}

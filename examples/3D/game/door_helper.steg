@@ -1,0 +1,155 @@
+import { map_get_wall, get_plane0 } from "./map_helper.steg";
+
+/*
+* Status :
+* DOOR_CLOSED  = 0;
+* DOOR_OPENING  = 1;
+* DOOR_OPEN  = 2;
+* DOOR_CLOSING  = 3;;
+*/
+
+file d_x     = 0;
+file d_y     = 0;
+file d_state = 0;
+file d_open  = 0;
+file d_timer = 0;
+file d_map   = 0;   // Table de mapping (64x64) : stocke l'ID de la porte ou 0xFFFF
+uint32 num_doors = 0;
+
+export fn init_doors() -> void {
+    file p0 = get_plane0();
+    d_x = file_create("");
+    d_y = file_create("");
+    d_state = file_create("");
+    d_open = file_create("");
+    d_timer = file_create("");
+    d_map = file_create("");
+
+    // Fill with 65535 (65535 = no door)
+    uint32 m = 0;
+    while (m < 4096) {
+        file_write_little_uint16(65535, d_map);
+        m += 1;
+    }
+
+    num_doors = 0;
+    file_reset_cursor(p0);
+
+    uint32 i = 0;
+    while (i < 64*64) {
+        uint16 val = file_read_little_uint16(p0);
+        if (val >= 90 && val <= 101) {
+            uint32 x = i % 64;
+            uint32 y = i / 64;
+
+            file_seek_cursor(i * 2, d_map);
+            file_write_little_uint16(num_doors, d_map);
+
+            file_seek_cursor(num_doors * 2, d_x);
+            file_write_little_uint16(x, d_x);
+
+            file_seek_cursor(num_doors * 2, d_y);
+            file_write_little_uint16(y, d_y);
+
+            file_seek_cursor(num_doors, d_state);
+            file_write_uint8(0, d_state);
+
+            file_seek_cursor(num_doors * 4, d_open);
+            file_write_little_uint32(0, d_open); // closed
+
+            file_seek_cursor(num_doors * 4, d_timer);
+            file_write_little_uint32(0, d_timer);
+
+            num_doors += 1;
+        }
+        i += 1;
+    }
+}
+
+export fn get_door_openness(int x, int y) -> float {
+    uint16 door_id = file_read_little_uint16_at(d_map, (y * 64 + x) * 2);
+
+    if (door_id == 65535) { return 0.0; }
+    return file_read_little_uint32_at(d_open, door_id * 4) / 10000.0;
+}
+
+export fn try_open_door(float px, float py, float pa) -> void {
+    float rdx = cos(deg2rad(pa));
+    float rdy = sin(deg2rad(pa));
+
+    float probe = 0.75;
+    while (probe <= 1.25) {
+        int tx = px + rdx * probe;
+        int ty = py + rdy * probe;
+
+        uint16 door_id = file_read_little_uint16_at(d_map, (ty * 64 + tx) * 2);
+
+        if (door_id != 65535) {
+            uint8 state = file_read_uint8_at(d_state, door_id);
+            if (state == 0 || state == 3) { // CLOSED or CLOSING
+                file_seek_cursor(door_id, d_state);
+                file_write_uint8(1, d_state); // set OPENING
+            }
+            return;
+        }
+        probe += 0.5;
+    }
+}
+
+export fn update_doors() -> void {
+    float delta = window_get_delta();
+    uint32 i = 0;
+
+    while (i < num_doors) {
+        uint8 state = file_read_uint8_at(d_state, i);
+
+        if (state == 1) { // DOOR_OPENING
+            float openness = file_read_little_uint32_at(d_open, i * 4) / 10000.0;
+            openness += delta * 2.0; // door speed 2.0
+
+            if (openness >= 1.0) {
+                openness = 1.0;
+                file_seek_cursor(i, d_state);
+                file_write_uint8(2, d_state);
+                file_seek_cursor(i * 4, d_timer);
+                file_write_little_uint32(0, d_timer); // Reset timer
+            }
+            file_seek_cursor(i * 4, d_open);
+            file_write_little_uint32(openness * 10000, d_open);
+            i += 1;
+            continue;
+        }
+
+        if (state == 2) { // DOOR_OPEN
+            float timer = file_read_little_uint32_at(d_timer, i * 4) / 10000.0;
+            timer += delta;
+
+            if (timer >= 3.0) { // 3 seconds before closing
+                timer = 3.0;
+                file_seek_cursor(i, d_state);
+                file_write_uint8(3, d_state); // Set DOOR_CLOSING
+            }
+            file_seek_cursor(i * 4, d_timer);
+            file_write_little_uint32(timer * 10000, d_timer);
+            i += 1;
+            continue;
+        }
+
+        if (state == 3) { // DOOR_CLOSING
+            float openness = file_read_little_uint32_at(d_open, i * 4) / 10000.0;
+            openness -= delta * 2.0; // Door speed 2.0
+
+            if (openness <= 0.0) {
+                openness = 0.0;
+                file_seek_cursor(i, d_state);
+                file_write_uint8(0, d_state); // Set as DOOR_CLOSED
+            }
+            file_seek_cursor(i * 4, d_open);
+            i += 1;
+            file_write_little_uint32(openness * 10000, d_open);
+            continue;
+        }
+
+        i += 1;
+    }
+}

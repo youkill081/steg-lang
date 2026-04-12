@@ -1,9 +1,9 @@
-uint8  DDA_SIDE    = 0;
-float  DDA_HIT_X   = 0.0;
-float  DDA_HIT_Y   = 0.0;
-float  DDA_RDX     = 0.0;
-float  DDA_RDY     = 0.0;
-bool  DDA_IS_DOOR = false;
+uint8  DDA_SIDE = 0;
+float  DDA_HIT_X = 0.0;
+float  DDA_HIT_Y = 0.0;
+float  DDA_RDX = 0.0;
+float  DDA_RDY = 0.0;
+uint16  DDA_IS_DOOR = 0;
 bool DDA_IS_DOOR_FRAME = false;
 
 uint16 DDA_WALL_ID = 0;
@@ -13,6 +13,7 @@ framebuffer z_buffer_fb = 0;
 import { map_is_wall, map_get_wall } from "./game/map_helper.steg";
 import { get_pa, get_px, get_py }    from "./game/player_helper.steg";
 import { texture_get_pixel, wall_to_tex_id, texture_get_pixel_at } from "./game/texture_helper.steg";
+import { get_door_openness } from "./game/door_helper.steg";
 
 export fn init_renderer() -> void {
     z_buffer_fb = window_framebuffer_create(320, 1);
@@ -62,14 +63,16 @@ fn dda_cast(float px, float py, float rdx, float rdy) -> float {
     }
 
     uint16 tile = map_get_wall(mx, my);
-    if (tile == 91) { DDA_SIDE = 1; }
-    if (tile == 92) { DDA_SIDE = 0; }
+    if (tile >= 90 && tile <= 101) {
+        if (tile % 2 == 0) { DDA_SIDE = 0; }
+        else { DDA_SIDE = 1; }
+    }
 
     while (true) {
         tile = map_get_wall(mx, my);
 
         if (tile > 0) {
-            if (tile == 91 || tile == 92) {
+            if (tile >= 90 && tile <= 101) {
                 float dist_gate = 0.0;
                 if (DDA_SIDE == 0) { dist_gate = sx - (ddx * 0.5); }
                 else { dist_gate = sy - (ddy * 0.5); }
@@ -79,26 +82,26 @@ fn dda_cast(float px, float py, float rdx, float rdy) -> float {
 
                     if (DDA_SIDE == 0) {
                         if (sy < dist_gate) {
-                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = false; DDA_SIDE = 1; sy += ddy; break;
+                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = 0; DDA_SIDE = 1; sy += ddy; break;
                         }
                         hit_pos = py + dist_gate * rdy;
                         int hit_pos_int = hit_pos; hit_pos -= hit_pos_int;
                     } else {
                         if (sx < dist_gate) {
-                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = false; DDA_SIDE = 0; sx += ddx; break;
+                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = 0; DDA_SIDE = 0; sx += ddx; break;
                         }
                         hit_pos = px + dist_gate * rdx;
                         int hit_pos_int = hit_pos; hit_pos -= hit_pos_int;
                     }
 
-                    float open_amount = 0.15;
+                    float open_amount = get_door_openness(mx, my);
 
                     if (hit_pos < open_amount) {
                         if (DDA_SIDE == 0 && sy < sx) {
-                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = false; DDA_SIDE = 1; sy += ddy; break;
+                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = 0; DDA_SIDE = 1; sy += ddy; break;
                         }
                         if (DDA_SIDE == 1 && sx < sy) {
-                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = false; DDA_SIDE = 0; sx += ddx; break;
+                            DDA_IS_DOOR_FRAME = true; DDA_IS_DOOR = 0; DDA_SIDE = 0; sx += ddx; break;
                         }
                         tile = 0;
                     } else {
@@ -107,13 +110,13 @@ fn dda_cast(float px, float py, float rdx, float rdy) -> float {
                         } else {
                             sy = dist_gate + ddy; DDA_HIT_Y = hit_pos - open_amount;
                         }
-                        DDA_IS_DOOR = true; DDA_IS_DOOR_FRAME = false; break;
+                        DDA_IS_DOOR = tile; DDA_IS_DOOR_FRAME = false; break;
                     }
                 }
             }
 
-            if (tile > 0 && tile < 91) {
-                DDA_IS_DOOR = false; DDA_IS_DOOR_FRAME = false; break;
+            if (tile > 0 && tile < 90) {
+                DDA_IS_DOOR = 0; DDA_IS_DOOR_FRAME = false; break;
             }
         }
 
