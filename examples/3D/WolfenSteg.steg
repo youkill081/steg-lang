@@ -1,17 +1,15 @@
 import { load_level } from "./file_loader.steg";
-import { display_player_pos, update_player_pos } from "./game/player_helper.steg";
+import { display_player_pos, init_gun, update_player_pos, update_player_gun } from "./game/player_helper.steg";
 import { cast_rays, init_renderer, get_zbuffer } from "./renderer.steg";
 import { draw_things } from "./game/things_helper.steg";
 import { init_doors, update_doors } from "./game/door_helper.steg";
-import { draw_static_things } from "./game/static_things_helper.steg";
 
 fn main() -> void {
     load_level(rand() % 59);
 
     init_renderer();
     init_doors();
-
-    uint16 curr = 421;
+    init_gun();
 
     window_create(1280, 800, "WolfenSteg");
     window_set_target_fps(120);
@@ -26,7 +24,7 @@ fn main() -> void {
 
         update_doors();
         draw_things(buf, get_zbuffer());
-        draw_static_things(curr, 85, 0, 150, buf);
+        update_player_gun(buf);
 
         window_framebuffer_sync(buf);
         window_framebuffer_draw(buf, 0, 0);

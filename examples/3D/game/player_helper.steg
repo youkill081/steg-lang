@@ -2,8 +2,13 @@ float px = 0.0;
 float py = 0.0;
 float pa = 0.0;
 
+export fn get_pa() -> float { return pa; }
+export fn get_px() -> float { return px; }
+export fn get_py() -> float { return py; }
+
 import { map_is_wall, map_is_door } from "./map_helper.steg"
 import { try_open_door, get_door_openness } from "./door_helper.steg"
+import { draw_static_things } from "./static_things_helper.steg";
 
 export fn load_player_helper(file p1) -> void
 {
@@ -144,6 +149,91 @@ export fn display_player_pos() -> void {
     print_f(pa);
 }
 
-export fn get_pa() -> float { return pa; }
-export fn get_px() -> float { return px; }
-export fn get_py() -> float { return py; }
+/*
+* Gun management
+*/
+
+bool has_machine_gun = true;
+bool has_chain_gun = true;
+bool is_shooting = false;
+
+uint8 current_gun = 3; // 0 knife, 1 gun, 2 machine gun, 3 chaingun
+uint8 anim_state = 0;
+clock gun_clock = 0;
+
+
+export fn init_gun() -> void {
+    gun_clock = clock_create();
+}
+
+fn deal_damage(bool is_knife) -> void {
+    if (is_knife) {
+        uint8 damage = (rand() % 255) / 16;
+        print_str("C'est le couteau, je dois faire : ");
+        print_n(damage);
+    }  else {
+        print_str("Je suis pas un couteau, je sait pas combien faire");
+    }
+
+    debug_t(2);
+}
+
+fn get_current_gun_id() -> uint16 {
+    if (current_gun == 0) {
+        if ((is_shooting || anim_state != 0) && clock_get_elapsed_ms(gun_clock) > 40) {
+            anim_state = (anim_state + 1) % 5;
+            if (anim_state == 1) {
+                deal_damage(true);
+            }
+            clock_reset(gun_clock);
+        }
+        return 416 + anim_state;
+    }
+    if (current_gun == 1) {
+        if ((is_shooting || anim_state != 0) && clock_get_elapsed_ms(gun_clock) > 60) {
+            anim_state = (anim_state + 1) % 6;
+            if (anim_state == 1) {
+                deal_damage(false);
+            }
+            clock_reset(gun_clock);
+        }
+        return 421 + anim_state;
+    }
+    if (current_gun == 2) {
+        if ((is_shooting || anim_state != 0) && clock_get_elapsed_ms(gun_clock) > 20) {
+            anim_state = (anim_state + 1) % 5;
+            if (anim_state == 1) {
+                deal_damage(false);
+            }
+            clock_reset(gun_clock);
+        }
+        return 426 + anim_state;
+    }
+    if (current_gun == 3) {
+        if ((is_shooting || anim_state != 0) && clock_get_elapsed_ms(gun_clock) > 10) {
+            anim_state = (anim_state + 1) % 6;
+            if (anim_state == 1) {
+                deal_damage(false);
+            }
+            clock_reset(gun_clock);
+        }
+        return 431 + anim_state;
+    }
+
+    return 416; // fallback
+}
+
+export fn update_player_gun(framebuffer buf) -> void {
+    if (window_mouse_button_down(0)) {
+        is_shooting = true;
+    } else {
+        is_shooting = false;
+    }
+
+    if (window_key_pressed(49)) { current_gun = 0; } // KEY_ONE
+    if (window_key_pressed(50)) { current_gun = 1; } // KEY_TWO
+    if (window_key_pressed(51) && has_machine_gun ) { current_gun = 2; } // KEY_THREE
+    if (window_key_pressed(52) && has_chain_gun ) { current_gun = 3; } // KEY_THREE
+
+    draw_static_things(get_current_gun_id(), 85, 0, 150, buf);
+}
