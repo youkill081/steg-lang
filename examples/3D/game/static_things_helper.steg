@@ -1,0 +1,111 @@
+import { VSWAP } from "../file_loader.steg";
+import { palette } from "./texture_helper.steg";
+import { get_first_sprite } from "./sprite_helper.steg";
+
+int s_sx = 0;
+int s_sy = 0;
+int s_height = 0;
+float s_dist = 0.0;
+uint32 s_iz_dist = 0;
+uint32 s_sprite_offset = 0;
+uint32 s_pixel_pool = 0;
+uint16 s_first_col = 0;
+
+fn draw_static_post(uint32 @fb, uint16 start_row, uint16 end_row, int cx_start, int cx_end) -> void {
+    uint16 row = start_row;
+    while (row < end_row) {
+        uint8 ci = file_read_uint8_at(VSWAP, s_pixel_pool);
+        s_pixel_pool += 1;
+        uint32 color = file_read_little_uint32_at(palette, ci * 4);
+
+        int py = 63 - row;
+        int scr_y = s_sy + ((py * s_height) >> 6);
+        int next_py = s_sy + (((py + 1) * s_height) >> 6);
+
+        int cy_start = scr_y;
+        if (cy_start < 0) { cy_start = 0; }
+        int cy_end = next_py;
+        if (cy_end > 200) { cy_end = 200; }
+
+        if (cy_start < cy_end) {
+            int cx = cx_start;
+            while (cx < cx_end) {
+                int cy = cy_start;
+                int fb_idx = (cy * 320) + cx;
+                while (cy < cy_end) {
+                    fb[fb_idx] = color;
+                    fb_idx += 320;
+                    cy += 1;
+                }
+                cx += 1;
+            }
+        }
+        row += 1;
+    }
+}
+
+fn draw_static_sprite_col(uint32 @fb, uint16 col) -> void {
+    int scr_x = s_sx + ((col * s_height) >> 6);
+    int next_px = s_sx + (((col + 1) * s_height) >> 6);
+
+    int cx_start = scr_x;
+    if (cx_start < 0) { cx_start = 0; }
+    int cx_end = next_px;
+    if (cx_end > 320) { cx_end = 320; }
+
+    uint16 rel = file_read_little_uint16_at(VSWAP, s_sprite_offset + 4 + (2 * (col - s_first_col)));
+    uint32 cmd = s_sprite_offset + rel;
+
+    int visible = 0;
+    if (cx_start < cx_end) {
+        visible = 1;
+    }
+
+    uint16 safety = 0;
+    while (safety < 100) {
+        safety += 1;
+        uint16 end_raw = file_read_little_uint16_at(VSWAP, cmd);
+        if (end_raw == 0) { break; }
+
+        uint16 end_row   = end_raw >> 1;
+        uint16 start_row = file_read_little_uint16_at(VSWAP, cmd + 4) >> 1;
+        cmd += 6;
+
+        if (visible == 1) {
+            draw_static_post(fb, start_row, end_row, cx_start, cx_end);
+        } else {
+            s_pixel_pool += (end_row - start_row);
+        }
+    }
+}
+
+export fn draw_static_things(
+    uint16 sprite_id,
+    uint16 col,
+    uint16 row,
+    uint16 size,
+    framebuffer buf
+) -> void {
+    uint32 @fb = window_framebuffer_get_address(buf);
+
+    s_sx = col;
+    s_sy = row;
+    s_height = size;
+
+    uint16 fs = get_first_sprite();
+    uint32 soff = file_read_little_uint32_at(VSWAP, 6 + (4 * (fs + sprite_id)));
+    s_sprite_offset = soff;
+
+    uint16 first_col = file_read_little_uint16_at(VSWAP, soff);
+    uint16 last_col  = file_read_little_uint16_at(VSWAP, soff + 2);
+    uint16 nb_col = last_col - first_col + 1;
+
+    s_pixel_pool = soff + 4 + (2 * nb_col);
+    s_first_col = first_col;
+
+    uint16 c = first_col;
+    while (c <= last_col) {
+        draw_static_sprite_col(fb, c);
+        c += 1;
+    }
+}
