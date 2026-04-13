@@ -12,11 +12,11 @@
 class Pixels : public std::vector<pixel>
 {
 public:
-    void display()
+    void shuffle_pixels_channels(Random32 &random)
     {
         for (auto &pix: *this)
         {
-            std::cout << std::to_string(pix) << std::endl;
+            pix.shuffle_read_order(random);
         }
-    };
+    }
 };

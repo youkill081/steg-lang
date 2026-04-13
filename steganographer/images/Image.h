@@ -24,6 +24,7 @@ namespace steganographer
         [[nodiscard]] int get_height() const {return _height;};
 
         [[nodiscard]] pixel &get_pixel(uint32_t number) const;
+        [[nodiscard]] Pixels &get_pixels() const;
 
         [[nodiscard]] std::size_t get_number_of_pixels() const {return pixels->size();};
     };

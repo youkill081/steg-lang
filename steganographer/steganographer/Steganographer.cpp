@@ -51,7 +51,6 @@ uint32_t Steganographer::complete_to_final_seed(const steganographer::Image &ima
 void Steganographer::write_seed(steganographer::Image& image, uint32_t seed, uint32_t seed_size)
 {
     uint32_t padding = 0;
-
     random.reseed(image.get_number_of_pixels());
 
     for (int i = 0; i < seed_size; ++i)
@@ -63,7 +62,7 @@ void Steganographer::write_seed(steganographer::Image& image, uint32_t seed, uin
 
         pixel& pix = image.get_pixel(padding % image.get_number_of_pixels());
 
-        if (pix.usage != ZERO_READ)
+        if (pix.usage != HIDE_DATA)
         {
             padding += 1;
             goto write_seed_start;
@@ -90,7 +89,7 @@ uint32_t Steganographer::read_seed(steganographer::Image& image, uint32_t seed_s
 
         pixel& pix = image.get_pixel(padding % image.get_number_of_pixels());
 
-        if (pix.usage != ZERO_READ)
+        if (pix.usage != HIDE_DATA)
         {
             padding += 1;
             goto read_seed_start;

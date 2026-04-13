@@ -6,38 +6,31 @@
 
 #include <sstream>
 
+#include "Random32.h"
+
 enum pixel_usage {
     HIDE_SEED,
-    ZERO_READ,
-    ONE_READ,
-    TWO_READ,
-    ALL_READ
+    HIDE_DATA,
 };
 
 struct pixel {
     uint8_t red, blue, green;
-    int usage;
-};
 
-namespace std
-{
-    inline std::string to_string(pixel_usage usage) {
-        switch (usage) {
-        case HIDE_SEED: return "HIDE_SEED";
-        case ZERO_READ: return "ZERO_READ";
-        case ONE_READ:  return "ONE_READ";
-        case TWO_READ:  return "TWO_READ";
-        case ALL_READ:  return "ALL_READ";
-        default:        return "UNKNOWN";
+    uint8_t channel_read_order[3];
+    uint8_t current_read_index = 0;
+    pixel_usage usage = HIDE_DATA;
+
+    void shuffle_read_order(Random32 &random)
+    {
+        channel_read_order[0] = 0;
+        channel_read_order[1] = 1;
+        channel_read_order[2] = 2;
+        current_read_index = 0;
+
+        for (int i = 2; i > 0; --i)
+        {
+            const uint32_t j = random.get_next_rand() % (i + 1);
+            std::swap(channel_read_order[i], channel_read_order[j]);
         }
     }
-
-    inline std::string to_string(const pixel& p) {
-        std::ostringstream oss;
-        oss << "R=" << static_cast<int>(p.red)
-            << " G=" << static_cast<int>(p.green)
-            << " B=" << static_cast<int>(p.blue)
-            << " Usage=" << to_string(static_cast<pixel_usage>(p.usage));
-        return oss.str();
-    }
-}
+};

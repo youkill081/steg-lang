@@ -24,6 +24,8 @@ public:
         return dist(engine);
     }
 
+
+    [[nodiscard]] std::mt19937 &get_engine() { return engine; }
 private:
     std::mt19937 engine;
     std::uniform_int_distribution<uint32_t> dist{0, 0xFFFFFFFFu};

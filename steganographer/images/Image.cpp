@@ -39,7 +39,6 @@ Image::Image(const std::string& path)
             px.red = p[0];
             px.green = p[1];
             px.blue = p[2];
-            px.usage = ZERO_READ;
             pixels->push_back(px);
         }
     }
@@ -90,7 +89,12 @@ void Image::save_png(const std::string& output_path) const
     }
 }
 
-pixel& Image::get_pixel(uint32_t number) const
+pixel &Image::get_pixel(uint32_t number) const
 {
     return pixels->at(number%pixels->size());
+}
+
+Pixels &Image::get_pixels() const
+{
+    return *pixels;
 }
