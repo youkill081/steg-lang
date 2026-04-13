@@ -1,8 +1,8 @@
 file enemy_thing_idx = 0;
-file enemy_state     = 0;
-file enemy_timer     = 0;
-file enemy_type      = 0;
-uint32 num_enemies   = 0;
+file enemy_state = 0;
+file enemy_timer = 0;
+file enemy_type = 0;
+uint32 num_enemies = 0;
 
 import { get_px, get_py, get_pa } from "./player_helper.steg";
 import { get_thing_x, get_thing_y, set_thing_pos, set_thing_tex, set_thing_colidable } from "./things_helper.steg";

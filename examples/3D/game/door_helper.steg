@@ -8,12 +8,12 @@ import { map_get_wall, get_plane0 } from "./map_helper.steg";
 * DOOR_CLOSING  = 3;;
 */
 
-file d_x     = 0;
-file d_y     = 0;
+file d_x = 0;
+file d_y = 0;
 file d_state = 0;
-file d_open  = 0;
+file d_open = 0;
 file d_timer = 0;
-file d_map   = 0;   // Table de mapping (64x64) : stocke l'ID de la porte ou 0xFFFF
+file d_map = 0; // Mapping table, 0xFFFF or door id
 uint32 num_doors = 0;
 
 export fn init_doors() -> void {

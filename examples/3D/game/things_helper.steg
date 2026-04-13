@@ -1,8 +1,8 @@
 file things_order = 0;
-file things_x     = 0;
-file things_y     = 0;
-file things_tex   = 0;
-file things_dist  = 0;
+file things_x = 0;
+file things_y = 0;
+file things_tex = 0;
+file things_dist = 0;
 file things_colidable = 0;
 uint32 num_things = 0;
 
