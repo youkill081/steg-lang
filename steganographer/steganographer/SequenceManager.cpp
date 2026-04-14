@@ -4,6 +4,8 @@
 
 #include "SequenceManager.h"
 
+#include <utility>
+
 #include "Colors.h"
 #include "../images/Image.h"
 #include "Logger.h"
@@ -42,7 +44,7 @@ uint8_t& SequenceManager::get_pixel_data_channel(pixel& pixel)
     case 0: return pixel.red;
     case 1: return pixel.green;
     case 2: return pixel.blue;
-    default: throw std::runtime_error("invalid channel");
+    default: std::unreachable();
     }
 
 }
