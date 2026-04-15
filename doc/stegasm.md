@@ -291,13 +291,13 @@ L'implémentation se trouve dans le dossier [stegasm/src](../stegasm/src).
 
 Les fichiers et dossiers importants :
 
-| Fichier / Dossier                                                   | Rôle                                                |
-|---------------------------------------------------------------------|-----------------------------------------------------|
-| [`instructions.h`](../stegasm/src/instructions.h)                   | Définition de **toutes** les instructions StegASM   |
-| [`interpreter/`](../stegasm/src/interpreter)                        | Implémentation de StegVM                            |
-| [`interpreter/Vm.cpp`](../stegasm/src/interpreter/Vm.cpp)           | Boucle principale de la VM                          |
+| Fichier / Dossier                                                   | Rôle                                                 |
+|---------------------------------------------------------------------|------------------------------------------------------|
+| [`instructions.h`](../stegasm/src/instructions.h)                   | Définition de **toutes** les instructions StegASM    |
+| [`interpreter/`](../stegasm/src/interpreter)                        | Implémentation de StegVM                             |
+| [`interpreter/Vm.cpp`](../stegasm/src/interpreter/Vm.cpp)           | Boucle principale de la VM                           |
 | [`assembler/`](../stegasm/src/assembler)                            | Implémentation de l'assembleur (StegASM -> ByteCode) |
-| [`assembler/Assembler.cpp`](../stegasm/src/assembler/Assembler.cpp) | Base de l'assembleur                                |
+| [`assembler/Assembler.cpp`](../stegasm/src/assembler/Assembler.cpp) | Base de l'assembleur                                 |
 
 ---
 
