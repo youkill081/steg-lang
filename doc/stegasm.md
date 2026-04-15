@@ -1,6 +1,6 @@
 # StegASM
 
-StegASM est le langage d'assemblage bas niveau de la VM **StegVM**. Il mélange
+StegASM est le langage assembleur bas niveau de la VM **StegVM**. Il mélange
 des instructions très bas niveau (déplacement de registres, comparaisons, arithmétique...)
 et des instructions haut niveau (fenêtres, fichiers, vecteurs, horloge...).
 
@@ -43,7 +43,7 @@ StegVM consomme StegASM directement sous forme de bytecode. Le processus de tran
       * [Comparaison et sauts conditionnels](#comparaison-et-sauts-conditionnels)
       * [Affichage et debug](#affichage-et-debug)
       * [Fenêtre](#fenêtre)
-    * [Création et configuration](#création-et-configuration)
+        * [Création et configuration](#création-et-configuration)
         * [Dessin](#dessin)
         * [Framebuffer](#framebuffer)
         * [Entrées clavier](#entrées-clavier)
@@ -223,7 +223,7 @@ LOAD_16 R1, 1000    ; R1 = 1000
 ADD R2, R0, R1      ; R2 = R0 + R1
 ```
 
-> ⚠️ Les registres ne sont pas sauvegardés automatiquement lors d'un `CALL`. Si une sous-routine modifie un registre que vous utilisez, c'est à vous de le sauvegarder (avec un PUSH/POP par exemple).
+> ⚠️ Les registres ne sont pas sauvegardés automatiquement lors d'un `CALL`. Si une fonction modifie un registre que vous utilisez, c'est à vous de le sauvegarder (avec un PUSH/POP par exemple).
 
 ---
 
@@ -276,7 +276,7 @@ LOAD_8 R0, 5 ; Ceci est un commentaire
 
 ### Liste des opérandes
 
-La liste complète des instructions disponibles (opérandes, types acceptés, comportements) est disponible dans la **[documentation développeur - Liste des opérandes](#liste-des-opérandes-1)**.
+La liste complète des instructions disponibles (opérandes, types acceptés, comportements) est disponible dans la **[documentation développeur - Liste des opérandes](#liste-des-opérandes-stegasm)**.
 
 ---
 
@@ -527,20 +527,20 @@ Si `data_type != NO_DATA`, un **second bloc de 32 bits** suit immédiatement pou
 
 > `CMP`/`FCMP` mettent à jour les flags internes de la VM. Les instructions de saut se basent sur le dernier `CMP`/`FCMP` exécuté.
 
-| Mnémonique | Opérande 1   | Opérande 2 | Opérande 3 | Description                                                       |
-|------------|--------------|------------|------------|-------------------------------------------------------------------|
-| `CMP`      | `reg_both`   | `val`      | -          | Compare `op1` et `op2` (entiers), met à jour les flags            |
-| `FCMP`     | `reg_both`   | `val`      | -          | Compare `op1` et `op2` (flottants), met à jour les flags          |
-| `JMP`      | `imm`        | -          | -          | Saut inconditionnel vers `op1` (label)                            |
-| `JE`       | `imm`        | -          | -          | Saut si `op1 == op2` (dernier CMP)                                |
-| `JNE`      | `imm`        | -          | -          | Saut si `op1 != op2`                                              |
-| `JA`       | `imm`        | -          | -          | Saut si `op1 > op2` (non signé)                                   |
-| `JSA`      | `imm`        | -          | -          | Saut si `op1 > op2` (signé)                                       |
-| `JB`       | `imm`        | -          | -          | Saut si `op1 < op2` (non signé)                                   |
-| `JSB`      | `imm`        | -          | -          | Saut si `op1 < op2` (signé)                                       |
-| `CALL`     | `imm`        | -          | -          | Appel de sous-routine à `op1` (label), empile l'adresse de retour |
-| `RET`      | -            | -          | -          | Retour de sous-routine, dépile l'adresse de retour                |
-| `HALT`     | `(reg_both)` | -          | -          | Arrête le programme, code de sortie optionnel `op1`               |
+| Mnémonique | Opérande 1   | Opérande 2 | Opérande 3 | Description                                                   |
+|------------|--------------|------------|------------|---------------------------------------------------------------|
+| `CMP`      | `reg_both`   | `val`      | -          | Compare `op1` et `op2` (entiers), met à jour les flags        |
+| `FCMP`     | `reg_both`   | `val`      | -          | Compare `op1` et `op2` (flottants), met à jour les flags      |
+| `JMP`      | `imm`        | -          | -          | Saut inconditionnel vers `op1` (label)                        |
+| `JE`       | `imm`        | -          | -          | Saut si `op1 == op2` (dernier CMP)                            |
+| `JNE`      | `imm`        | -          | -          | Saut si `op1 != op2`                                          |
+| `JA`       | `imm`        | -          | -          | Saut si `op1 > op2` (non signé)                               |
+| `JSA`      | `imm`        | -          | -          | Saut si `op1 > op2` (signé)                                   |
+| `JB`       | `imm`        | -          | -          | Saut si `op1 < op2` (non signé)                               |
+| `JSB`      | `imm`        | -          | -          | Saut si `op1 < op2` (signé)                                   |
+| `CALL`     | `imm`        | -          | -          | Appel de fonction à `op1` (label), empile l'adresse de retour |
+| `RET`      | -            | -          | -          | Retour de fonction, dépile l'adresse de retour                |
+| `HALT`     | `(reg_both)` | -          | -          | Arrête le programme, code de sortie optionnel `op1`           |
 
 ---
 
@@ -564,7 +564,7 @@ Si `data_type != NO_DATA`, un **second bloc de 32 bits** suit immédiatement pou
 
 #### Fenêtre
 
-### Création et configuration
+##### Création et configuration
 
 | Mnémonique                 | Opérande 1 | Opérande 2 | Opérande 3 | Description                                                         |
 |----------------------------|------------|------------|------------|---------------------------------------------------------------------|
