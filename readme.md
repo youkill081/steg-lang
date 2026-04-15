@@ -34,7 +34,7 @@
   └─────────────────────────────────────────────────────┘
         │
         ▼
-  Code StegASM (.StegASM) <- Vous pouvez aussi écrire directement en StegASM !
+  Code StegASM (.stegasm) <- Vous pouvez aussi écrire directement en StegASM !
         │
         ▼
   ┌─────────────────────────────────────────────────────┐
@@ -132,8 +132,8 @@ Pour l'activer, il suffit de rajouter le flag `-DENABLE_INSTRUCTION_COUNTER=ON`.
 
 ````
 USAGE:
-  steg run <file.StegASM|file.steg> [-d]
-  steg build <file.StegASM|file.steg> <input.png> <output.png>
+  steg run <file.stegasm|file.steg> [-d]
+  steg build <file.stegasm|file.steg> <input.png> <output.png>
   steg run_img <img.png>
 
 OPTIONS:
@@ -153,7 +153,7 @@ Le lancement est directement compatible avec les fichiers **.steg** et **.stegas
 
 ### Construire une image executable
 
-Compile un programme (steg ou StegASM) l'injecte dans une image PNG : 
+Compile un programme (Steg ou StegASM) l'injecte dans une image PNG : 
 ````shell
 steg build mon_programme.steg input.png output.png
 steg build mon_programme.stegam input.png output.png
@@ -196,6 +196,8 @@ Lexer -> Parseur -> AST -> Analyse sémantique -> IR -> Backend Génération Ste
 ````
 
 Les fichiers sources portent l'extension `.steg`.
+
+> Une documentation de Steg est disponible [ici](./doc/steg.md).
 
 --- 
 
