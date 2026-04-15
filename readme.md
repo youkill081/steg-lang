@@ -10,7 +10,7 @@
 
 [![C++](https://img.shields.io/badge/C++-23-00599C?style=flat-square&logo=c%2B%2B)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/CMake-4.0+-064F8C?style=flat-square&logo=cmake)](https://cmake.org/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=flat-square)]()
+[![Plaformes](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)]()
 
 </div>
