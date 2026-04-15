@@ -1,4 +1,4 @@
-# Stéganographe
+# Stéganographe / OUTDATED, cette documentation est à refaire
 
 Le but de ce programme est de cacher de la donnée dans des images en les altérant le moins possible.
 
