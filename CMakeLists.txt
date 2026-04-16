@@ -10,6 +10,10 @@ if(MINGW)
     set(CMAKE_RANLIB "gcc-ranlib")
 endif()
 
+if (WIN32 AND MINGW)
+    add_link_options("-static-libgcc" "-static-libstdc++" "-static")
+endif ()
+
 set(APP_NAME stegnocode)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -19,8 +23,8 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 # Gen version header and create a lib
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/version.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/version.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/version.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/version.h"
 )
 add_library(project_version INTERFACE)
 target_include_directories(project_version INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/generated")
