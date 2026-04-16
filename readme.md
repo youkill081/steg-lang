@@ -97,10 +97,10 @@
 | **StegLSP** | Serveur LSP pour les fichiers .steg, directement connecté au compilateur steg !                                                       |
 
 Malgré la forte composante from-scratch ; le projet s'appuie quand même sur quelques librairies externes (incluses en submodules) : 
-- [**stb**](https://github.com/nothings/stb) — Lecture/Écriture de pixels pour la stéganographie, gère également plusieurs formats d'image
-- [**raylib**](https://www.raylib.com/) — Moteur graphique, fenêtres, inputs...
-- [**lsp-framework**](https://github.com/leon-bckl/lsp-framework) — Socle du serveur LSP
-- [**googletest**](https://github.com/google/googletest) — Framework de tests
+- [**stb**](https://github.com/nothings/stb) - Lecture/Écriture de pixels pour la stéganographie, gère également plusieurs formats d'image
+- [**raylib**](https://www.raylib.com/) - Moteur graphique, fenêtres, inputs...
+- [**lsp-framework**](https://github.com/leon-bckl/lsp-framework) - Socle du serveur LSP
+- [**googletest**](https://github.com/google/googletest) - Framework de tests
 
 ---
 
@@ -250,7 +250,7 @@ steg run_img ./examples/wolfensteg/wolfensteg.png
 
 Ou vous pouvez également le compiler vous même ! : 
 ````shell
-steg run ./examples/wolfensteg/wolfensteg.steg
+steg run ./examples/wolfensteg/WolfenSteg.steg
 ````
 
 ### Tetris - StegASM

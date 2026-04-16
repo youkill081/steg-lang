@@ -80,7 +80,6 @@ namespace compiler
         ErasedCallable& operator=(ErasedCallable const&) = default;
         ErasedCallable& operator=(ErasedCallable&&) = default;
 
-        // Constructeur inconditionnel — pas d'enable_if, GCC ne peut plus râler
         template<typename F>
         requires (!std::is_same_v<std::decay_t<F>, ErasedCallable>)
         ErasedCallable(F&& f)
@@ -91,7 +90,6 @@ namespace compiler
         explicit operator bool() const { return bool(ptr); }
     };
 
-    // Remplace l'ancien using Parser = std::function<...>
     template <typename T, typename Stream>
     using Parser = ErasedCallable<std::optional<Result<T, Stream>>(Stream)>;
 
