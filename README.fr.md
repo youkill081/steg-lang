@@ -123,6 +123,7 @@ Sur Windows il est conseillé d'utiliser [MinGW](https://www.mingw-w64.org/) pou
 
 
 ````shell
+git submodule update --init --recursive
 cmake -B build -DENABLE_INSTRUCTION_COUNTER=OFF
 cmake --build build --config Release
 ````

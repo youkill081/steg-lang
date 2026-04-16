@@ -122,6 +122,7 @@ On Window it is recommended to use [MinGW](https://www.mingw-w64.org/) to have t
 
 
 ````shell
+git submodule update --init --recursive
 cmake -B build -DENABLE_INSTRUCTION_COUNTER=OFF
 cmake --build build --config Release
 ````
