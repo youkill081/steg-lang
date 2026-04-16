@@ -12,7 +12,7 @@
 [![CMake](https://img.shields.io/badge/CMake-4.0+-064F8C?style=flat-square&logo=cmake)](https://cmake.org/)
 [![Plaformes](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)]()
-[![en](https://img.shields.io/badge/lang-fr-red.svg)](https://github.com/youkill081/steg-lang/blob/master/README.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/youkill081/steg-lang/blob/main/README.md)
 
 </div>
 
