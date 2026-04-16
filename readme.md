@@ -59,6 +59,10 @@
   └─────────────────┘
 ```
 
+## Démo
+
+![](./doc/demo-wolfensteg.gif)
+
 ---
 
 ## Table des matières
@@ -66,6 +70,7 @@
 <!-- TOC -->
 * [Steg](#steg)
   * [Vue d'ensemble](#vue-densemble)
+  * [Démo](#démo)
   * [Table des matières](#table-des-matières)
   * [Composant du projet](#composant-du-projet)
   * [Compilation](#compilation)
