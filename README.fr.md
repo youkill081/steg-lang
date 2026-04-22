@@ -68,6 +68,12 @@
     <b>Charge WolfenSteg depuis l'image et joue.</b>
 </p>
 
+<p align="center">
+    <img src="./doc/demo-tetris.gif">
+    <br>
+    <b>Demo tu Tetris (jeu crée directement en StegASM)</b>
+</p>
+
 ---
 
 ## Table des matières

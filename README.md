@@ -59,12 +59,18 @@ Write code in **Steg** (high level language), compile it, and inject it silently
   └─────────────────┘
 ```
 
-## Démo
+## Demo
 
 <p align="center">
     <img src="./doc/demo-wolfensteg.gif">
     <br>
     <b>Load WolfenSteg from the image and play it.</b>
+</p>
+
+<p align="center">
+    <img src="./doc/demo-tetris.gif">
+    <br>
+    <b>Demo of Tetris (game created directly in StegASM)</b>
 </p>
 
 ---
@@ -74,7 +80,7 @@ Write code in **Steg** (high level language), compile it, and inject it silently
 <!-- TOC -->
 * [Steg](#steg)
   * [Overview](#overview)
-  * [Démo](#démo)
+  * [Demo](#demo)
   * [Table of contents](#table-of-contents)
   * [Project component](#project-component)
   * [Compilation](#compilation)
