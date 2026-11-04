@@ -199,6 +199,8 @@ namespace compiler
             builtin("clock_get_elapsed_ms", v(T::UINT32), {v(T::CLOCK)}, "CLOCK_GET_ELAPSED_MS");
             builtin("clock_get_elapsed_s", v(T::UINT32), {v(T::CLOCK)}, "CLOCK_GET_ELAPSED_S");
             builtin("clock_reset", v(T::VOID), {v(T::CLOCK)}, "CLOCK_RESET");
+            builtin("raycast_segments", v(T::UINT32), {v(T::UINT32, 1), v(T::FILE)}, "RAYCAST_SEGMENTS");
+            builtin("raster_indexed_span", v(T::VOID), {v(T::UINT32, 1), v(T::FILE), v(T::FRAMEBUFFER)}, "RASTER_INDEXED_SPAN");
         }
     };
 }

@@ -7,6 +7,9 @@
 #include <random>
 #include <cmath>
 #include <bit>
+#include <algorithm>
+#include <array>
+#include <cstring>
 
 #include "Logger.h"
 #include "interpreter/exceptions.h"
@@ -16,6 +19,158 @@
 #include "interpreter/runtime/TimeDebugger.h"
 
 // ASM Instructions
+
+namespace {
+uint32_t word_le(const uint8_t* p)
+{
+    return uint32_t(p[0]) | (uint32_t(p[1]) << 8) |
+           (uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24);
+}
+
+template<size_t N>
+std::array<uint32_t, N> read_job(Runtime& runtime, uint32_t address)
+{
+    auto& block = runtime.memory.get_block(address);
+    const size_t offset = address - block.start;
+    if (offset > block.data.size() || N * 4 > block.data.size() - offset)
+        throw InterpreterError("Raster or ray descriptor outside memory");
+    std::array<uint32_t, N> words{};
+    const auto* p = block.data.data() + offset;
+    for (size_t i = 0; i < N; ++i, p += 4)
+        words[i] = (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) |
+                   (uint32_t(p[2]) << 8) | uint32_t(p[3]);
+    return words;
+}
+}
+
+void instr_RAYCAST_SEGMENTS(Runtime& runtime, InstructionView view)
+{
+    const uint32_t address = view.get_r2(runtime);
+    const auto a = read_job<13>(runtime, address);
+    const auto& bytes = runtime.files.get_file(view.get_r3(runtime))->get_file_data().get_buffer();
+    const auto [offset, count, stride, flags] = std::array{a[0], a[1], a[2], a[3]};
+    const bool packed = (flags & 1) != 0;
+    if (stride < (packed ? 8u : 16u) || uint64_t(offset) + uint64_t(count) * stride > bytes.size())
+        throw InterpreterError("Ray segments outside source file");
+    const float x = std::bit_cast<float>(a[4]), y = std::bit_cast<float>(a[5]);
+    const float vx = std::bit_cast<float>(a[6]), vy = std::bit_cast<float>(a[7]);
+    const float after = std::bit_cast<float>(a[8]), epsilon = std::bit_cast<float>(a[10]);
+    float limit = std::bit_cast<float>(a[9]), hit_u = 0;
+    if (!(std::isfinite(x) && std::isfinite(y) && std::isfinite(vx) && std::isfinite(vy) &&
+          std::isfinite(after) && std::isfinite(limit) && std::isfinite(epsilon) && epsilon >= 0))
+        throw InterpreterError("Invalid ray descriptor");
+    uint32_t hit = UINT32_MAX;
+    for (uint32_t i = 0; i < count; ++i) {
+        const auto* p = bytes.data() + offset + uint64_t(i) * stride;
+        const auto first = word_le(p), second = word_le(p+4);
+        const float ex = packed ? int(second & 65535) - 32768 : std::bit_cast<float>(word_le(p+8));
+        const float ey = packed ? int(second >> 16) - 32768 : std::bit_cast<float>(word_le(p+12));
+        const float det = vx * ey - vy * ex;
+        if (!(det < -epsilon || ((flags & 2) && det > epsilon))) continue;
+        const float ax = (packed ? int(first & 65535) - 32768 : std::bit_cast<float>(first)) - x;
+        const float ay = (packed ? int(first >> 16) - 32768 : std::bit_cast<float>(second)) - y;
+        const float u = ax * vy - ay * vx;
+        if (u < std::min(0.0f,det)-epsilon || u > std::max(0.0f,det)+epsilon) continue;
+        const float t = (ax * ey - ay * ex) / det;
+        if (t > after && t < limit) { hit = i; limit = t; hit_u = u / det; }
+    }
+    if (hit != UINT32_MAX) {
+        runtime.memory.write_uint32(address+44, std::bit_cast<uint32_t>(limit));
+        runtime.memory.write_uint32(address+48, std::bit_cast<uint32_t>(hit_u));
+    }
+    runtime.registries.write(view.r1(), hit);
+}
+
+void instr_RASTER_INDEXED_SPAN(Runtime& runtime, InstructionView view)
+{
+    const uint32_t address = view.get_r1(runtime);
+    const auto a = read_job<17>(runtime, address);
+    const auto& bytes = runtime.files.get_file(view.get_r2(runtime))->get_file_data().get_buffer();
+    const auto framebuffer = runtime.graphical_backend.framebuffer_get_address(view.get_r3(runtime));
+    auto& pixels = runtime.memory.get_block(framebuffer).data;
+    const uint32_t w = a[2], h = a[3], count = a[6], flags = a[11], repeat = a[13];
+    const bool projective = (flags & 8) != 0;
+    const int64_t dst = a[4], step = std::bit_cast<int32_t>(a[5]);
+    const float u0 = std::bit_cast<float>(a[7]), v0 = std::bit_cast<float>(a[8]);
+    const float du = std::bit_cast<float>(a[9]), dv = std::bit_cast<float>(a[10]);
+    const int64_t last = dst + (count ? int64_t(count-1)*step : 0);
+    if (!w || !h || !repeat || repeat>4 || count>UINT32_MAX/repeat || w>65535 || h>65535 ||
+        uint64_t(a[0])+uint64_t(w)*h*2 > bytes.size() ||
+        uint64_t(a[1])+(projective ? 32*1024+4 : 1028) > bytes.size() ||
+        std::min(dst,last)<0 || uint64_t(std::max(dst,last))+repeat*4 > pixels.size() ||
+        !(std::isfinite(u0) && std::isfinite(v0) && std::isfinite(du) && std::isfinite(dv)))
+        throw InterpreterError("Invalid indexed raster span");
+    const auto* tex = bytes.data()+a[0];
+    const auto* palette = bytes.data()+a[1];
+    const std::array<uint8_t,4> fallback{uint8_t(a[12]>>24),uint8_t(a[12]>>16),uint8_t(a[12]>>8),uint8_t(a[12])};
+    const auto coord = [flags](float v, int dim) {
+        if (!(std::abs(v)<2147483648.0f)) throw InterpreterError("Raster coordinate outside integer range");
+        if (!(flags&1)) return std::clamp(int(v),0,dim-1);
+        const int n=int(v)%dim;
+        return n<0 ? n+dim : n;
+    };
+    const int32_t start=std::bit_cast<int32_t>(a[14]), anchor=std::bit_cast<int32_t>(a[15]);
+    if (projective) {
+        const auto plane = read_job<20>(runtime, address);
+        const float center = std::bit_cast<float>(plane[17]);
+        const float factor = std::bit_cast<float>(plane[18]);
+        const int32_t light = std::bit_cast<int32_t>(plane[19]);
+        if (start<0 || uint64_t(start)+count>INT32_MAX || light<0 || light>60 ||
+            !std::isfinite(center) || !std::isfinite(factor))
+            throw InterpreterError("Invalid projective raster span");
+        uint32_t written = 0;
+        for (uint32_t i=0; i<count; ++i) {
+            float denom = float(start+int32_t(i))-center;
+            if (std::abs(denom)<0.5f) denom=0.5f;
+            const float d = factor/denom;
+            const int x = coord(u0+du*d,int(w)), y = coord(v0+dv*d,int(h));
+            const int z = int(std::min(std::abs(d)/16.0f,127.0f));
+            const int shade = std::clamp(light-80/(z+1),0,31);
+            const auto* pixel = tex+(uint64_t(x)*h+y)*2;
+            const unsigned index = pixel[0] | (unsigned(pixel[1])<<8);
+            if (index>256) throw InterpreterError("Indexed raster texel outside palette");
+            if (!index && (flags&4)) continue;
+            const auto* color = index ? palette+shade*1024+index*4 : fallback.data();
+            auto* out = pixels.data()+dst+int64_t(i)*step;
+            for (uint32_t j=0; j<repeat; ++j) std::memcpy(out+j*4,color,4);
+            written+=repeat;
+        }
+        runtime.memory.write_uint32(address+64,written);
+        return;
+    }
+    uint32_t written=0;
+    if ((flags&2) && (!(dv>0) || start<0 || uint64_t(start)+count>INT32_MAX))
+        throw InterpreterError("Invalid anchored raster span");
+    for (uint32_t i=0; i<count;) {
+        uint32_t end=i+1;
+        int x=0, y=0;
+        if (flags&2) {
+            // Vertical nearest-neighbour runs with Doom's anchored phase.
+            const int row=start+int(i);
+            const float phase=(float(row)-float(anchor))*dv+v0;
+            if (!(std::abs(phase)<2147483520.0f)) throw InterpreterError("Invalid raster phase");
+            const int sample=int(std::floor(phase));
+            y=sample%int(h); if (y<0) y+=h;
+            const float next=float(row)+(float(sample)+1.0f-phase)/dv;
+            if (next>=float(start)+count) end=count;
+            else if (next>float(row)+1.0f) end=uint32_t(int(next)-start);
+        } else {
+            x=coord(u0+float(i)*du,int(w)); y=coord(v0+float(i)*dv,int(h));
+        }
+        const auto* pixel=tex+(uint64_t(x)*h+y)*2;
+        const unsigned index=pixel[0] | (unsigned(pixel[1])<<8);
+        if (index>256) throw InterpreterError("Indexed raster texel outside palette");
+        if (index || !(flags&4)) {
+            const auto* color=index ? palette+index*4 : fallback.data();
+            for (;i<end;++i) {
+                auto* out=pixels.data()+dst+int64_t(i)*step;
+                for(uint32_t j=0;j<repeat;++j) std::memcpy(out+j*4,color,4);
+                written+=repeat;
+            }
+        } else i=end;
+    }
+    runtime.memory.write_uint32(address+64,written);
+}
 
 void instr_EOF(Runtime& runtime, InstructionView view)
 {
