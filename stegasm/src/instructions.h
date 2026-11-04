@@ -286,6 +286,8 @@ void instr_CLOCK_DELETE(Runtime &runtime, InstructionView view);
 void instr_CLOCK_GET_ELAPSED_MS(Runtime &runtime, InstructionView view);
 void instr_CLOCK_GET_ELAPSED_S(Runtime &runtime, InstructionView view);
 void instr_CLOCK_RESET(Runtime &runtime, InstructionView view);
+void instr_RAYCAST_SEGMENTS(Runtime &runtime, InstructionView view);
+void instr_RASTER_INDEXED_SPAN(Runtime &runtime, InstructionView view);
 
 struct InstructionHandler
 {
@@ -702,7 +704,9 @@ struct InstructionDesc
     X(CLOCK_DELETE, true, InstructionHandler(&instr_CLOCK_DELETE, REG)) \
     X(CLOCK_GET_ELAPSED_MS, true, InstructionHandler(&instr_CLOCK_GET_ELAPSED_MS, REG, REG)) \
     X(CLOCK_GET_ELAPSED_S, true, InstructionHandler(&instr_CLOCK_GET_ELAPSED_S, REG, REG)) \
-    X(CLOCK_RESET, true, InstructionHandler(&instr_CLOCK_RESET, REG))
+    X(CLOCK_RESET, true, InstructionHandler(&instr_CLOCK_RESET, REG)) \
+    X(RAYCAST_SEGMENTS, true, InstructionHandler(&instr_RAYCAST_SEGMENTS, REG, REG, REG)) \
+    X(RASTER_INDEXED_SPAN, true, InstructionHandler(&instr_RASTER_INDEXED_SPAN, REG, REG, REG))
 
 constexpr std::array rawInstructionSet = {
     #define MAKE_RAW(name, usable, ...) RawInstruction{#name, usable, __VA_ARGS__},

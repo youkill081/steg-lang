@@ -465,6 +465,15 @@ Les fonctions built-in sont directement intégrées au langage. Elles ne nécess
 | `window_framebuffer_sync(framebuffer fb)`                     | `void`        | Synchronise les modifications en mémoire vers le GPU |
 | `window_framebuffer_draw(framebuffer fb, uint32 x, uint32 y)` | `void`        | Dessine le framebuffer à la position donnée          |
 
+### Rendu par lots
+
+| Signature | Retour | Description |
+|-----------|--------|-------------|
+| `raycast_segments(uint32 @descriptor, file source)` | `uint32` | Trouve le segment le plus proche intersecté par un rayon |
+| `raster_indexed_span(uint32 @descriptor, file source, framebuffer fb)` | `void` | Dessine une bande de texture indexée dans un framebuffer |
+
+La [référence des deux instructions](raycast-and-raster.md) détaille les descripteurs, les options et les valeurs de sortie.
+
 ### Fichiers et vecteurs
 
 | Signature                                  | Retour   | Description                                    |

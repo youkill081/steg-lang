@@ -698,6 +698,10 @@ If `data_type != NO_DATA`, a **second bloc of 32 bits** immediately follows to s
 
 ---
 
+### Batched rendering instructions
+
+See [ray tests and indexed spans](raycast-and-raster.md) for the operands, memory layout, and return values of `RAYCAST_SEGMENTS` and `RASTER_INDEXED_SPAN`.
+
 #### Clocks
 
 | Mnemonic               | Operand 1 | Operand 2 | Operand 3 | Description                                                                      |

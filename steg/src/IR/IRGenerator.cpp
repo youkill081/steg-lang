@@ -570,10 +570,12 @@ void IRGenerator::visit(ASTVariableStatement* node)
     if (node->expression)
     {
         auto val = eval(node->expression.get());
-        const IrValueType dest_type = resolved_to_ir_type(ResolvedType::from(node->type));
-        val = ensure_type(val, dest_type);
+        const auto type = ResolvedType::from(node->type);
+        // Pointer initializers copy an address, regardless of the pointee type.
+        if (!type.is_pointer())
+            val = ensure_type(val, resolved_to_ir_type(type));
 
-        const auto dest = operand_from_resolved(ResolvedType::from(node->type), node->name);
+        const auto dest = operand_from_resolved(type, node->name);
         add_instruction({IrOpCode::COPY, dest, val});
     }
 }

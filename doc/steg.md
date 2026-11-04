@@ -467,6 +467,15 @@ The built-in functions are directly integrated into the language. They require n
 | `window_framebuffer_sync(framebuffer fb)`                     | `void`        | Sync modification with the GPU                    |
 | `window_framebuffer_draw(framebuffer fb, uint32 x, uint32 y)` | `void`        | Draw the framebuffer at given position            |
 
+### Batched rendering
+
+| Signature | Return | Description |
+|-----------|--------|-------------|
+| `raycast_segments(uint32 @descriptor, file source)` | `uint32` | Find the nearest intersecting segment |
+| `raster_indexed_span(uint32 @descriptor, file source, framebuffer fb)` | `void` | Draw an indexed texture span into a framebuffer |
+
+See [ray tests and indexed spans](raycast-and-raster.md) for the descriptor layouts, flags, and outputs.
+
 ### Files and vectors
 
 | Signature                                  | Return   | Description                               |
