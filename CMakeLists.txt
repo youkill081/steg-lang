@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(stegnocode VERSION 0.0.1)
+project(stegnocode VERSION 0.0.2)
 
 option(ENABLE_INSTRUCTION_COUNTER "If enable, display in the console the number of operation computed each second" OFF)
 
