@@ -58,12 +58,15 @@ public:
     void close();
 
     void save();
+    [[nodiscard]] bool is_readable() const;
     void delete_file();
 
     void reset_cursor();
     void seek_cursor(uint32_t);
     uint32_t get_cursor();
     void clear_data();
+    void replace_data(std::vector<uint8_t> bytes);
+    std::span<uint8_t> mutable_bytes();
 
     uint8_t read_byte();
     uint16_t read_word();

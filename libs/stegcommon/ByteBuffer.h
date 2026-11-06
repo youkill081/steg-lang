@@ -6,6 +6,8 @@
 
 #include <cstdint>
 #include <ostream>
+#include <span>
+#include <utility>
 #include <vector>
 
 class ByteBuffer
@@ -20,6 +22,7 @@ private:
     uint8_t write_bit_count = 0;
 public:
     ByteBuffer() = default;
+    explicit ByteBuffer(std::vector<uint8_t> bytes) : buffer(std::move(bytes)) {}
     explicit ByteBuffer(std::initializer_list<uint8_t> init);
 
     friend std::ostream& operator<<(std::ostream& os, const ByteBuffer& obj)
@@ -68,5 +71,6 @@ public:
     [[nodiscard]] const std::vector<uint8_t>& data() const;
     void clear_data();
     [[nodiscard]] const std::vector<uint8_t> &get_buffer() const { return buffer; }
+    [[nodiscard]] std::span<uint8_t> mutable_bytes() { return buffer; }
 };
 
