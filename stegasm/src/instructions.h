@@ -244,6 +244,7 @@ void instr_FILE_OPEN2(Runtime &runtime, InstructionView view);
 void instr_FILE_CREATE(Runtime &runtime, InstructionView view);
 void instr_FILE_CREATE2(Runtime &runtime, InstructionView view);
 void instr_FILE_SAVE(Runtime &runtime, InstructionView view);
+void instr_FILE_IS_READABLE(Runtime &runtime, InstructionView view);
 void instr_FILE_DELETE(Runtime &runtime, InstructionView view);
 void instr_FILE_CLOSE(Runtime &runtime, InstructionView view);
 void instr_FILE_GET_SIZE(Runtime &runtime, InstructionView view);
@@ -286,6 +287,31 @@ void instr_CLOCK_DELETE(Runtime &runtime, InstructionView view);
 void instr_CLOCK_GET_ELAPSED_MS(Runtime &runtime, InstructionView view);
 void instr_CLOCK_GET_ELAPSED_S(Runtime &runtime, InstructionView view);
 void instr_CLOCK_RESET(Runtime &runtime, InstructionView view);
+void instr_AUDIO_INIT(Runtime &runtime, InstructionView view);
+void instr_AUDIO_CLOSE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_UPDATE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_WAIT(Runtime &runtime, InstructionView view);
+void instr_AUDIO_MASTER_SET(Runtime &runtime, InstructionView view);
+void instr_AUDIO_SOURCE_LOAD(Runtime &runtime, InstructionView view);
+void instr_AUDIO_SOURCE_PCM(Runtime &runtime, InstructionView view);
+void instr_AUDIO_SOURCE_INFO(Runtime &runtime, InstructionView view);
+void instr_AUDIO_SOURCE_FREE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_PLAY(Runtime &runtime, InstructionView view);
+void instr_AUDIO_VOICE_SET(Runtime &runtime, InstructionView view);
+void instr_AUDIO_VOICE_CONTROL(Runtime &runtime, InstructionView view);
+void instr_AUDIO_VOICE_SEEK(Runtime &runtime, InstructionView view);
+void instr_AUDIO_VOICE_INFO(Runtime &runtime, InstructionView view);
+void instr_AUDIO_STREAM_CREATE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_STREAM_WRITE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_STREAM_INFO(Runtime &runtime, InstructionView view);
+void instr_AUDIO_STREAM_PLAY(Runtime &runtime, InstructionView view);
+void instr_AUDIO_STREAM_CONTROL(Runtime &runtime, InstructionView view);
+void instr_AUDIO_DECODE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_PCM_CONVERT(Runtime &runtime, InstructionView view);
+void instr_AUDIO_PCM_MIX(Runtime &runtime, InstructionView view);
+void instr_AUDIO_PCM_MEASURE(Runtime &runtime, InstructionView view);
+void instr_AUDIO_PCM_ENCODE(Runtime &runtime, InstructionView view);
+
 void instr_RAYCAST_SEGMENTS(Runtime &runtime, InstructionView view);
 void instr_RASTER_INDEXED_SPAN(Runtime &runtime, InstructionView view);
 
@@ -706,7 +732,32 @@ struct InstructionDesc
     X(CLOCK_GET_ELAPSED_S, true, InstructionHandler(&instr_CLOCK_GET_ELAPSED_S, REG, REG)) \
     X(CLOCK_RESET, true, InstructionHandler(&instr_CLOCK_RESET, REG)) \
     X(RAYCAST_SEGMENTS, true, InstructionHandler(&instr_RAYCAST_SEGMENTS, REG, REG, REG)) \
-    X(RASTER_INDEXED_SPAN, true, InstructionHandler(&instr_RASTER_INDEXED_SPAN, REG, REG, REG))
+    X(RASTER_INDEXED_SPAN, true, InstructionHandler(&instr_RASTER_INDEXED_SPAN, REG, REG, REG)) \
+    X(AUDIO_INIT, true, InstructionHandler(&instr_AUDIO_INIT, REG)) \
+    X(AUDIO_CLOSE, true, InstructionHandler(&instr_AUDIO_CLOSE)) \
+    X(AUDIO_UPDATE, true, InstructionHandler(&instr_AUDIO_UPDATE)) \
+    X(AUDIO_MASTER_SET, true, InstructionHandler(&instr_AUDIO_MASTER_SET, REG)) \
+    X(AUDIO_SOURCE_LOAD, true, InstructionHandler(&instr_AUDIO_SOURCE_LOAD, REG, REG, REG)) \
+    X(AUDIO_SOURCE_PCM, true, InstructionHandler(&instr_AUDIO_SOURCE_PCM, REG, REG, REG)) \
+    X(AUDIO_SOURCE_INFO, true, InstructionHandler(&instr_AUDIO_SOURCE_INFO, REG, REG, REG)) \
+    X(AUDIO_SOURCE_FREE, true, InstructionHandler(&instr_AUDIO_SOURCE_FREE, REG)) \
+    X(AUDIO_PLAY, true, InstructionHandler(&instr_AUDIO_PLAY, REG, REG, REG)) \
+    X(AUDIO_VOICE_SET, true, InstructionHandler(&instr_AUDIO_VOICE_SET, REG, REG, REG)) \
+    X(AUDIO_VOICE_CONTROL, true, InstructionHandler(&instr_AUDIO_VOICE_CONTROL, REG, REG, REG)) \
+    X(AUDIO_VOICE_SEEK, true, InstructionHandler(&instr_AUDIO_VOICE_SEEK, REG, REG, REG)) \
+    X(AUDIO_VOICE_INFO, true, InstructionHandler(&instr_AUDIO_VOICE_INFO, REG, REG, REG)) \
+    X(AUDIO_STREAM_CREATE, true, InstructionHandler(&instr_AUDIO_STREAM_CREATE, REG, REG)) \
+    X(AUDIO_STREAM_WRITE, true, InstructionHandler(&instr_AUDIO_STREAM_WRITE, REG, REG, REG)) \
+    X(AUDIO_STREAM_INFO, true, InstructionHandler(&instr_AUDIO_STREAM_INFO, REG, REG, REG)) \
+    X(AUDIO_STREAM_PLAY, true, InstructionHandler(&instr_AUDIO_STREAM_PLAY, REG, REG)) \
+    X(AUDIO_STREAM_CONTROL, true, InstructionHandler(&instr_AUDIO_STREAM_CONTROL, REG, REG, REG)) \
+    X(AUDIO_DECODE, true, InstructionHandler(&instr_AUDIO_DECODE, REG, REG, REG)) \
+    X(AUDIO_PCM_CONVERT, true, InstructionHandler(&instr_AUDIO_PCM_CONVERT, REG, REG, REG)) \
+    X(AUDIO_PCM_MIX, true, InstructionHandler(&instr_AUDIO_PCM_MIX, REG, REG, REG)) \
+    X(AUDIO_PCM_MEASURE, true, InstructionHandler(&instr_AUDIO_PCM_MEASURE, REG, REG, REG)) \
+    X(AUDIO_PCM_ENCODE, true, InstructionHandler(&instr_AUDIO_PCM_ENCODE, REG, REG, REG)) \
+    X(AUDIO_WAIT, true, InstructionHandler(&instr_AUDIO_WAIT, REG)) \
+    X(FILE_IS_READABLE, true, InstructionHandler(&instr_FILE_IS_READABLE, REG, REG))
 
 constexpr std::array rawInstructionSet = {
     #define MAKE_RAW(name, usable, ...) RawInstruction{#name, usable, __VA_ARGS__},

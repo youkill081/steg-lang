@@ -22,6 +22,9 @@ set(STEGASM_LIB_SOURCES
         src/interpreter/runtime/Registries.cpp
         src/interpreter/runtime/Registries.h
         src/instructions.cpp
+        src/interpreter/runtime/AudioBackend.h
+        src/interpreter/runtime/AudioBackend.cpp
+        src/interpreter/runtime/AudioInstructions.cpp
         src/interpreter/runtime/GraphicalBackend.h
         src/interpreter/runtime/GraphicalBackend.cpp
         src/interpreter/runtime/Utils.cpp

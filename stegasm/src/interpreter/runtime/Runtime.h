@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 
+#include "AudioBackend.h"
 #include "Clocks.h"
 #include "GraphicalBackend.h"
 #include "InstructionView.h"
@@ -43,6 +44,7 @@ public:
     Clocks clocks;
     Stack stack{}; // Force usage of vector, more efficient than deque
     GraphicalBackend graphical_backend;
+    AudioBackend audio_backend;
     Utils utils{*this};
 
     std::vector<LoadedInstruction> instructions{};

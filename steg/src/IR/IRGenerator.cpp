@@ -155,6 +155,9 @@ IrValueType IRGenerator::resolved_to_ir_type(const ResolvedType& t)
     case ASTTypeNode::FILE:
     case ASTTypeNode::CLOCK:
     case ASTTypeNode::FRAMEBUFFER:
+    case ASTTypeNode::AUDIO_SOURCE:
+    case ASTTypeNode::AUDIO_VOICE:
+    case ASTTypeNode::AUDIO_STREAM:
     case ASTTypeNode::UINT32: return IrValueType::UINT32;
     case ASTTypeNode::INT: return IrValueType::INT;
     default: return IrValueType::UNKNOWN;

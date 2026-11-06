@@ -2055,6 +2055,11 @@ void instr_FILE_SAVE(Runtime& runtime, InstructionView view)
     runtime.files.get_file(view.get_r1(runtime))->save();
 }
 
+void instr_FILE_IS_READABLE(Runtime& runtime, InstructionView view)
+{
+    runtime.registries.write(view.r1(), runtime.files.get_file(view.get_r2(runtime))->is_readable());
+}
+
 void instr_FILE_DELETE(Runtime& runtime, InstructionView view)
 {
     runtime.files.delete_file(

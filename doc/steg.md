@@ -476,11 +476,16 @@ The built-in functions are directly integrated into the language. They require n
 
 See [ray tests and indexed spans](raycast-and-raster.md) for the descriptor layouts, flags, and outputs.
 
+### Audio
+
+See the [audio reference](audio.md) for playback, streaming and offline PCM processing.
+
 ### Files and vectors
 
 | Signature                                  | Return   | Description                               |
 |--------------------------------------------|----------|-------------------------------------------|
 | `file_open(uint8 @path)`                   | `file`   | Opens an existing file on disk            |
+| `file_is_readable(file f)`                 | `bool`   | Checks whether the handle has in-memory data or can open its file for reading |
 | `file_create(uint8 @path)`                 | `file`   | Creates a new empty file or vector (`""`) |
 | `file_save(file f)`                        | `void`   | Save the file to disk                     |
 | `file_delete(file f)`                      | `void`   | Delete the file on disk                   |

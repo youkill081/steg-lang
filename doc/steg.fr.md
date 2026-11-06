@@ -474,11 +474,16 @@ Les fonctions built-in sont directement intégrées au langage. Elles ne nécess
 
 La [référence des deux instructions](raycast-and-raster.md) détaille les descripteurs, les options et les valeurs de sortie.
 
+### Audio
+
+La [référence audio](audio.md) décrit la lecture, les flux et le traitement PCM hors ligne.
+
 ### Fichiers et vecteurs
 
 | Signature                                  | Retour   | Description                                    |
 |--------------------------------------------|----------|------------------------------------------------|
 | `file_open(uint8 @path)`                   | `file`   | Ouvre un fichier existant sur disque           |
+| `file_is_readable(file f)`                 | `bool`   | Vérifie si le descripteur contient un vecteur ou si son fichier peut être ouvert en lecture |
 | `file_create(uint8 @path)`                 | `file`   | Crée un nouveau fichier ou vecteur vide (`""`) |
 | `file_save(file f)`                        | `void`   | Sauvegarde le fichier sur disque               |
 | `file_delete(file f)`                      | `void`   | Supprime le fichier sur disque                 |

@@ -1,0 +1,50 @@
+export fn main() -> void {
+    void @memory = aloc(32);
+    uint32 @job = memory;
+    float @floats = memory;
+    file pcm = file_create("");
+    file wav = file_create("");
+    file decoded = file_create("");
+    file output = file_create("");
+
+    // Two mono float32 samples, 0.5 and -0.5.
+    file_append_little_uint32(1056964608, pcm);
+    file_append_little_uint32(3204448256, pcm);
+    job[0] = 8000; job[1] = 1; job[2] = 32;
+    job[3] = 1;
+    audio_pcm_encode(pcm, wav, job);
+    if (job[4] != 0 || file_size(wav) != 64) { exit(1); }
+
+    job[0] = 1;
+    audio_decode(wav, decoded, job);
+    if (job[1] != 0 || job[2] != 8000 || job[3] != 1 || job[4] != 16 || job[5] != 2) { exit(2); }
+
+    job[0] = 8000; job[1] = 1; job[2] = 16;
+    job[3] = 0; job[4] = 2;
+    if (audio_pcm_measure(decoded, job) != 0 || floats[5] < 0.499 || floats[6] > 0.501) { exit(3); }
+
+    file_append_little_uint32(0, output);
+    file_append_little_uint32(0, output);
+    job[2] = 32; job[3] = 0; job[4] = 0; job[5] = 2; floats[6] = 0.5;
+    audio_pcm_mix(output, pcm, job);
+    if (job[7] != 0 || file_read_little_uint32_at(output, 0) != 1048576000) { exit(4); }
+
+    job[3] = 8000; job[4] = 1; job[5] = 16;
+    audio_pcm_convert(output, decoded, job);
+    if (job[6] != 0 || job[7] != 2 || file_size(decoded) != 4) { exit(5); }
+
+    audio_source source = audio_source_pcm(pcm, job);
+    if (audio_source_info(source, job) != 0 || job[3] != 2) { exit(6); }
+    audio_source_free(source);
+    if (audio_source_info(source, job) != 1) { exit(7); }
+
+    job[0] = 8000; job[1] = 1; job[2] = 32; job[3] = 256; job[4] = 256;
+    audio_stream stream = audio_stream_create(job);
+    if (audio_stream_write(stream, pcm) != 2 || audio_stream_write(stream, pcm) != 0) { exit(8); }
+    if (audio_stream_info(stream, job) != 0 || job[0] != 254 || job[1] != 2) { exit(9); }
+    if (audio_stream_control(stream, 1) != 0 || audio_stream_info(stream, job) != 0 || job[1] != 0) { exit(10); }
+    if (audio_stream_control(stream, 2) != 0 || audio_stream_info(stream, job) != 1) { exit(11); }
+
+    free(memory);
+    exit(0);
+}
