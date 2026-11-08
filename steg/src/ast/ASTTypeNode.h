@@ -27,7 +27,10 @@ namespace compiler
             VOID,
             FILE,
             CLOCK,
-            FRAMEBUFFER
+            FRAMEBUFFER,
+            AUDIO_SOURCE,
+            AUDIO_VOICE,
+            AUDIO_STREAM
         };
 
         ASTTypeNode(
@@ -53,6 +56,9 @@ namespace compiler
         {ASTTypeNode::Types::VOID, "void"},
         {ASTTypeNode::Types::FILE, "file"},
         {ASTTypeNode::Types::CLOCK, "clock"},
-        {ASTTypeNode::Types::FRAMEBUFFER, "framebuffer"}
+        {ASTTypeNode::Types::FRAMEBUFFER, "framebuffer"},
+        {ASTTypeNode::Types::AUDIO_SOURCE, "audio_source"},
+        {ASTTypeNode::Types::AUDIO_VOICE, "audio_voice"},
+        {ASTTypeNode::Types::AUDIO_STREAM, "audio_stream"}
     };
 }

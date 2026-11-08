@@ -107,6 +107,29 @@ void File::close()
     this->call_callbacks();
 }
 
+void File::replace_data(std::vector<uint8_t> bytes)
+{
+    _file_data = ByteBuffer(std::move(bytes));
+    _data_was_read = true;
+    _modified = true;
+}
+
+std::span<uint8_t> File::mutable_bytes()
+{
+    read_data_if_needed();
+    _modified = true;
+    return _file_data.mutable_bytes();
+}
+
+bool File::is_readable() const
+{
+    if (_data_was_read || _type == FileType::EMPTY) return true;
+    std::error_code error;
+    if (std::filesystem::is_directory(_path, error)) return false;
+    std::ifstream stream(_path, std::ios::binary);
+    return stream.good();
+}
+
 void File::save()
 {
     if (_type == FileType::BYTECODE)

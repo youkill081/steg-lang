@@ -164,6 +164,7 @@ namespace compiler
             builtin("file_delete", v(T::VOID), {v(T::FILE)}, "FILE_DELETE");
             builtin("file_close", v(T::VOID), {v(T::FILE)}, "FILE_CLOSE");
             builtin("file_size", v(T::UINT32), {v(T::FILE)}, "FILE_GET_SIZE");
+            builtin("file_is_readable", v(T::BOOL), {v(T::FILE)}, "FILE_IS_READABLE");
             builtin("file_map", v(T::VOID, 1), {v(T::FILE)}, "FILE_MAP");
             builtin("file_map_x_from_cursor", v(T::VOID, 1), {v(T::FILE), v(T::UINT32)}, "FILE_MAP_FROM_CURSOR");
             builtin("file_reset_cursor", v(T::VOID), {v(T::FILE)}, "FILE_RESET_CURSOR");
@@ -199,6 +200,31 @@ namespace compiler
             builtin("clock_get_elapsed_ms", v(T::UINT32), {v(T::CLOCK)}, "CLOCK_GET_ELAPSED_MS");
             builtin("clock_get_elapsed_s", v(T::UINT32), {v(T::CLOCK)}, "CLOCK_GET_ELAPSED_S");
             builtin("clock_reset", v(T::VOID), {v(T::CLOCK)}, "CLOCK_RESET");
+            builtin("audio_init", v(T::UINT32), {}, "AUDIO_INIT");
+            builtin("audio_close", v(T::VOID), {}, "AUDIO_CLOSE");
+            builtin("audio_update", v(T::VOID), {}, "AUDIO_UPDATE");
+            builtin("audio_wait", v(T::VOID), {v(T::UINT32)}, "AUDIO_WAIT");
+            builtin("audio_master_set", v(T::VOID), {v(T::FLOAT)}, "AUDIO_MASTER_SET");
+            builtin("audio_source_load", v(T::AUDIO_SOURCE), {v(T::FILE), v(T::UINT32, 1)}, "AUDIO_SOURCE_LOAD");
+            builtin("audio_source_pcm", v(T::AUDIO_SOURCE), {v(T::FILE), v(T::UINT32, 1)}, "AUDIO_SOURCE_PCM");
+            builtin("audio_source_info", v(T::UINT32), {v(T::AUDIO_SOURCE), v(T::UINT32, 1)}, "AUDIO_SOURCE_INFO");
+            builtin("audio_source_free", v(T::VOID), {v(T::AUDIO_SOURCE)}, "AUDIO_SOURCE_FREE");
+            builtin("audio_play", v(T::AUDIO_VOICE), {v(T::AUDIO_SOURCE), v(T::UINT32, 1)}, "AUDIO_PLAY");
+            builtin("audio_voice_set", v(T::UINT32), {v(T::AUDIO_VOICE), v(T::UINT32, 1)}, "AUDIO_VOICE_SET");
+            builtin("audio_voice_control", v(T::UINT32), {v(T::AUDIO_VOICE), v(T::UINT32)}, "AUDIO_VOICE_CONTROL");
+            builtin("audio_voice_seek", v(T::UINT32), {v(T::AUDIO_VOICE), v(T::UINT32)}, "AUDIO_VOICE_SEEK");
+            builtin("audio_voice_info", v(T::UINT32), {v(T::AUDIO_VOICE), v(T::UINT32, 1)}, "AUDIO_VOICE_INFO");
+            builtin("audio_stream_create", v(T::AUDIO_STREAM), {v(T::UINT32, 1)}, "AUDIO_STREAM_CREATE");
+            builtin("audio_stream_write", v(T::UINT32), {v(T::AUDIO_STREAM), v(T::FILE)}, "AUDIO_STREAM_WRITE");
+            builtin("audio_stream_info", v(T::UINT32), {v(T::AUDIO_STREAM), v(T::UINT32, 1)}, "AUDIO_STREAM_INFO");
+            builtin("audio_stream_play", v(T::AUDIO_VOICE), {v(T::AUDIO_STREAM)}, "AUDIO_STREAM_PLAY");
+            builtin("audio_stream_control", v(T::UINT32), {v(T::AUDIO_STREAM), v(T::UINT32)}, "AUDIO_STREAM_CONTROL");
+            builtin("audio_decode", v(T::VOID), {v(T::FILE), v(T::FILE), v(T::UINT32, 1)}, "AUDIO_DECODE");
+            builtin("audio_pcm_convert", v(T::VOID), {v(T::FILE), v(T::FILE), v(T::UINT32, 1)}, "AUDIO_PCM_CONVERT");
+            builtin("audio_pcm_mix", v(T::VOID), {v(T::FILE), v(T::FILE), v(T::UINT32, 1)}, "AUDIO_PCM_MIX");
+            builtin("audio_pcm_measure", v(T::UINT32), {v(T::FILE), v(T::UINT32, 1)}, "AUDIO_PCM_MEASURE");
+            builtin("audio_pcm_encode", v(T::VOID), {v(T::FILE), v(T::FILE), v(T::UINT32, 1)}, "AUDIO_PCM_ENCODE");
+
             builtin("raycast_segments", v(T::UINT32), {v(T::UINT32, 1), v(T::FILE)}, "RAYCAST_SEGMENTS");
             builtin("raster_indexed_span", v(T::VOID), {v(T::UINT32, 1), v(T::FILE), v(T::FRAMEBUFFER)}, "RASTER_INDEXED_SPAN");
         }

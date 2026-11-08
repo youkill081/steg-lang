@@ -25,3 +25,4 @@ target_compile_definitions(stegnocode_tests PRIVATE
 # Enable testing
 enable_testing()
 add_test(NAME stegnocode_tests COMMAND stegnocode_tests)
+add_test(NAME steg_audio_pcm COMMAND steg run "${CMAKE_CURRENT_SOURCE_DIR}/audio_pcm.steg")

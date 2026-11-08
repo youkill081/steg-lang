@@ -646,6 +646,7 @@ If `data_type != NO_DATA`, a **second bloc of 32 bits** immediately follows to s
 | Mnemonic               | Operand 1 | Operand 2  | Operand 3  | Description                                                      |
 |------------------------|-----------|------------|------------|------------------------------------------------------------------|
 | `FILE_OPEN`            | `reg`     | `val`      | -          | Open file at path `op2`, descriptor in`op1`                      |
+| `FILE_IS_READABLE`     | `reg`     | `reg`      | -          | Set `op1` to 1 if the file handle in `op2` can be read, or 0 otherwise |
 | `FILE_CREATE`          | `reg`     | `val`      | -          | Create the file at path `op2`, descriptor in `op1`               |
 | `FILE_SAVE`            | `reg`     | -          | -          | Save modification in the file `op1` on the disk                  |
 | `FILE_DELETE`          | `reg`     | -          | -          | Delete the file `op1`                                            |
@@ -701,6 +702,10 @@ If `data_type != NO_DATA`, a **second bloc of 32 bits** immediately follows to s
 ### Batched rendering instructions
 
 See [ray tests and indexed spans](raycast-and-raster.md) for the operands, memory layout, and return values of `RAYCAST_SEGMENTS` and `RASTER_INDEXED_SPAN`.
+
+### Audio instructions
+
+See the [audio reference](audio.md) for all audio mnemonics, operands and descriptor layouts.
 
 #### Clocks
 
