@@ -64,6 +64,12 @@ Write code in **Steg** (high level language), compile it, and inject it silently
 > GIFs may take a little while to load
 
 <p align="center">
+    <a href="./examples/doom/README.md"><img src="./doc/demo-doom.gif" alt="DOOM Steg: from the image to the end of the first level"></a>
+    <br>
+    <b>Load DOOM from a PNG, choose a level, and complete E1M1.</b>
+</p>
+
+<p align="center">
     <img src="./doc/demo-wolfensteg.gif">
     <br>
     <b>Load WolfenSteg from the image and play it.</b>
@@ -97,6 +103,7 @@ Write code in **Steg** (high level language), compile it, and inject it silently
   * [StegASM the low-level language](#stegasm-the-low-level-language)
   * [StegLSP - the language server](#steglsp---the-language-server)
   * [Examples](#examples)
+    * [DOOM Steg - Steg](#doom-steg---steg)
     * [WolfenSteg - Steg](#wolfensteg---steg)
       * [Performance and capacity](#performance-and-capacity)
       * [Play](#play)
@@ -245,10 +252,34 @@ Thanks to this LSP server, you can have the following on most modern IDEs:
 
 ## Examples
 
+### DOOM Steg - Steg
+
+**DOOM Steg** is the project's main showcase: a recreation of DOOM in Steg, with the complete program embedded in a PNG image.
+It reads the included `DOOM.wad`, containing all four episodes, directly to load maps, textures, sprites, sound effects and music. WAD parsing and game logic are written in Steg; graphics and audio use the VM instructions.
+
+<p align="center">
+    <a href="./examples/doom/doom.png"><img src="./examples/doom/doom.png" alt="DOOM Steg executable image" width="400"></a>
+    <br>
+    <b>This image contains the game's program.</b>
+</p>
+
+From the repository root, with `steg` on your PATH:
+
+```shell
+cd examples/doom
+steg run_img doom.png
+```
+
+The WAD must be in the **working directory**, named exactly `DOOM.wad`. It is included in this example; no resource pack or external converter is needed.
+
+The game includes level selection, five difficulty settings, weapons and enemies, doors and lifts, an automap, saves, sound effects and music. **Escape** opens the pause menu, **END GAME** returns to the main menu and **F11** toggles fullscreen.
+
+[Standalone source](./examples/doom/doom.steg) · [Setup, controls and rebuilding](./examples/doom/README.md)
+
 ### WolfenSteg - Steg
 
 wolfenSteg is a Ray-casting 3D game engine entirely written in Steg.  
-This is the technical showcase of the project, proving that the VM and the compilation chain can handle intensive mathematical calculations in real time.
+This earlier showcase demonstrates how the VM and compilation chain handle intensive mathematical calculations in real time.
 
 ![WolfenSteg](./examples/wolfensteg/wolfensteg.png)
 **This image contains the game**

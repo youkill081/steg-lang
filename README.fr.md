@@ -65,6 +65,12 @@
 > Les gifs peuvent prendre un peu de temps à charger.
 
 <p align="center">
+    <a href="./examples/doom/README.fr.md"><img src="./doc/demo-doom.gif" alt="DOOM Steg : de l'image à la fin du premier niveau"></a>
+    <br>
+    <b>Charge DOOM depuis une image PNG, choisis un niveau et termine E1M1.</b>
+</p>
+
+<p align="center">
     <img src="./doc/demo-wolfensteg.gif">
     <br>
     <b>Charge WolfenSteg depuis l'image et joue.</b>
@@ -98,6 +104,7 @@
   * [StegASM le langage bas niveau](#stegasm-le-langage-bas-niveau)
   * [StegLSP - le serveur de langage](#steglsp---le-serveur-de-langage)
   * [Exemples](#exemples)
+    * [DOOM Steg - Steg](#doom-steg---steg)
     * [WolfenSteg - Steg](#wolfensteg---steg)
       * [Performance et capacité](#performance-et-capacité)
       * [Jouer](#jouer)
@@ -244,10 +251,34 @@ Grâce à ce serveur LSP, vous pouvez avoir sur la plupart des IDE moderne :
 
 ## Exemples
 
+### DOOM Steg - Steg
+
+**DOOM Steg** est la démo principale du projet : une recréation de DOOM en Steg, dont le programme est entièrement embarqué dans une image PNG.
+Le jeu lit directement le `DOOM.wad` fourni, avec les quatre épisodes, pour charger les cartes, textures, sprites, bruitages et musiques. Le parsing du WAD et la logique du jeu sont écrits en Steg ; les graphismes et l'audio utilisent les instructions de la VM.
+
+<p align="center">
+    <a href="./examples/doom/doom.png"><img src="./examples/doom/doom.png" alt="Image exécutable de DOOM Steg" width="400"></a>
+    <br>
+    <b>Cette image contient le programme du jeu.</b>
+</p>
+
+Depuis la racine du dépôt, avec `steg` dans le PATH :
+
+```shell
+cd examples/doom
+steg run_img doom.png
+```
+
+Le WAD doit se trouver dans le **dossier de lancement**, sous le nom exact `DOOM.wad`. Il est inclus dans cet exemple ; aucun pack de ressources ni convertisseur externe n'est nécessaire.
+
+Le jeu propose la sélection des cartes, cinq difficultés, les armes et ennemis, les portes et ascenseurs, la carte, les sauvegardes, les bruitages et la musique. **Échap** ouvre la pause, **END GAME** revient au menu et **F11** bascule le plein écran.
+
+[Source autonome](./examples/doom/doom.steg) · [Lancement, commandes et recompilation](./examples/doom/README.fr.md)
+
 ### WolfenSteg - Steg
 
 WolfenSteg est un moteur de rendu pseudo-3D (Raycasting) entièrement écrit en Steg.  
-C'est la vitrine technique du projet, prouvant que la VM et la chaîne de compilation peuvent gérer des calculs mathématiques intensifs en temps réel.  
+Cette autre démo montre comment la VM et la chaîne de compilation gèrent des calculs mathématiques intensifs en temps réel.
 
 #### Performance et capacité
 
