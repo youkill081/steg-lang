@@ -4586,6 +4586,7 @@ float horizon = 64.0;
 bool mouse_captured = false;
 bool mouse_ready = false;
 float sight_rise = 0.0;
+float bullet_slope=0.0; float candidate_slope=0.0;
 float dx = 0.0;
 float dy = 1.0;
 int sector = 0;
@@ -4632,7 +4633,9 @@ float bob = 0.0;
 bool backpack=false; float suit_time=0.0; float light_time=0.0; float shadow_time=0.0;
 float eye_z=0.0; int bonus_count=0; float bonus_clock=0.0;
 float sway=0.0; float move_vx=0.0; float move_vy=0.0;
-float feet_z=0.0;
+float feet_z=0.0; float player_floor=0.0; float classic_momz=0.0;
+float player_viewheight=41.0; float player_viewdelta=0.0;
+bool collision_monster=false;
 float info_time = 0.0;
 int info = 0;
 int scale_x = 1;
@@ -4841,7 +4844,8 @@ fn reset() -> void {
     angle = deg2rad(file_read_little_uint16_at(data,map_base+16));
     dx = cos(angle); dy = sin(angle);
     sync_classic_position();
-    feet_z=floor_of(sector); pz=feet_z+41.0; eye_z=pz;
+    feet_z=floor_of(sector); player_floor=feet_z; classic_momz=0.0;
+    player_viewheight=41.0; player_viewdelta=0.0; pz=feet_z+41.0; eye_z=pz;
     move_vx=0.0; move_vy=0.0; sway=0.0; bonus_count=0; bonus_clock=0.0;
     hp = 100; armor = 0; armor_type=0; ammo = 50; shells = 0; kills = 0;
     shotgun = false; has_shotgun = false; won = false; map_open = false;
@@ -5192,6 +5196,12 @@ fn player_in_sector(int id) -> bool {
         || sector_at(px-9.0,py+9.0)==id || sector_at(px+9.0,py+9.0)==id;
 }
 
+fn carry_player_with_floor(int room,int old_floor,int next_floor) -> void {
+    if (feet_z==old_floor && player_in_sector(room)) {
+        feet_z=next_floor; player_floor=next_floor;
+    }
+}
+
 fn tick_sector(int id,int tics) -> bool {
     int p=id*12;
     int f=signed_word(sector_state,p);
@@ -5204,6 +5214,7 @@ fn tick_sector(int id,int tics) -> bool {
         int rate=2; if ((mode&8)!=0) { rate=8; }
         int next_c=approach(c,tc,tics*rate);
         if ((next_f>f || next_c<c) && next_c-next_f<49 && player_in_sector(id)) { return true; }
+        if (next_f!=f) { carry_player_with_floor(id,f,next_f); }
         file_seek_cursor(p,sector_state);
         file_write_little_uint16(coordinate(next_f),sector_state);
         file_write_little_uint16(coordinate(next_c),sector_state);
@@ -5401,7 +5412,8 @@ fn action_apply(int id,int mode) -> void {
         int room=sector_at(px,py);
         if (room>=0) {
             sector=room; angle=deg2rad(file_read_little_uint16_at(data,p+12));
-            dx=cos(angle); dy=sin(angle); feet_z=floor_of(sector); pz=feet_z+41.0; eye_z=pz;
+            dx=cos(angle); dy=sin(angle); feet_z=floor_of(sector); player_floor=feet_z; classic_momz=0.0;
+    player_viewheight=41.0; player_viewdelta=0.0; pz=feet_z+41.0; eye_z=pz;
             sync_classic_position();
             move_vx=0.0; move_vy=0.0; sway=0.0; bonus_count=0; bonus_clock=0.0;
         }
@@ -5508,18 +5520,7 @@ fn put_hp(int at, int life) -> void {
     file_write_uint8(life,things);
 }
 
-fn on_target(int at,float x,float y,float forward) -> bool {
-    int room=sector_at(px+x,py+y);
-    if (room<0) { return false; }
-    float base=floor_of(room);
-    float rise=(horizon-64.0)*forward/116.0;
-    float target=pz+rise;
-    int height=file_read_uint8_at(things,at+8);
-    if (target<base-4.0 || target>base+height+4.0) { return false; }
-    ray_setup(px,py,x,y);
-    sight_rise=rise;
-    return visible(sector,pz);
-}
+
 
 fn start_player_death(int source) -> void {
     death_tics=0; death_weapon_y=0; death_viewheight=41.0;
@@ -5565,12 +5566,126 @@ fn actor_flags(int at) -> int {
     return file_read_uint8_at(data,actor_traits+(at/12)*8+3);
 }
 
-fn actor_clear(float x,float y,int radius,int exclude) -> bool {
+fn fixed_mul(int a,int b) -> int {
+    int al=a&65535; int bl=b&65535;
+    int ah=(a-al)/65536; int bh=(b-bl)/65536;
+    uint32 product=al*bl;
+    int carry=product>>16;
+    return ah*b+bh*al+carry;
+}
+
+fn fine_sine(int index) -> int {
+    return file_read_little_uint32_at(doom_sine_data,(index&8191)*4);
+}
+
+fn classic_partition(int x,int y,int vx,int vy) -> int {
+    if (vx==0) {
+        if ((x<=0 && vy>0) || (x>0 && vy<0)) { return 1; }
+        return 0;
+    }
+    if (vy==0) {
+        if ((y<=0 && vx<0) || (y>0 && vx>0)) { return 1; }
+        return 0;
+    }
+    if (fixed_mul(y,vx)<fixed_mul(x,vy)) { return 0; }
+    return 1;
+}
+
+fn classic_sector_at(int x,int y) -> int {
+    if (classic_node_count==0) { return file_read_little_uint16_at(data,classic_leaves); }
+    int child=classic_node_count-1;
+    while (child<32768) {
+        int p=classic_nodes+child*28;
+        int xx=x-signed_word(data,p)*65536; int yy=y-signed_word(data,p+2)*65536;
+        int vx=signed_word(data,p+4); int vy=signed_word(data,p+6);
+        int side=0;
+        if (vx!=0 && vy!=0 && (vx^vy^xx^yy)<0) {
+            if ((vy^xx)<0) { side=1; }
+        } else { side=classic_partition(xx,yy,vx,vy); }
+        child=file_read_little_uint16_at(data,p+24+side*2);
+    }
+    return file_read_little_uint16_at(data,classic_leaves+(child&32767)*2);
+}
+
+fn classic_crosses(int x0,int y0,int x1,int y1) -> bool {
+    if ((classic_left>=x0 && classic_left>=x1) || (classic_right<=x0 && classic_right<=x1)
+        || (classic_bottom>=y0 && classic_bottom>=y1) || (classic_top<=y0 && classic_top<=y1)) { return false; }
+    int vx=(x1-x0)/65536; int vy=(y1-y0)/65536;
+    if (vx==0 || vy==0) { return true; }
+    int ax=classic_left-x0; int bx=classic_right-x0;
+    if ((vx<0 && vy>0) || (vx>0 && vy<0)) {
+        ax=classic_right-x0; bx=classic_left-x0;
+    }
+    return classic_partition(ax,classic_top-y0,vx,vy)!=classic_partition(bx,classic_bottom-y0,vx,vy);
+}
+
+fn classic_open_line(int p) -> bool {
+    int x0=signed_word(data,p)*65536; int y0=signed_word(data,p+2)*65536;
+    int x1=signed_word(data,p+4)*65536; int y1=signed_word(data,p+6)*65536;
+    if (!classic_crosses(x0,y0,x1,y1)) { return true; }
+    int flags=file_read_little_uint16_at(data,p+8);
+    int front=file_read_little_uint16_at(data,p+10)-1;
+    int back=file_read_little_uint16_at(data,p+12)-1;
+    if (back<0 || front<0 || (flags&1)!=0 || (collision_monster && (flags&2)!=0)) { return false; }
+    int floor=floor_of(front); int ceiling=ceiling_of(front);
+    if (floor>classic_floor) { classic_floor=floor; }
+    if (ceiling<classic_ceiling) { classic_ceiling=ceiling; }
+    floor=floor_of(back); ceiling=ceiling_of(back);
+    if (floor>classic_floor) { classic_floor=floor; }
+    if (ceiling<classic_ceiling) { classic_ceiling=ceiling; }
+    return true;
+}
+
+fn classic_check_lines() -> bool {
+    int x0=(classic_left-classic_block_x)>>23; int x1=(classic_right-classic_block_x)>>23;
+    int y0=(classic_bottom-classic_block_y)>>23; int y1=(classic_top-classic_block_y)>>23;
+    if (x0<0) { x0=0; } if (x1>=classic_block_w) { x1=classic_block_w-1; }
+    if (y0<0) { y0=0; } if (y1>=classic_block_h) { y1=classic_block_h-1; }
+    int x=x0;
+    while (x<=x1) {
+        int y=y0;
+        while (y<=y1) {
+            int slot=classic_blockmap+8+(y*classic_block_w+x)*2;
+            int list=classic_blockmap+file_read_little_uint16_at(data,slot)*2;
+            int line=file_read_little_uint16_at(data,list);
+            while (line!=65535) {
+                if (!classic_open_line(classic_lines+line*14)) { return false; }
+                list+=2; line=file_read_little_uint16_at(data,list);
+            }
+            y+=1;
+        }
+        x+=1;
+    }
+    return true;
+}
+
+fn position_limits(int x,int y,int room,int radius,bool monster) -> bool {
+    collision_monster=monster;
+    classic_floor=floor_of(room); classic_ceiling=ceiling_of(room);
+    classic_left=x-radius*65536; classic_right=x+radius*65536;
+    classic_bottom=y-radius*65536; classic_top=y+radius*65536;
+    return classic_check_lines();
+}
+
+fn classic_position_limits(int x,int y,int room) -> bool { return position_limits(x,y,room,16,false); }
+
+fn enemy_base_z(int at,int room) -> int {
+    if (file_read_little_uint16_at(monster_state,at+10)!=0) { return signed_word(monster_state,at+8); }
+    if ((actor_flags(at)&8)!=0) { return ceiling_of(room)-file_read_uint8_at(things,at+8); }
+    return floor_of(room);
+}
+
+fn actor_clear(float x,float y,int radius,int exclude,float z,int height) -> bool {
     int at=0;
     while (at<count*12) {
         if (at!=exclude && file_read_uint8_at(things,at+7)>0 && (actor_flags(at)&1)!=0) {
             int gap=radius+actor_radius(at);
-            if (fabs(x-signed_word(things,at))<gap && fabs(y-signed_word(things,at+2))<gap) { return false; }
+            if (fabs(x-signed_word(things,at))<gap && fabs(y-signed_word(things,at+2))<gap) {
+                int room=classic_sector_at(signed_word(things,at)*65536,signed_word(things,at+2)*65536);
+                int base=floor_of(room);
+                if (file_read_uint8_at(things,at+6)<=4) { base=enemy_base_z(at,room); }
+                if (z<base+file_read_uint8_at(things,at+8) && z+height>base) { return false; }
+            }
         }
         at+=12;
     }
@@ -5683,6 +5798,8 @@ fn damage_actor(int at,int damage) -> void {
     }
     if (kind==5) { start_barrel(at); return; }
     put_hp(at,0);
+    if ((actor_flags(at)&4)!=0) { file_seek_cursor(at+6,monster_state); file_write_little_uint16(0,monster_state); }
+    file_seek_cursor(at+3,monster_state); file_write_uint8(0,monster_state);
     file_seek_cursor(at+10,things); file_write_little_uint16(0,things);
     kills+=1;
     if ((file_read_uint8_at(things,at+9)&32)!=0) { play_doom_effect(sfx_dssgtdth); }
@@ -5725,28 +5842,9 @@ fn missile_slot() -> int {
     return at;
 }
 
-fn launch_player_missile(int family) -> bool {
-    int at=missile_slot();
-    if (at<0) { return false; }
-    float speed=875.0;
-    if (family==1) { speed=700.0; }
-    float vz=(horizon-64.0)*speed/116.0;
-    file_seek_cursor(at,imp_shots);
-    file_write_little_uint32(imp_encode(px),imp_shots);
-    file_write_little_uint32(imp_encode(py),imp_shots);
-    file_write_little_uint32(imp_encode(feet_z+32.0),imp_shots);
-    file_write_little_uint16(coordinate(dx*speed),imp_shots);
-    file_write_little_uint16(coordinate(dy*speed),imp_shots);
-    file_write_little_uint16(coordinate(vz),imp_shots);
-    file_write_little_uint16(4500,imp_shots);
-    file_write_uint8(0,imp_shots);
-    file_write_uint8(family,imp_shots);
-    if (family==1) { play_doom_effect(sfx_dsrlaunc); }
-    if (family==2) { play_doom_effect(sfx_dsplasma); }
-    return true;
-}
 
-fn launch_rocket() -> bool { return launch_player_missile(1); }
+
+
 
 fn select_weapon(int weapon) -> void {
     shotgun=weapon==3;
@@ -5774,6 +5872,71 @@ fn choose_loaded_weapon() -> void {
     select_weapon(1);
 }
 
+// Find a visible part of the actor inside vanilla's vertical autoaim cone.
+fn aim_target(int at,float x,float y,float forward) -> bool {
+    int room=classic_sector_at((px+x)*65536.0,(py+y)*65536.0);
+    float origin=feet_z+36.0;
+    float bottom=-0.625; float top=0.625;
+    ray_setup(px,py,x,y);
+    int here=sector; float after=-0.001; int crossed=0;
+    while (crossed<64) {
+        float distance=crossing(here,after,1.0);
+        if (edge_hit<0 || distance>=1.0) { break; }
+        int other=file_read_little_uint16_at(data,edge_hit+16)-1;
+        if (other<0) { return false; }
+        float floor=fmax(floor_of(here),floor_of(other));
+        float ceiling=fmin(ceiling_of(here),ceiling_of(other));
+        if (ceiling<=floor) { return false; }
+        if (distance>0.00001) {
+            bottom=fmax(bottom,(floor-origin)/(forward*distance));
+            top=fmin(top,(ceiling-origin)/(forward*distance));
+            if (top<=bottom) { return false; }
+        }
+        after=distance+0.00001; here=other; crossed+=1;
+    }
+    if (crossed>=64) { return false; }
+    float base=enemy_base_z(at,room);
+    bottom=fmax(bottom,(base-origin)/forward);
+    top=fmin(top,(base+file_read_uint8_at(things,at+8)-origin)/forward);
+    if (top<=bottom) { return false; }
+    candidate_slope=(top+bottom)*0.5;
+    return true;
+}
+
+fn find_aim_target(float vx,float vy,float range) -> int {
+    int best=-1; int at=0;
+    while (at<count*12) {
+        if (file_read_uint8_at(things,at+6)<=5 && file_read_uint8_at(things,at+7)>0) {
+            float x=signed_word(things,at)-px; float y=signed_word(things,at+2)-py;
+            float forward=x*vx+y*vy;
+            if (forward>0.0 && forward<range && fabs(x*vy-y*vx)<actor_radius(at) && aim_target(at,x,y,forward)) {
+                best=at; range=forward; bullet_slope=candidate_slope;
+            }
+        }
+        at+=12;
+    }
+    return best;
+}
+
+fn prepare_player_aim(float range) -> void {
+    bullet_slope=0.0;
+    if (find_aim_target(dx,dy,range)>=0) { return; }
+    // The original also tries 5.625 degrees to either side for near misses.
+    if (find_aim_target(dx*0.995184727-dy*0.098017140,dx*0.098017140+dy*0.995184727,range)>=0) { return; }
+    find_aim_target(dx*0.995184727+dy*0.098017140,-dx*0.098017140+dy*0.995184727,range);
+}
+
+fn on_target(int at,float x,float y,float forward) -> bool {
+    int room=classic_sector_at((px+x)*65536.0,(py+y)*65536.0);
+    float base=enemy_base_z(at,room);
+    float origin=feet_z+36.0;
+    float rise=bullet_slope*forward;
+    float target=origin+rise;
+    if (target<base || target>base+file_read_uint8_at(things,at+8)) { return false; }
+    ray_setup(px,py,x,y); sight_rise=rise;
+    return visible(sector,origin);
+}
+
 fn attack_target(float vx,float vy,float range) -> int {
     int best=-1;
     int at=0;
@@ -5789,6 +5952,30 @@ fn attack_target(float vx,float vy,float range) -> int {
     }
     return best;
 }
+
+fn launch_player_missile(int family) -> bool {
+    prepare_player_aim(1024.0);
+    int at=missile_slot();
+    if (at<0) { return false; }
+    float speed=875.0;
+    if (family==1) { speed=700.0; }
+    float vz=bullet_slope*speed;
+    file_seek_cursor(at,imp_shots);
+    file_write_little_uint32(imp_encode(px),imp_shots);
+    file_write_little_uint32(imp_encode(py),imp_shots);
+    file_write_little_uint32(imp_encode(feet_z+32.0),imp_shots);
+    file_write_little_uint16(coordinate(dx*speed),imp_shots);
+    file_write_little_uint16(coordinate(dy*speed),imp_shots);
+    file_write_little_uint16(coordinate(vz),imp_shots);
+    file_write_little_uint16(4500,imp_shots);
+    file_write_uint8(0,imp_shots);
+    file_write_uint8(family,imp_shots);
+    if (family==1) { play_doom_effect(sfx_dsrlaunc); }
+    if (family==2) { play_doom_effect(sfx_dsplasma); }
+    return true;
+}
+
+fn launch_rocket() -> bool { return launch_player_missile(1); }
 
 fn gun_spread() -> float {
     int first=doom_random(); int second=doom_random();
@@ -5823,6 +6010,7 @@ fn bullet_attack(float yaw,int damage,file volley) -> void {
 }
 
 fn fire_bullets() -> void {
+    prepare_player_aim(1024.0);
     extra_anim=true;
     if (shotgun) {
         shells-=1; cooldown=41.0/35.0; flash=7.0/35.0;
@@ -5892,6 +6080,7 @@ fn shoot() -> void {
     if (extra_weapon==1 && berserk_tics>0) { damage*=10; }
     float yaw=gun_spread();
     float cc=cos(yaw); float ss=sin(yaw);
+    prepare_player_aim(reach);
     int best=attack_target(dx*cc-dy*ss,dx*ss+dy*cc,reach);
     if (best<0) {
         if (extra_weapon==2) { play_doom_effect(sfx_dssawful); }
@@ -5971,9 +6160,9 @@ fn rocket_contact(float x,float y,float z,int radius) -> int {
             int ax=signed_word(things,at); int ay=signed_word(things,at+2);
             int gap=radius+actor_radius(at);
             if (fabs(x-ax)<gap && fabs(y-ay)<gap) {
-                int room=sector_at(ax,ay);
+                int room=classic_sector_at(ax*65536,ay*65536);
                 if (room>=0) {
-                    int bottom=floor_of(room);
+                    int bottom=enemy_base_z(at,room);
                     if (z+8.0>=bottom && z<bottom+file_read_uint8_at(things,at+8)) { return at; }
                 }
             }
@@ -5984,25 +6173,7 @@ fn rocket_contact(float x,float y,float z,int radius) -> int {
 }
 
 fn bfg_ray(float vx,float vy) -> int {
-    int best=-1;
-    float closest=1024.0;
-    int at=0;
-    while (at<count*12) {
-        if (file_read_uint8_at(things,at+6)<=5 && file_read_uint8_at(things,at+7)>0) {
-            float x=signed_word(things,at)-px; float y=signed_word(things,at+2)-py;
-            float depth=x*vx+y*vy;
-            if (depth>0.0 && depth<closest && fabs(x*vy-y*vx)<actor_radius(at)) {
-                int room=sector_at(px+x,py+y);
-                if (room>=0) {
-                    ray_setup(px,py,x,y);
-                    sight_rise=floor_of(room)+file_read_uint8_at(things,at+8)/2.0-pz;
-                    if (visible(sector,pz)) { closest=depth; best=at; }
-                }
-            }
-        }
-        at+=12;
-    }
-    return best;
+    return find_aim_target(vx,vy,1024.0);
 }
 
 fn bfg_hit_effect(int target) -> void {
@@ -6011,7 +6182,7 @@ fn bfg_hit_effect(int target) -> void {
     if (room<0) { return; }
     int at=missile_slot();
     if (at<0) { return; }
-    float z=floor_of(room)+file_read_uint8_at(things,target+8)/4.0;
+    float z=enemy_base_z(target,classic_sector_at(x*65536.0,y*65536.0))+file_read_uint8_at(things,target+8)/4.0;
     file_seek_cursor(at,imp_shots);
     file_write_little_uint32(imp_encode(x),imp_shots);
     file_write_little_uint32(imp_encode(y),imp_shots);
@@ -6064,7 +6235,7 @@ fn rocket_blast(float x,float y,float z,int source) -> void {
                 int target=sector_at(x+vx,y+vy);
                 if (target>=0) {
                     ray_setup(x,y,vx,vy);
-                    sight_rise=floor_of(target)+24.0-z;
+                    sight_rise=enemy_base_z(at,classic_sector_at((x+vx)*65536.0,(y+vy)*65536.0))+file_read_uint8_at(things,at+8)/2.0-z;
                     if (visible(room,z)) { damage_actor(at,(damage+9)/10); }
                 }
             }
@@ -6220,9 +6391,9 @@ fn hostile_hit_actor(int shot,float x,float y,float z) -> bool {
             int ax=signed_word(things,at); int ay=signed_word(things,at+2);
             int gap=actor_radius(at)+6;
             if (fabs(x-ax)<gap && fabs(y-ay)<gap) {
-                int room=sector_at(ax,ay);
+                int room=classic_sector_at(ax*65536,ay*65536);
                 if (room>=0) {
-                    int floor=floor_of(room);
+                    int floor=enemy_base_z(at,room);
                     if (z+8.0>=floor && z<floor+file_read_uint8_at(things,at+8)) {
                         if (actor_type(at)!=species) {
                             int base=8;
@@ -6333,16 +6504,20 @@ fn face_player(int at,float x,float y) -> void {
 
 fn enemy_step(int at,float x,float y,int floor) -> bool {
     int radius=actor_radius(at);
-    if (hp>0 && fabs(px-x)<radius+16 && fabs(py-y)<radius+16) { return false; }
-    if (!actor_clear(x,y,radius,at)) { return false; }
-    int room=sector_at(x,y);
-    if (room<0) { return false; }
+    int room=classic_sector_at(x*65536.0,y*65536.0);
+    int old_room=classic_sector_at(signed_word(things,at)*65536,signed_word(things,at+2)*65536);
+    int z=enemy_base_z(at,old_room);
+    int height=file_read_uint8_at(things,at+8);
+    if (hp>0 && feet_z<z+height && feet_z+56.0>z
+        && fabs(px-x)<radius+16 && fabs(py-y)<radius+16) { return false; }
+    if (!actor_clear(x,y,radius,at,z,height)) { return false; }
+    if (!position_limits(x*65536.0,y*65536.0,room,radius,true)) { return false; }
+    if (classic_ceiling-classic_floor<height) { return false; }
     if ((actor_flags(at)&4)!=0) {
-        if (ceiling_of(room)-floor_of(room)<file_read_uint8_at(things,at+8)) { return false; }
-    } else {
-        if (!clear_at(x,y,radius,floor) || floor-ground_floor>24) { return false; }
+        return z>=classic_floor && z+height<=classic_ceiling;
     }
-    return true;
+    // Walking monsters do not deliberately step off drops over 24 map units.
+    return classic_floor-z<=24 && floor-classic_floor<=24 && classic_ceiling-z>=height;
 }
 
 fn set_actor_position(int at,float x,float y) -> void {
@@ -6370,6 +6545,67 @@ fn enemy_hitscan(int at,int shots) -> void {
 }
 
 
+fn enemy_try_door(int room,float x,float y,float vx,float vy) -> void {
+    ray_setup(x,y,vx,vy);
+    float distance=crossing(room,-0.001,1.0);
+    if (edge_hit<0 || distance>=1.0 || (file_read_uint8_at(data,edge_hit+19)&4)==0) { return; }
+    int other=file_read_little_uint16_at(data,edge_hit+16)-1;
+    if (other>=0 && ceiling_of(other)==floor_of(other)) {
+        action_apply(file_read_little_uint16_at(data,edge_hit+24),1);
+    }
+}
+
+fn enemy_walk_direction(int at,int direction,float dt) -> bool {
+    float step=file_read_uint8_at(data,actor_traits+(at/12)*8+6)*8.75*dt;
+    if (difficulty==4) { step*=1.3; }
+    float vx=cos(direction*0.7853981633974483)*step;
+    float vy=sin(direction*0.7853981633974483)*step;
+    float x=signed_word(things,at); float y=signed_word(things,at+2);
+    int room=classic_sector_at(x*65536.0,y*65536.0);
+    if (!enemy_step(at,x+vx,y+vy,floor_of(room))) { enemy_try_door(room,x,y,vx*16.0,vy*16.0); return false; }
+    set_actor_position(at,x+vx,y+vy);
+    return true;
+}
+
+fn enemy_pick_direction(int at,int direction,float dt) -> bool {
+    if (direction>=8 || !enemy_walk_direction(at,direction,dt)) { return false; }
+    file_seek_cursor(at+4,monster_state);
+    file_write_uint8(direction,monster_state); file_write_uint8(8+(doom_random()&15),monster_state);
+    return true;
+}
+
+fn enemy_chase(int at,float dt,int room,float d) -> void {
+    int old=file_read_uint8_at(monster_state,at+4);
+    int remaining=file_read_uint8_at(monster_state,at+5);
+    if (old<8 && remaining>0 && enemy_walk_direction(at,old,dt)) {
+        file_seek_cursor(at+5,monster_state); file_write_uint8(remaining-1,monster_state); return;
+    }
+    int back=8; if (old<8) { back=(old+4)&7; }
+    float x=px-signed_word(things,at); float y=py-signed_word(things,at+2);
+    int horizontal=8; int vertical=8;
+    if (x>10.0) { horizontal=0; } else { if (x< -10.0) { horizontal=4; } }
+    if (y>10.0) { vertical=2; } else { if (y< -10.0) { vertical=6; } }
+    if (horizontal<8 && vertical<8) {
+        int diagonal=1;
+        if (horizontal==4) { diagonal=3; }
+        if (vertical==6) { diagonal=7; if (horizontal==4) { diagonal=5; } }
+        if (diagonal!=back && enemy_pick_direction(at,diagonal,dt)) { return; }
+    }
+    if (doom_random()>200 || fabs(y)>fabs(x)) { int swap=horizontal; horizontal=vertical; vertical=swap; }
+    if (horizontal!=back && enemy_pick_direction(at,horizontal,dt)) { return; }
+    if (vertical!=back && enemy_pick_direction(at,vertical,dt)) { return; }
+    if (old<8 && old!=back && enemy_pick_direction(at,old,dt)) { return; }
+    int direction=0; int step=1;
+    if ((doom_random()&1)!=0) { direction=7; step=-1; }
+    int tried=0;
+    while (tried<8) {
+        if (direction!=back && enemy_pick_direction(at,direction,dt)) { return; }
+        direction+=step; tried+=1;
+    }
+    if (enemy_pick_direction(at,back,dt)) { return; }
+    file_seek_cursor(at+4,monster_state); file_write_uint8(8,monster_state); file_write_uint8(0,monster_state);
+}
+
 fn update_pinky(int at,float dt) -> void {
     int timer=file_read_little_uint16_at(things,at+10);
     float x=signed_word(things,at); float y=signed_word(things,at+2);
@@ -6394,39 +6630,44 @@ fn update_pinky(int at,float dt) -> void {
         timer=next;
     } else {
         if (seen && near) { timer=686; }
-        if (seen && !near && d2>1600.0) {
-            float step=140.0*dt/sqrt(d2);
-            if (enemy_step(at,x+vx*step,y,floor)) { x+=vx*step; }
-            if (enemy_step(at,x,y+vy*step,floor)) { y+=vy*step; }
+        if (!near && d2>1600.0) {
+            enemy_chase(at,dt,room,sqrt(d2));
             if (x!=signed_word(things,at) || y!=signed_word(things,at+2)) { flags=flags|8; }
-            file_seek_cursor(at,things);
-            file_write_little_uint16(coordinate(x),things);
-            file_write_little_uint16(coordinate(y),things);
         }
     }
     file_seek_cursor(at+9,things); file_write_uint8(flags,things);
     file_seek_cursor(at+10,things); file_write_little_uint16(timer,things);
 }
 
-fn enemy_base_z(int at,int room) -> int {
-    if ((actor_flags(at)&4)!=0 && file_read_little_uint16_at(monster_state,at+10)!=0) {
-        return signed_word(monster_state,at+8);
-    }
-    int floor=floor_of(room);
-    if ((actor_flags(at)&8)!=0) { return ceiling_of(room)-file_read_uint8_at(things,at+8); }
-    return floor;
-}
 
-fn update_flying_height(int at,int room,float dt) -> void {
-    if ((actor_flags(at)&4)==0) { return; }
+
+fn update_actor_height(int at) -> void {
+    int room=classic_sector_at(signed_word(things,at)*65536,signed_word(things,at+2)*65536);
     int z=enemy_base_z(at,room);
-    float goal=fmax(floor_of(room),fmin(feet_z+20.0,ceiling_of(room)-file_read_uint8_at(things,at+8)));
-    float step=140.0*dt;
-    if (goal>z) { z=fmin(goal,z+step); }
-    else { z=fmax(goal,z-step); }
+    int floor=floor_of(room); int ceiling=ceiling_of(room);
+    if (position_limits(signed_word(things,at)*65536,signed_word(things,at+2)*65536,room,actor_radius(at),true)) {
+        floor=classic_floor; ceiling=classic_ceiling;
+    }
+    int height=file_read_uint8_at(things,at+8);
+    bool alive=file_read_uint8_at(things,at+7)>0;
+    if (!alive) { height=height/4; }
+    int velocity=0;
+    if ((actor_flags(at)&4)!=0 && (alive || actor_type(at)==3006)) {
+        if (file_read_uint8_at(things,at+7)>0 && hp>0 && file_read_uint8_at(monster_state,at+2)!=0 && file_read_uint8_at(monster_state,at+3)==0) {
+            int goal=feet_z+20.0;
+            if (goal>z) { z+=4; } else { if (goal<z) { z-=4; } }
+        }
+    } else {
+        velocity=signed_word(monster_state,at+6);
+        z+=velocity;
+        if (z>floor) { if (velocity==0) { velocity=-2; } else { velocity-=1; } }
+        else { z=floor; velocity=0; }
+        file_seek_cursor(at+6,monster_state); file_write_little_uint16(coordinate(velocity),monster_state);
+    }
+    if (z+height>ceiling) { z=ceiling-height; }
+    if (z<floor) { z=floor; }
     file_seek_cursor(at+8,monster_state);
-    file_write_little_uint16(coordinate(z),monster_state);
-    file_write_little_uint16(1,monster_state);
+    file_write_little_uint16(coordinate(z),monster_state); file_write_little_uint16(1,monster_state);
 }
 
 fn launch_skull(int at,float vx,float vy,float d) -> void {
@@ -6469,29 +6710,13 @@ fn enemy_attack(int at,int type,int room,float distance) -> void {
     if (type==3006 && distance>1.0) { launch_skull(at,px-x,py-y,distance); }
 }
 
-fn enemy_try_door(int room,float x,float y,float vx,float vy) -> void {
-    ray_setup(x,y,vx,vy);
-    float distance=crossing(room,-0.001,1.0);
-    if (edge_hit<0 || distance>=1.0 || (file_read_uint8_at(data,edge_hit+19)&4)==0) { return; }
-    int other=file_read_little_uint16_at(data,edge_hit+16)-1;
-    if (other>=0 && ceiling_of(other)==floor_of(other)) {
-        action_apply(file_read_little_uint16_at(data,edge_hit+24),1);
-    }
-}
 
-fn enemy_chase(int at,float dt,int room,float d) -> void {
-    float x=signed_word(things,at); float y=signed_word(things,at+2);
-    float vx=px-x; float vy=py-y;
-    float step=file_read_uint8_at(data,actor_traits+(at/12)*8+6)*8.75*dt/d;
-    if (difficulty==4) { step*=1.3; }
-    int floor=floor_of(room);
-    float tx=x+vx*step; float ty=y+vy*step;
-    if (enemy_step(at,tx,ty,floor)) { set_actor_position(at,tx,ty); return; }
-    enemy_try_door(room,x,y,vx*64.0/d,vy*64.0/d);
-    if (enemy_step(at,tx,y,floor)) { x=tx; }
-    if (enemy_step(at,x,ty,floor)) { y=ty; }
-    set_actor_position(at,x,y);
-}
+
+
+
+
+
+
 
 fn update_monster(int at,int kind,float dt) -> void {
     // With no living player to target, return to the standing state.
@@ -6510,13 +6735,13 @@ fn update_monster(int at,int kind,float dt) -> void {
     float d2=vx*vx+vy*vy;
     int wait=file_read_little_uint16_at(things,at+10);
     if (d2>1440000.0 && wait<=20000) { return; }
-    int room=sector_at(x,y);
+    int room=classic_sector_at(x*65536.0,y*65536.0);
     if (room<0) { return; }
     bool seen=enemy_visible(room,x,y,enemy_base_z(at,room)+40.0);
     if (!enemy_awake(at,room,seen)) { return; }
     if (seen) { face_player(at,x,y); }
     float distance=sqrt(d2);
-    update_flying_height(at,room,dt);
+
     if (type==3006 && file_read_uint8_at(monster_state,at+3)!=0) {
         if (fly_skull(at,dt,floor_of(room))) { return; }
     }
@@ -6535,7 +6760,7 @@ fn update_monster(int at,int kind,float dt) -> void {
         }
         if (next<=20000) { next=1000; if (difficulty==4) { next=430; } }
     } else {
-        if (distance>58.0 && (seen || file_read_uint8_at(sector_state,room*12+11)!=0)) { enemy_chase(at,dt,room,distance); }
+        if (distance>58.0 && (seen || file_read_uint8_at(monster_state,at+2)!=0)) { enemy_chase(at,dt,room,distance); }
         float range=320.0;
         if (kind==1) { range=800.0; }
         if (next==0 && seen && distance<range) {
@@ -6663,11 +6888,18 @@ fn collect_energy_pickup(int kind) -> bool {
     return true;
 }
 
+fn pickup_reachable(int at) -> bool {
+    int room=classic_sector_at(signed_word(things,at)*65536,signed_word(things,at+2)*65536);
+    int delta=floor_of(room)-feet_z;
+    return delta>= -8 && delta<=56;
+}
+
 fn update_things(float dt) -> void {
     int at = 0;
     while (at < count*12) {
         int kind = file_read_uint8_at(things,at+6);
         int life = file_read_uint8_at(things,at+7);
+        if (kind<=4 && file_read_little_uint16_at(monster_state,at+10)==0) { update_actor_height(at); }
         if (life==0 && kind==5) { update_barrel(at,dt); }
         if (life==0 && kind<=4 && ((difficulty==4 && !won) || kind==1)) {
             int age=file_read_little_uint16_at(things,at+10)+dt*1000.0;
@@ -6695,7 +6927,7 @@ fn update_things(float dt) -> void {
         if (hp>0 && life==0 && kind>=2 && kind<=3 && (file_read_uint8_at(things,at+9)&128)==0) {
             float rx=px-signed_word(things,at);
             float ry=py-signed_word(things,at+2);
-            if (rx*rx+ry*ry<750.0) {
+            if (rx*rx+ry*ry<750.0 && pickup_reachable(at)) {
                 file_seek_cursor(at+9,things);
                 file_write_uint8(128,things);
                 if (kind==3) { has_shotgun=true; give_shells(4); }
@@ -6710,7 +6942,7 @@ fn update_things(float dt) -> void {
             float vy = py-ay;
             float d2 = vx*vx+vy*vy;
             if (kind<=4) { update_monster(at,kind,dt); }
-            if (hp>0 && d2 < 850.0 && kind >= 6) {
+            if (hp>0 && d2 < 850.0 && kind >= 6 && pickup_reachable(at)) {
                 if (!collect_health_armor(kind)) { at+=12; continue; }
                 if (kind == 11) { keys=keys|1; }
                 if (kind == 12) { keys=keys|2; }
@@ -6756,6 +6988,7 @@ fn update_things(float dt) -> void {
                 put_hp(at,0);
             }
         }
+        if (kind<=4 && (lift || fabs(px-signed_word(things,at))+fabs(py-signed_word(things,at+2))<1600.0)) { update_actor_height(at); }
         at += 12;
     }
 }
@@ -6768,120 +7001,52 @@ fn capture_mouse(bool capture) -> void {
 }
 
 // Split the product into 16-bit limbs. Steg exposes 32-bit integers.
-fn fixed_mul(int a,int b) -> int {
-    int al=a&65535; int bl=b&65535;
-    int ah=(a-al)/65536; int bh=(b-bl)/65536;
-    uint32 product=al*bl;
-    int carry=product>>16;
-    return ah*b+bh*al+carry;
-}
 
-fn fine_sine(int index) -> int {
-    return file_read_little_uint32_at(doom_sine_data,(index&8191)*4);
-}
 
-fn classic_partition(int x,int y,int vx,int vy) -> int {
-    if (vx==0) {
-        if ((x<=0 && vy>0) || (x>0 && vy<0)) { return 1; }
-        return 0;
-    }
-    if (vy==0) {
-        if ((y<=0 && vx<0) || (y>0 && vx>0)) { return 1; }
-        return 0;
-    }
-    if (fixed_mul(y,vx)<fixed_mul(x,vy)) { return 0; }
-    return 1;
-}
 
-fn classic_sector_at(int x,int y) -> int {
-    if (classic_node_count==0) { return file_read_little_uint16_at(data,classic_leaves); }
-    int child=classic_node_count-1;
-    while (child<32768) {
-        int p=classic_nodes+child*28;
-        int xx=x-signed_word(data,p)*65536; int yy=y-signed_word(data,p+2)*65536;
-        int vx=signed_word(data,p+4); int vy=signed_word(data,p+6);
-        int side=0;
-        if (vx!=0 && vy!=0 && (vx^vy^xx^yy)<0) {
-            if ((vy^xx)<0) { side=1; }
-        } else { side=classic_partition(xx,yy,vx,vy); }
-        child=file_read_little_uint16_at(data,p+24+side*2);
-    }
-    return file_read_little_uint16_at(data,classic_leaves+(child&32767)*2);
-}
 
-fn classic_crosses(int x0,int y0,int x1,int y1) -> bool {
-    if ((classic_left>=x0 && classic_left>=x1) || (classic_right<=x0 && classic_right<=x1)
-        || (classic_bottom>=y0 && classic_bottom>=y1) || (classic_top<=y0 && classic_top<=y1)) { return false; }
-    int vx=(x1-x0)/65536; int vy=(y1-y0)/65536;
-    if (vx==0 || vy==0) { return true; }
-    int ax=classic_left-x0; int bx=classic_right-x0;
-    if ((vx<0 && vy>0) || (vx>0 && vy<0)) {
-        ax=classic_right-x0; bx=classic_left-x0;
-    }
-    return classic_partition(ax,classic_top-y0,vx,vy)!=classic_partition(bx,classic_bottom-y0,vx,vy);
-}
 
-fn classic_open_line(int p) -> bool {
-    int x0=signed_word(data,p)*65536; int y0=signed_word(data,p+2)*65536;
-    int x1=signed_word(data,p+4)*65536; int y1=signed_word(data,p+6)*65536;
-    if (!classic_crosses(x0,y0,x1,y1)) { return true; }
-    int flags=file_read_little_uint16_at(data,p+8);
-    int front=file_read_little_uint16_at(data,p+10)-1;
-    int back=file_read_little_uint16_at(data,p+12)-1;
-    if (back<0 || front<0 || (flags&1)!=0) { return false; }
-    int floor=floor_of(front); int ceiling=ceiling_of(front);
-    if (floor>classic_floor) { classic_floor=floor; }
-    if (ceiling<classic_ceiling) { classic_ceiling=ceiling; }
-    floor=floor_of(back); ceiling=ceiling_of(back);
-    if (floor>classic_floor) { classic_floor=floor; }
-    if (ceiling<classic_ceiling) { classic_ceiling=ceiling; }
-    return true;
-}
 
-fn classic_check_lines() -> bool {
-    int x0=(classic_left-classic_block_x)>>23; int x1=(classic_right-classic_block_x)>>23;
-    int y0=(classic_bottom-classic_block_y)>>23; int y1=(classic_top-classic_block_y)>>23;
-    if (x0<0) { x0=0; } if (x1>=classic_block_w) { x1=classic_block_w-1; }
-    if (y0<0) { y0=0; } if (y1>=classic_block_h) { y1=classic_block_h-1; }
-    int x=x0;
-    while (x<=x1) {
-        int y=y0;
-        while (y<=y1) {
-            int slot=classic_blockmap+8+(y*classic_block_w+x)*2;
-            int list=classic_blockmap+file_read_little_uint16_at(data,slot)*2;
-            int line=file_read_little_uint16_at(data,list);
-            while (line!=65535) {
-                if (!classic_open_line(classic_lines+line*14)) { return false; }
-                list+=2; line=file_read_little_uint16_at(data,list);
-            }
-            y+=1;
-        }
-        x+=1;
-    }
-    return true;
-}
 
-fn classic_position_limits(int x,int y,int room) -> bool {
-    classic_floor=floor_of(room); classic_ceiling=ceiling_of(room);
-    classic_left=x-1048576; classic_right=x+1048576;
-    classic_bottom=y-1048576; classic_top=y+1048576;
-    return classic_check_lines();
-}
+
+
+
+
+
+
+
+
+
+
 
 fn classic_update_height(int displacement) -> void {
-    // Keep the same supporting floor as movement until the whole radius clears a ledge.
-    feet_z=floor_of(sector);
-    int ceiling=ceiling_of(sector);
-    if (classic_position_limits(classic_x,classic_y,sector)) {
-        feet_z=classic_floor; ceiling=classic_ceiling;
+    classic_position_limits(classic_x,classic_y,sector);
+    player_floor=classic_floor;
+    if (feet_z<player_floor) {
+        player_viewheight-=player_floor-feet_z;
+        player_viewdelta=(41.0-player_viewheight)/8.0;
     }
-    pz=fmin(ceiling-4.0,feet_z+41.0+displacement/65536.0);
+    feet_z+=classic_momz;
+    if (feet_z<=player_floor) {
+        if (classic_momz< -8.0) { player_viewdelta=classic_momz/8.0; }
+        feet_z=player_floor; classic_momz=0.0;
+    } else {
+        if (classic_momz==0.0) { classic_momz=-2.0; } else { classic_momz-=1.0; }
+    }
+    int height=56; if (hp<=0) { height=14; }
+    if (feet_z+height>classic_ceiling) { feet_z=classic_ceiling-height; if (classic_momz>0.0) { classic_momz=0.0; } }
+    player_viewheight+=player_viewdelta;
+    if (player_viewheight>41.0) { player_viewheight=41.0; player_viewdelta=0.0; }
+    if (player_viewheight<20.5) { player_viewheight=20.5; if (player_viewdelta<=0.0) { player_viewdelta=1.0; } }
+    if (player_viewdelta!=0.0) { player_viewdelta+=0.25; }
+    if (feet_z>player_floor) { displacement=0; }
+    pz=fmin(classic_ceiling-4.0,feet_z+player_viewheight+displacement/65536.0);
     eye_z=pz;
 }
 
 fn classic_try_move(int x,int y) -> bool {
     float target_x=x/65536.0; float target_y=y/65536.0;
-    if (!actor_clear(target_x,target_y,16,-1)) { return false; }
+    if (!actor_clear(target_x,target_y,16,-1,feet_z,56)) { return false; }
     int room=classic_sector_at(x,y);
     int height=56; if (hp<=0) { height=14; }
     if (!classic_position_limits(x,y,room) || classic_ceiling-classic_floor<height
@@ -6909,8 +7074,9 @@ fn move_classic() -> void {
     int fine=classic_heading>>3;
     dx=fine_sine(fine+2048)/65536.0; dy=fine_sine(fine)/65536.0;
     int forward=tick_forward*2048.0; int side=tick_side*2048.0;
-    classic_thrust(forward,fine);
-    classic_thrust(side,fine-2048);
+    if (feet_z<=player_floor) {
+        classic_thrust(forward,fine); classic_thrust(side,fine-2048);
+    }
     int motion=fixed_mul(classic_momx,classic_momx)+fixed_mul(classic_momy,classic_momy);
     int bob_amplitude=motion/4;
     if (bob_amplitude>1048576) { bob_amplitude=1048576; }
@@ -6929,6 +7095,7 @@ fn move_classic() -> void {
     }
     classic_update_height(displacement);
     sway=bob_amplitude/1048576.0; bob=phase*0.00076699039394282;
+    if (feet_z>player_floor) { move_vx=classic_momx*(35.0/65536.0); move_vy=classic_momy*(35.0/65536.0); walk_actions(old_x,old_y); return; }
     if (classic_momx>-4096 && classic_momx<4096 && classic_momy>-4096 && classic_momy<4096
         && forward==0 && side==0) {
         classic_momx=0; classic_momy=0;
@@ -6970,6 +7137,7 @@ fn capture_tick_input() -> void {
 }
 
 fn apply_floor_special() -> void {
+    if (feet_z>player_floor) { return; }
     if (feet_z!=floor_of(sector)) { return; }
     int special=file_read_uint8_at(data,light_specs+sector);
     int phase=level_tic-1;
@@ -8000,7 +8168,7 @@ fn render_thing(framebuffer fb, int at) -> void {
 
     float side=x*dy-y*dx;
     if (fabs(side)>=forward*0.90+30.0) { return; }
-    int s=sector_at(x+px,y+py);
+    int s=classic_sector_at((x+px)*65536.0,(y+py)*65536.0);
     if (s<0) { return; }
     int tex=file_read_little_uint16_at(things,at+4);
     if (kind==1 && (file_read_uint8_at(things,at+9)&32)==0) {
@@ -8054,7 +8222,7 @@ fn render_thing(framebuffer fb, int at) -> void {
     blit_d=forward;
     int offset=sprite_offsets+(tex-1)*4;
     int base_z=floor_of(s);
-    if ((actor_flags(at)&12)!=0) { base_z=enemy_base_z(at,s); }
+    if (kind<=4 || (actor_flags(at)&12)!=0) { base_z=enemy_base_z(at,s); }
     int patch_top=signed_word(data,offset+2);
     int sprite_top=base_z+patch_top;
     int top=project(sprite_top,forward);
@@ -9156,7 +9324,7 @@ fn save_scalars(file f) -> void {
     save_float(f,move_vx);
     save_float(f,move_vy);
     save_float(f,feet_z);
-    save_float(f,0.0);
+    save_float(f,classic_momz);
     save_float(f,info_time);
     file_append_little_uint32(info,f);
     file_append_little_uint32(level_tic,f);
@@ -9234,7 +9402,8 @@ fn load_scalars(file f) -> void {
     move_vx=load_float(f);
     move_vy=load_float(f);
     feet_z=load_float(f);
-    load_float(f); // Legacy jump velocity, retained in the save format.
+    classic_momz=load_float(f); // Vertical momentum; older saves store zero here.
+    player_floor=floor_of(sector); player_viewheight=41.0; player_viewdelta=0.0;
     info_time=load_float(f);
     info=file_read_little_uint32(f);
     level_tic=file_read_little_uint32(f);
